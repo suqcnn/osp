@@ -47,6 +47,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'local_requests.middleware.LocalRequestMiddleware'
 ]
 
 ROOT_URLCONF = 'osp.urls'
@@ -105,7 +106,7 @@ LOGGING = {
         'default': {
             'level': 'DEBUG',
             'class': 'utils.log_handlers.MyLoggerHandler',
-            'filename': os.path.join(LOG_PATH, 'cckbackend'),
+            'filename': os.path.join(LOG_PATH, 'osp'),
             'when': 'D',
             'backupCount': 365,
             'formatter': 'standard',

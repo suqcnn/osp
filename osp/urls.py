@@ -19,6 +19,8 @@ from django.urls import path, re_path
 import api.test
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    re_path('test/?', api.test.health)
+    # path('admin/', admin.site.urls),
+    re_path('ws_test/?', api.test.test_con),
+    re_path('test/?', api.test.health),
+    re_path('ws_mock/?', api.test.ws_mock)
 ]

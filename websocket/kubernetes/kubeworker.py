@@ -1,13 +1,10 @@
 import concurrent.futures
-import datetime
-import json
 import logging
 import threading
 from queue import Queue
 
-from django_redis import get_redis_connection
-
-from service.middlemessage import MiddleMessage
+from service.middlemessage import MiddleMessage, MiddleResponse
+from utils import CommonReturn, Code
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +15,9 @@ class KubeWorker(threading.Thread):
         self.middle_request_handler = MiddleRequestHandler(ws)
         self.ws_response_handler = WSResponseHandler()
         super().__init__(*args, **kwargs)
+
+    def set_cluster(self, cluster):
+        self.middle_request_handler.set_cluster(cluster)
 
     def run(self):
         self.middle_request_handler.start()
@@ -37,16 +37,23 @@ class MiddleRequestHandler(threading.Thread):
         self.ws = ws
         self.middle_message = MiddleMessage()
         self.has_stopped = False
+        self.cluster = None
         super().__init__(*args, **kwargs)
+
+    def set_cluster(self, cluster):
+        self.cluster = cluster
 
     def run(self):
         while not self.has_stopped:
             try:
-                for req in self.middle_message.get_request('testws'):
+                for req in self.middle_message.get_request(self.cluster):
                     try:
-                        self.ws.send(json.dumps(req))
+                        self.ws.send(req.serialize())
                     except Exception as exc:
                         logger.error('send request error: %s' % exc, exc_info=True)
+                        ret = CommonReturn(code=Code.REQUEST_ERROR, msg='request error: %s' % exc)
+                        response = MiddleResponse(req.request_id, ret.to_json())
+                        self.middle_message.send_response(response)
             except Exception as exc:
                 if not self.has_stopped:
                     logger.error('get request error: %s' % exc, exc_info=True)
@@ -65,6 +72,7 @@ class WSResponseHandler:
         self.has_stopped = False
         pool = concurrent.futures.ThreadPoolExecutor(int(max_worker_handlers))
         self.pool = pool
+        self.middle_message = MiddleMessage()
 
     def put_ws_response(self, data):
         self.queue.put(data)
@@ -80,15 +88,11 @@ class WSResponseHandler:
         logger.info('ws response handler stopped')
 
     def ws_handle(self, data):
-        con = get_redis_connection("default")
-        # json_data = json.loads(text_data)
-        ret_list_key = data.get('ret_key')
-        msg = data.get('msg')
-        ret_msg = '%s: %s' % (datetime.datetime.now(), msg)
-        # sleep(2)
-        rpipe = con.pipeline()
-        rpipe.lpush(ret_list_key, ret_msg).expire(ret_list_key, time=10)
-        rpipe.execute()
+        try:
+            middle_response = MiddleResponse.unserialize(data)
+            self.middle_message.send_response(middle_response)
+        except Exception as exc:
+            logger.error('send response error: %s' % exc, exc_info=True)
 
     def stop(self):
         self.has_stopped = True

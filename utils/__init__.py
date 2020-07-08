@@ -18,6 +18,7 @@ class Code:
     DATA_DUPLICATION = 'DataDuplication'    # 数据重复
     TIMEOUT_ERROR = 'TimeOut'               # 请求超时
 
+    NOT_IMPLEMENTATION = 'NotImplementation'    # 方法未实现
 
 class CommonException(Exception):
     """

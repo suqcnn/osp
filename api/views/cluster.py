@@ -13,15 +13,16 @@ logger = logging.getLogger(__name__)
 class ClusterViewSet(viewsets.GenericViewSet):
 
     @api_decorator('Create cluster', serializer_class=cluster_serializers.CreateClusterSerializer)
-    def create(self, request, params):
+    def create(self, req):
+        params = req.get('params')
         cluster = Cluster(params.get('name'))
         cluster.save()
         return CommonReturn(Code.SUCCESS, '添加成功')
 
     @api_decorator('Get cluster')
-    def retrieve(self, request, pk):
+    def retrieve(self, req):
         return CommonReturn(Code.SUCCESS)
 
     @api_decorator('List cluster')
-    def list(self, request):
+    def list(self, req):
         return CommonReturn(Code.SUCCESS)

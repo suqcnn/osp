@@ -42,8 +42,9 @@ def api_decorator(api_name, serializer_class=None):
                         return Response(res, status=400)
                 if serializer_data:
                     kwargs['params'] = serializer_data.data
+                kwargs['request'] = req
                 # 返回CommonReturn对象
-                res = func(*args, **kwargs)
+                res = func(self, kwargs)
                 status = None
                 if not res.is_success():
                     status = 500

@@ -12,20 +12,21 @@ logger = logging.getLogger(__name__)
 class UserViewSet(viewsets.GenericViewSet):
 
     @api_decorator('Create user')
-    def create(self, request, params):
+    def create(self, req):
         u = User('tom', 'asdf', 'asdlfkje')
         u.save()
         return CommonReturn(Code.SUCCESS, 'success', u.repr())
 
     @api_decorator('Get user')
-    def retrieve(self, request, pk):
+    def retrieve(self, req):
+        pk = req.get('pk')
         logger.info(pk)
         u = User.get(pk)
         res = {'name': u.name, 'email': u.email}
         return CommonReturn(Code.SUCCESS, data=res)
 
     @api_decorator('List user')
-    def list(self, request):
+    def list(self, req):
         users = User.filter()
         ret = []
         for u in users:

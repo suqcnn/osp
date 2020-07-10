@@ -15,7 +15,11 @@ Including another URLconf
 """
 from django.urls import path, re_path, include
 
+import api.views
+import api.views.cluster
 
 urlpatterns = [
+    re_path('health/?', api.views.health),
+    re_path('osp/api/cluster/agent/?', api.views.cluster.agent),
     path('osp/api/', include('api.urls'))
 ]

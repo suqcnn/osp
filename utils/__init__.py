@@ -20,6 +20,7 @@ class Code:
 
     NOT_IMPLEMENTATION = 'NotImplementation'    # 方法未实现
 
+
 class CommonException(Exception):
     """
     工作流平台异常

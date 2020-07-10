@@ -1,9 +1,11 @@
 import logging
 
+from django.http import HttpResponse
 from rest_framework import viewsets
 
 from api.views import api_decorator
 from api.views.serializers import cluster_serializers
+from models import const
 from models.cluster import Cluster
 from utils import CommonReturn, Code
 
@@ -24,5 +26,23 @@ class ClusterViewSet(viewsets.GenericViewSet):
         return CommonReturn(Code.SUCCESS)
 
     @api_decorator('List cluster')
-    def list(self, req):
-        return CommonReturn(Code.SUCCESS)
+    def list(self, _):
+        clusters = Cluster.filter()
+        data = []
+        for cluster in clusters:
+            data.append({
+                'name': cluster.name,
+                'create_time': cluster.create_time,
+                'update_time': cluster.update_time
+            })
+        return CommonReturn(Code.SUCCESS, data=data)
+
+
+def agent(req):
+    agent_yaml = const.agent_yaml
+    token = req.GET.get('token')
+    clusters = Cluster.filter(token=token)
+    if len(clusters) < 1 or len(clusters) > 1:
+        return HttpResponse("Not found cluster with token %s" % token)
+    agent_yaml = agent_yaml.replace('${token}', token)
+    return HttpResponse(agent_yaml)

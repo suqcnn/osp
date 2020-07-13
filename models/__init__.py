@@ -49,29 +49,35 @@ class Model:
     def unrepr(cls, **kwargs):
         return cls(**kwargs)
 
-    def save(self):
+    def save(self, expire=None, add_sets=True):
         primary_id = self.primary_key
         if not primary_id:
             primary_id = self.increment_latest_primary_id()
-        added = self.add_to_set(primary_id)
-        if not added:
-            raise CommonException(Code.DATA_DUPLICATION, 'primary key duplicated')
+        if add_sets:
+            added = self.add_to_set(primary_id)
+            if not added:
+                raise CommonException(Code.DATA_DUPLICATION, 'primary key duplicated')
         r = self.repr()
         if not r.get('create_time'):
             r['create_time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if not r.get('update_time'):
             r['update_time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        res = self.conn.hmset(self.cache_key(primary_id), r)
-        logger.info(res)
+        set_key = self.cache_key(primary_id)
+        if expire:
+            pipeline = self.conn.pipeline()
+            res = pipeline.hmset(set_key, r).expire(set_key, expire).execute()
+        else:
+            res = self.conn.hmset(set_key, r)
+        logger.debug(res)
         return self
 
     @classmethod
     def get(cls, pk):
         conn = get_redis_connection()
         primary_key = cls.cache_key(pk)
-        logger.info(primary_key)
+        logger.debug(primary_key)
         res = conn.hgetall(primary_key)
-        logger.info(res)
+        logger.debug(res)
         if not res:
             raise CommonException(Code.DATA_NOT_EXISTS, 'Not found %s %s' % (str(pk), cls.class_name()))
         data = {}
@@ -80,16 +86,34 @@ class Model:
         return cls.unrepr(**data)
 
     @classmethod
+    def delete(cls, pk):
+        conn = get_redis_connection()
+        primary_key = cls.cache_key(pk)
+        set_key = cls.set_key()
+        pipeline = conn.pipeline()
+        logger.info('delete primary key %s' % primary_key)
+        res = pipeline.srem(set_key, pk).delete(primary_key).execute()
+        logger.info(res)
+
+    @classmethod
     def filter(cls, **kwargs):
         conn = get_redis_connection()
         instances = []
+        pipeline = conn.pipeline()
         for pk in conn.smembers(cls.set_key()):
-            pk = pk.decode('utf-8')
-            instance = cls.get(pk)
+            pipeline.hgetall(cls.cache_key(pk.decode('utf-8')))
+        res = pipeline.execute()
+        logger.debug(res)
+        for r in res:
+            if not r:
+                continue
+            d = {}
+            for k, v in r.items():
+                d[k.decode('utf-8')] = v.decode('utf-8')
             if kwargs:
                 for k, v in kwargs.items():
-                    if hasattr(instance, k) and getattr(instance, k) == v:
-                        instances.append(instance)
+                    if d.get(k) == v:
+                        instances.append(cls.unrepr(**d))
             else:
-                instances.append(instance)
+                instances.append(cls.unrepr(**d))
         return instances

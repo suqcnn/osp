@@ -1,3 +1,150 @@
+### User
+
+#### 1. Create a user
+
+Create a user
+
+##### HTTP request
+
+```
+POST /osp/api/users HTTP/1.1
+Authorization: Bearer $TOKEN
+Accept: applicaton/json
+```
+
+##### Body
+
+| Parameter | Required | Type   | Description                   |
+| --------- | -------- | ------ | ----------------------------- |
+| name      | true     | string | name of the user to login     |
+| email     | true     | string | email of the user             |
+| password  | true     | string | password of the user to login |
+
+##### Responses
+
+| Field | Type   | Description   |
+| ----- | ------ | ------------- |
+| code  | string | error code    |
+| msg   | string | error message |
+
+
+
+#### 2. List all users
+
+List all users
+
+##### HTTP request
+
+```
+GET /osp/api/users HTTP/1.1
+Authorization: Bearer $TOKEN
+Accept: applicaton/json
+```
+
+##### Query parameters
+
+| Parameter | Required | Type   | Description      |
+| --------- | -------- | ------ | ---------------- |
+| name      | false    | string | name of the user |
+
+##### Responses
+
+| Field       | Type       | Description       |
+| ----------- | ---------- | ----------------- |
+| code        | string     | error code        |
+| msg         | string     | error message     |
+| data        | list[dict] | list users        |
+| name        | string     | name of the user  |
+| email       | string     | email of the user |
+| create_time | datetime   | create time       |
+| update_time | datetime   | update time       |
+
+example:
+
+```json
+{
+  "code": "Success",
+  "msg": "Success",
+  "data": [{
+    "name": "test",
+    "email": "test@abc.com",
+    "create_time": "2020-07-12 08:24:10",
+    "update_time": "2020-07-12 08:24:10"
+  }]
+}
+```
+
+
+
+#### 3. Update a user
+
+Update a user
+
+##### HTTP request
+
+```
+PUT /osp/api/users/$NAME HTTP/1.1
+Authorization: Bearer $TOKEN
+Accept: applicaton/json
+```
+
+##### Body
+
+| Parameter | Required | Type   | Description                   |
+| --------- | -------- | ------ | ----------------------------- |
+| email     | false    | string | email of the user             |
+| password  | false    | string | password of the user to login |
+
+##### Responses
+
+| Field | Type   | Description   |
+| ----- | ------ | ------------- |
+| code  | string | error code    |
+| msg   | string | error message |
+
+
+
+#### 4. Login
+
+Login with a user
+
+##### HTTP request
+
+```
+POST /osp/api/login HTTP/1.1
+Accept: applicaton/json
+```
+
+##### Body
+
+| Parameter | Required | Type   | Description                   |
+| --------- | -------- | ------ | ----------------------------- |
+| name      | true     | string | name of the user to login     |
+| password  | true     | string | password of the user to login |
+
+##### Responses
+
+| Field | Type   | Description                                         |
+| ----- | ------ | --------------------------------------------------- |
+| code  | string | error code                                          |
+| msg   | string | error message                                       |
+| data  | dict   | response data                                       |
+| token | string | authenticate token of the user, expired after 30min |
+
+example:
+
+```json
+{
+  "code": "Success",
+  "msg": "Success",
+  "data": {
+    "token": ""
+  }
+}
+```
+
+
+
 ### Pods
 
 #### 1. List all pods
@@ -62,7 +209,8 @@ example:
     "controlled": "ReplicaSet",
     "qos": "BestEffort",
     "created": "2020-07-09T10:10:53Z",
-    "status": "Running"
+    "status": "Running",
+    "node_name": "woker001"
   }]
 }
 ```
@@ -88,6 +236,12 @@ Accept: applicaton/json
 | cluster   | string | name of the cluster       |
 | namespace | string | name of the pod namespace |
 | name      | string | name of the pod           |
+
+##### Query parameters
+
+| Parameter | Required | Type   | Description                                   |
+| --------- | -------- | ------ | --------------------------------------------- |
+| output    | false    | string | output type of the pod, default json, or yaml |
 
 ##### Responses
 

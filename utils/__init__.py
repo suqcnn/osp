@@ -4,21 +4,19 @@ class Code:
     错误码
     """
     SUCCESS = 'Success'
-    UNKNOWN_ERROR = 'UnknownError'          # 未知错误
-    RES_ERROR = 'ResopError'                # 请求resop失败
-    UCENTER_ERROR = 'UcenterError'          # 请求ucenter失败
-    PAAS_ERROR = 'PaasError'                # 请求Paas失败
-    BILL_ERROR = 'BillError'                # 请求ucenter失败
+    UNKNOWN_ERROR = 'UnknownError'              # 未知错误
 
-    CONFIG_ERROR = 'ConfigError'            # 配置错误
-    REQUEST_ERROR = 'RequestError'          # 请求错误
-    PARAM_ERROR = 'ParameterInvalid'        # 参数错误
-    DATA_EXISTS = 'DataExists'              # 数据已存在
-    DATA_NOT_EXISTS = 'DataNotExists'       # 数据不存在
-    DATA_DUPLICATION = 'DataDuplication'    # 数据重复
-    TIMEOUT_ERROR = 'TimeOut'               # 请求超时
+    CONFIG_ERROR = 'ConfigError'                # 配置错误
+    REQUEST_ERROR = 'RequestError'              # 请求错误
+    PARAM_ERROR = 'ParameterInvalid'            # 参数错误
+    DATA_EXISTS = 'DataExists'                  # 数据已存在
+    DATA_NOT_EXISTS = 'DataNotExists'           # 数据不存在
+    DATA_DUPLICATION = 'DataDuplication'        # 数据重复
+    TIMEOUT_ERROR = 'TimeOut'                   # 请求超时
 
     NOT_IMPLEMENTATION = 'NotImplementation'    # 方法未实现
+
+    AUTH_ERROR = 'AuthError'                    # 认证失败
 
 
 class CommonException(Exception):

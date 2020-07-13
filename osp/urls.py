@@ -17,9 +17,13 @@ from django.urls import path, re_path, include
 
 import api.views
 import api.views.cluster
+import api.views.user
 
 urlpatterns = [
+    re_path('^/?$', api.views.index),
+    re_path('^ui/.*?$', api.views.ui),
     re_path('health/?', api.views.health),
+    re_path('osp/api/login/?', api.views.user.login),
     re_path('osp/api/cluster/agent/?', api.views.cluster.agent),
-    path('osp/api/', include('api.urls'))
+    path('osp/api/', include('api.urls')),
 ]

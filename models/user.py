@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 class User(Model):
 
-    def __init__(self, name, email, password, create_time=None, update_time=None):
+    def __init__(self, name='', email='', password='', create_time=None, update_time=None):
         self.name = name
         self.email = email
         self.password = password

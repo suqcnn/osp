@@ -12,6 +12,7 @@ class KubeResource:
     RESOURCE_TYPE = None
 
     LIST_ACTION = 'list'
+    GET_ACTION = 'get'
 
     def __init__(self, cluster=None):
         self.cluster = cluster
@@ -19,6 +20,10 @@ class KubeResource:
 
     def list(self, params=None):
         res = self.request(self.LIST_ACTION, params=params)
+        return res
+
+    def get(self, params=None):
+        res = self.request(self.GET_ACTION, params=params)
         return res
 
     def request(self, action, params=None, timeout=30):

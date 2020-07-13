@@ -32,6 +32,7 @@ class ClusterViewSet(viewsets.GenericViewSet):
         for cluster in clusters:
             data.append({
                 'name': cluster.name,
+                'token': cluster.token,
                 'create_time': cluster.create_time,
                 'update_time': cluster.update_time
             })
@@ -39,10 +40,15 @@ class ClusterViewSet(viewsets.GenericViewSet):
 
 
 def agent(req):
-    agent_yaml = const.agent_yaml
-    token = req.GET.get('token')
-    clusters = Cluster.filter(token=token)
-    if len(clusters) < 1 or len(clusters) > 1:
-        return HttpResponse("Not found cluster with token %s" % token)
-    agent_yaml = agent_yaml.replace('${token}', token)
-    return HttpResponse(agent_yaml)
+    try:
+        token = req.GET.get('token')
+        if not token:
+            return HttpResponse("Token is blank")
+        clusters = Cluster.filter(token=token)
+        if len(clusters) < 1 or len(clusters) > 1:
+            return HttpResponse("Not found cluster with token %s" % token)
+        agent_yaml = const.agent_yaml.replace('${token}', token)
+        return HttpResponse(agent_yaml)
+    except Exception as exc:
+        logger.error('get agent yaml error: %s' % exc, exc_info=True)
+        return HttpResponse(str(exc), status=500)

@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '0ulokf$v*sqe1i(oqs6ung45x7v#b$&_)%36kbt*4=tx)6*na='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -80,7 +80,7 @@ REST_FRAMEWORK = {
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, "templates")],
+        'DIRS': [os.path.join(BASE_DIR, "ui", "dist")],
         'APP_DIRS': True,
         'OPTIONS': {
         },
@@ -93,7 +93,7 @@ TEMPLATES = [
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "templates"),
+    os.path.join(BASE_DIR, "ui", "dist", "static"),
 ]
 
 # Internationalization

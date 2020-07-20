@@ -84,7 +84,6 @@ export default {
     },
     routeTo(item) {
       const route = this.$route
-      console.log(item)
       this.$router.push({name: item.name, params: route.params})
     },
     isDisplay(meta) {

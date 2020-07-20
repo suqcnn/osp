@@ -1,14 +1,16 @@
 <template>
   <div v-if="!item.hidden">
     <template v-if="hasOneShowingChild(item.children,item) && (!onlyOneChild.children||onlyOneChild.noShowingChildren)&&!item.alwaysShow">
-      <app-link v-if="onlyOneChild.meta" :to="resolvePath(onlyOneChild.path)">
-        <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{'submenu-title-noDropdown':!isNest}">
+      <a v-if="isDisplay(onlyOneChild.meta)" v-on:click="routeTo(onlyOneChild)">
+      <!-- <app-link v-if="isDisplay(onlyOneChild.meta)" to="{name: node, params: {name: test}}"> -->
+        <el-menu-item :index="onlyOneChild.name" :class="{'submenu-title-noDropdown':!isNest}">
           <item :icon="onlyOneChild.meta.icon||(item.meta&&item.meta.icon)" :title="onlyOneChild.meta.title" />
         </el-menu-item>
-      </app-link>
+      <!-- </app-link> -->
+      </a>
     </template>
 
-    <el-submenu v-else ref="subMenu" :index="resolvePath(item.path)" popper-append-to-body>
+    <el-submenu v-else-if="isDisplay(item.meta)" ref="subMenu" :index="item.name" popper-append-to-body>
       <template slot="title">
         <item v-if="item.meta" :icon="item.meta && item.meta.icon" :title="item.meta.title" />
       </template>
@@ -27,11 +29,10 @@
 <script>
 import path from 'path'
 import Item from './Item'
-import AppLink from './Link'
 
 export default {
   name: 'SidebarItem',
-  components: { Item, AppLink },
+  components: { Item },
   props: {
     // route object
     item: {
@@ -80,6 +81,28 @@ export default {
     },
     resolvePath(routePath) {
       return path.resolve(this.basePath, routePath)
+    },
+    routeTo(item) {
+      const route = this.$route
+      console.log(item)
+      this.$router.push({name: item.name, params: route.params})
+    },
+    isDisplay(meta) {
+      if (!meta) {
+        return false
+      }
+      const route = this.$route
+      const routeMeta = route.meta
+      if (!meta.side && !routeMeta.side) {
+        return true
+      }
+      if (meta.side && !routeMeta.side) {
+        return false
+      }
+      if (meta.side == routeMeta.side) {
+        return true
+      }
+      return false
     }
   }
 }

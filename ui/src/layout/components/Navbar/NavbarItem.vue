@@ -1,11 +1,11 @@
 <template>
   <div class="navbar-item">
     <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect">
-        <el-menu-item index="1" class="submenu-class">全局配置</el-menu-item>
+        <el-menu-item index="1" class="submenu-class" v-on:click="globalClick">全局配置</el-menu-item>
         <el-submenu index="2" class="submenu-class">
             <template slot="title" class="submenu-class">集群管理</template>
-            <el-menu-item index="2-1" class="submenu-class">test1</el-menu-item>
-            <el-menu-item index="2-2" class="submenu-class">test2</el-menu-item>
+            <el-menu-item index="2-1" class="submenu-class" v-on:click="clusterClick('test1')">test1</el-menu-item>
+            <el-menu-item index="2-2" class="submenu-class" v-on:click="clusterClick('test2')">test2</el-menu-item>
         </el-submenu>
     </el-menu>
   </div>
@@ -23,6 +23,12 @@ export default {
   methods: {
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
+    },
+    globalClick() {
+      this.$router.push({name: 'settinsCluster'})
+    },
+    clusterClick(clusterName) {
+      this.$router.push({name: 'cluster', params: {'name': clusterName}})
     }
   }
 }

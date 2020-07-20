@@ -2,6 +2,7 @@
   <div class="side-bar">
     <el-scrollbar wrap-class="scrollbar-wrapper">
       <el-menu
+        :default-active="activeMenu"
         :collapse="false"
         :unique-opened="false"
         :collapse-transition="true"
@@ -21,7 +22,17 @@ export default {
   computed: {
     routes() {
       return this.$router.options.routes
-    }
+    },
+    activeMenu() {
+      const route = this.$route
+      console.log(route)
+      const { meta, name } = route
+      // if set path, the sidebar will highlight the path you set
+      if (meta.activeMenu) {
+        return meta.activeMenu
+      }
+      return name
+    },
   }
 }
 </script>

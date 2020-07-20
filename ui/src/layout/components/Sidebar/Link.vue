@@ -21,7 +21,7 @@ export default {
   methods: {
     linkProps(to) {
       return {
-        to: to
+        'to': to
       }
     }
   }

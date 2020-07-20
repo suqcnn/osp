@@ -8,7 +8,7 @@
       </transition-group>
     </el-breadcrumb>
 
-    <svg-icon class="icon-create" icon-class="create"/>
+    <!-- <svg-icon class="icon-create" icon-class="create"/> -->
     <!-- <svg-icon class="icon-create" icon-class="delete"/> -->
 
     <div class="right">
@@ -85,6 +85,7 @@ export default {
     width: 1.8em;
     height: 1.8em;
     vertical-align: 0.8em;
+    color: #bfbfbf;
   }
 
   .right {

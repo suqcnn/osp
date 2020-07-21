@@ -9,7 +9,7 @@ Router.prototype.push = function push(location) {
 Vue.use(Router)
 
 import ClusterRoutes from './ClusterRoutes'
-import GlobalRoutes from './GlobalRoutes'
+import SettingsRoutes from './SettingsRoutes'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -36,10 +36,10 @@ import GlobalRoutes from './GlobalRoutes'
  * all roles can be accessed
  */
 
-export const constantRoutes = [...ClusterRoutes, ...GlobalRoutes]
+export const constantRoutes = [...ClusterRoutes, ...SettingsRoutes]
 
 const createRouter = () => new Router({
-    // mode: 'history', // require service support
+  mode: 'history', // require service support
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRoutes
 })

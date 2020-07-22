@@ -11,7 +11,7 @@ const Routes = [
 ]
 
 const settingsRoutes = [{
-  path: '/settings',
+  path: 'settings',
   component: Layout,
   hidden: true,
   children: Routes

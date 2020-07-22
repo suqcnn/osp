@@ -10,6 +10,7 @@ Vue.use(Router)
 
 import ClusterRoutes from './ClusterRoutes'
 import SettingsRoutes from './SettingsRoutes'
+import { Noop } from '../layout/components'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -36,12 +37,47 @@ import SettingsRoutes from './SettingsRoutes'
  * all roles can be accessed
  */
 
-export const constantRoutes = [...ClusterRoutes, ...SettingsRoutes]
+const oRoutes = [
+  {
+    path: 'login',
+    name: 'login',
+    hidden: true,
+    component: () => import('@/views/login/index'),
+  },
+
+  {
+    path: '404',
+    component: () => import('@/views/404'),
+    hidden: true
+  },
+]
+
+const constantRoutes = [...ClusterRoutes, ...SettingsRoutes, ...oRoutes]
+
+export const routes = [
+  {
+    path: '/',
+    component: Noop,
+    hidden: true,
+    redirect: '/ui/settings/cluster'
+  },
+  {
+  path: '/ui',
+  component: Noop,
+  hidden: true,
+  redirect: '/ui/settings/cluster',
+  children: constantRoutes
+  },
+
+  // 404 page must be placed at the end !!!
+  { path: '*', redirect: '/ui/404', hidden: true }
+]
+
 
 const createRouter = () => new Router({
   mode: 'history', // require service support
   scrollBehavior: () => ({ y: 0 }),
-  routes: constantRoutes
+  routes: routes
 })
   
 const router = createRouter()

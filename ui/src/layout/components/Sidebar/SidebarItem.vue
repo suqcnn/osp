@@ -1,7 +1,7 @@
 <template>
   <div>
     <template v-if="item.hidden">
-      <template v-if="item.children.length > 0">
+      <template v-if="item.children && item.children.length > 0">
         <sidebar-item
           v-for="child in item.children"
           :key="child.path"

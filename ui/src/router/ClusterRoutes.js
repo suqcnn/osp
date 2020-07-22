@@ -159,10 +159,11 @@ const Routes = [
 
 const clusterRoutes = [
   {
-    path: '/cluster/:name',
+    path: 'cluster/:name',
     component: Layout,
     hidden: true,
-    children: Routes
+    children: Routes,
+    meta: { group: 'cluster' }
   }
 ]
 

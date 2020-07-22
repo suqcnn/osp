@@ -22,13 +22,10 @@ export default {
     activeMenu() {
       const route = this.$route
       const { meta } = route
-      if (meta.side) {
-        return meta.side
-      }
-      if (!meta.side || meta.side == "cluster") {
+      if (meta.group && meta.group == 'cluster') {
         return route.params.name
       }
-      return "cluster"
+      return meta.group
     },
   },
   methods: {

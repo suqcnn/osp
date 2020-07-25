@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from rest_framework.response import Response
 
+from models.user import User
 from service.auth import Auth
 from utils import CommonException, Code
 
@@ -24,7 +25,9 @@ def api_decorator(api_name, serializer_class=None, login_required=True):
                 req = args[1]       # request instance from args[1]
                 user = None
                 if login_required:
+                    logger.info(req.META)
                     token = req.META.get('HTTP_AUTHORIZATION', '')[7:]
+                    logger.info(token)
                     if not token:
                         return Response({'code': Code.AUTH_ERROR, 'msg': 'No auth token'}, status=401)
                     login_res = Auth.authenticate(token)
@@ -52,15 +55,12 @@ def api_decorator(api_name, serializer_class=None, login_required=True):
                             'code': Code.PARAM_ERROR,
                             'msg': serializer_data.errors
                         }
-                        return Response(res, status=400)
+                        return Response(res)
                 if serializer_data:
                     kwargs['params'] = serializer_data.data
                 kwargs['request'] = req
                 # return CommonReturn instance
                 res = func(self, kwargs)
-                status = None
-                if not res.is_success():
-                    status = 500
                 if res.response:
                     # CommonReturn has response instance
                     res = res.response
@@ -69,14 +69,12 @@ def api_decorator(api_name, serializer_class=None, login_required=True):
             except CommonException as exc:
                 logger.error('%s error: %s' % (api_name, exc), exc_info=True)
                 res = {'code': exc.code, 'msg': exc.msg}
-                status = 500
             except Exception as exc:
                 msg = '%s error: %s' % (api_name, exc)
                 logger.error(msg, exc_info=True)
                 res = {'code': Code.UNKNOWN_ERROR, 'msg': msg}
-                status = 500
             logger.info('res: %s' % res)
-            return Response(res, status=status)
+            return Response(res)
         return deco
 
     return _wrapper
@@ -95,4 +93,17 @@ def ui(req):
 
 
 def ui_login(req):
+    username = 'admin'
+    try:
+        User.get(username)
+    except CommonException as exc:
+        if exc.code == Code.DATA_NOT_EXISTS:
+            return redirect('/ui/login/admin')
+        logger.error('get admin user error: %s' % exc, exc_info=True)
+    except Exception as exc:
+        logger.error('get admin user error: %s' % exc, exc_info=True)
+    return render(req, 'index.html')
+
+
+def ui_login_admin(req):
     return render(req, 'index.html')

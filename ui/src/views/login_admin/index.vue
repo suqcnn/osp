@@ -6,29 +6,43 @@
                     <span class='login-title'>OpenSpace</span>
                 </el-col>
             </el-row>
-            <el-row>
+            <el-row style="margin-bottom: 8px">
                 <el-col :span="16" :offset="4">
                     <el-input 
-                        placeholder="请输入用户名" name="username" tabindex="1"
-                        v-model="username" class="login-input" clearable>
+                        placeholder="请输入用户名" name="username" tabindex="1" disabled
+                        v-model="username" class="login-input" auto-complete="on">
                         <i slot="prefix" class="el-input__icon el-icon-user"></i>
                     </el-input>
+                </el-col>
+            </el-row>
+            <el-row style="margin-bottom: 8px">
+                <el-col :span="16" :offset="4">
+                <span class="span-text">第一次登录，请输入admin管理员密码</span>
                 </el-col>
             </el-row>
             <el-row>
                 <el-col :span="16" :offset="4">
                     <el-input type="password" autocomplete="new-password" name="password" tabindex="2"
                         placeholder="请输入密码" clearable
-                        v-model="password" @keyup.enter.native="handleLogin">
+                        v-model="password" >
+                        <i slot="prefix" class="el-input__icon el-icon-lock"></i>
+                    </el-input>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="16" :offset="4">
+                    <el-input type="password" autocomplete="confirm-password" name="confirmPassword" tabindex="3"
+                        placeholder="请再次输入密码" clearable
+                        v-model="confirmPassword" @keyup.enter.native="handleAdmin">
                         <i slot="prefix" class="el-input__icon el-icon-lock"></i>
                     </el-input>
                 </el-col>
             </el-row>
             <el-row style="margin-top: 30px;">
                 <el-col :span="16" :offset="4" align="center">
-                    <el-button :loading="loading" size="medium" plain style="width: 100%;" @click.native.prevent="handleLogin">
-                        <span style="margin-right: 20px;">登</span>
-                        <span>录</span>
+                    <el-button :loading="loading" size="medium" plain style="width: 100%;" @click.native.prevent="handleAdmin">
+                        <span style="margin-right: 20px;">确</span>
+                        <span>认</span>
                     </el-button>
                 </el-col>
             </el-row>
@@ -38,58 +52,38 @@
 
 <script>
 import { Message } from 'element-ui'
-import { hasAdmin } from '@/api/user'
+import { adminSet } from '@/api/user'
 
 export default {
     data() {
         return {
-            username: '',
+            username: 'admin',
             password: '',
+            confirmPassword: '',
             loading: false,
-            redirect: undefined
-        }
-    },
-    beforeRouteEnter(to, from, next) {
-        console.log(to)
-        console.log(from)
-        hasAdmin().then(response => {
-            const { data } = response
-            const { has } = data
-            if (has) {
-                next()
-            } else {
-                next('/ui/login/admin')
-            }
-        }).catch(() => {
-            next()
-        })
-    },
-    watch: {
-        $route: {
-            handler: function(route) {
-                this.redirect = route.query && route.query.redirect
-            },
-            immediate: true
         }
     },
     methods: {
-        handleLogin() {
-            const userInfo = {username: this.username, password: this.password}
-            console.log(userInfo)
-            if (!userInfo.username) {
-                Message.error("用户名不能为空！")
-                return false
-            }
-            if (!userInfo.password) {
+        handleAdmin() {
+            const password = this.password
+            const confirmPassword = this.confirmPassword
+            if (!password) {
                 Message.error("密码不能为空！")
                 return false
             }
+            if (!confirmPassword) {
+                Message.error("确认密码不能为空！")
+                return false
+            }
+            if (password !== confirmPassword) {
+                Message.error("两次输入密码不同，请重新输入！")
+                return false
+            }
+            const adminPassword = {password: password}
             this.loading = true
-            this.$store.dispatch('user/login', userInfo).then(() => {
+            adminSet(adminPassword).then(() => {
                 this.loading = false
-                // console.log(this.redirect)
-                parent.location.href = this.redirect || '/'
-                // this.$router.push({ path: this.redirect || '/' })
+                parent.location.href = "/ui/login"
             }).catch(() => {
                 this.loading = false
             })
@@ -123,6 +117,11 @@ export default {
 }
 .login-title {
     font-size: 32px;
+    font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
+}
+.span-text {
+    font-size: 13px;
+    color: rgba(86, 88, 92, 0.733);
     font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
 }
 </style>

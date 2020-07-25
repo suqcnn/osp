@@ -63,6 +63,16 @@ class UserViewSet(viewsets.GenericViewSet):
         res = {'name': u.name, 'email': u.email}
         return CommonReturn(Code.SUCCESS, data=res)
 
+    @action(methods=['GET'], detail=False, url_path='token')
+    @api_decorator('Get user')
+    def token_user(self, req):
+        request = req.get('request')
+        user = request.user
+        data = {
+            'name': user.name,
+        }
+        return CommonReturn(Code.SUCCESS, data=data)
+
     @api_decorator('List user')
     def list(self, req):
         users = User.filter()
@@ -88,9 +98,41 @@ def login(req):
         if not password:
             return JsonResponse({'code': Code.PARAM_ERROR, 'msg': 'Parameter password is blank'})
         res = Auth.login(username, password)
-        if not res.is_success():
-            return JsonResponse(res.to_json(), status=401)
         return JsonResponse(res.to_json())
     except Exception as exc:
         logger.error('login error: %s' % exc, exc_info=True)
         return JsonResponse({'code': Code.AUTH_ERROR, 'msg': str(exc)})
+
+
+def logout(req):
+    try:
+        logger.info(req.META)
+        token = req.META.get('HTTP_AUTHORIZATION', '')[7:]
+        logger.info(token)
+        if token:
+            res = Auth.logout(token)
+            return JsonResponse(res.to_json())
+        return JsonResponse(Code.SUCCESS)
+    except Exception as exc:
+        logger.error('logout error: %s' % exc, exc_info=True)
+        return JsonResponse({'code': Code.UNKNOWN_ERROR, 'msg': str(exc)})
+
+
+def has_admin(_):
+    try:
+        username = 'admin'
+        res = CommonReturn(Code.SUCCESS, data={'has': 1})
+        try:
+            User.get(username)
+        except CommonException as exc:
+            if exc.code == Code.DATA_NOT_EXISTS:
+                res = CommonReturn(Code.SUCCESS, data={'has': 0})
+            else:
+                res = CommonReturn(exc.code, exc.msg)
+        except Exception as exc:
+            logger.error('get admin user error: %s' % exc, exc_info=True)
+            res = CommonReturn(Code.UNKNOWN_ERROR, str(exc))
+        return JsonResponse(res.to_json())
+    except Exception as exc:
+        logger.error('logout error: %s' % exc, exc_info=True)
+        return JsonResponse({'code': Code.UNKNOWN_ERROR, 'msg': str(exc)})

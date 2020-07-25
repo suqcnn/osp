@@ -39,6 +39,13 @@ import { Noop } from '../layout/components'
 
 const oRoutes = [
   {
+    path: 'login/admin',
+    name: 'login_admin',
+    hidden: true,
+    component: () => import('@/views/login_admin/index'),
+  },
+
+  {
     path: 'login',
     name: 'login',
     hidden: true,

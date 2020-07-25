@@ -9,141 +9,91 @@
                 </transition-group>
             </el-breadcrumb>
         </div>
+
         <div style="margin: 20px;">
-            <el-card class="box-card" shadow="hover">
+            <el-card class="box-card">
                 <div slot="header" class="clearfix">
                     <span>Master</span>
                 </div>
-                <el-row :gutter=10>
-                    <el-col :span=4 v-for="(item,index) in masterOptions" :key="index">
-                        <SolidGauge :id="item.id" :data="item">
-                        </SolidGauge>
-                    </el-col>
-                    <el-col :span=12>
-                        <Ployline id="masterLine"></Ployline>
-                    </el-col>
-                </el-row>
-                <!-- <div class="charts">
-                    <SolidGauge v-for="(item,index) in masterOptions" :key="index" :id="item.id" :data="item">
-                    </SolidGauge>
-                </div> -->
+                <div class="charts">
+                    <CPU></CPU>
+                    <!-- <MEM id="masterMem"></MEM> -->
+                    <POD></POD>
+                </div>
 
             </el-card>
-            <el-card class="box-card" shadow="hover">
+            <el-card class="box-card">
                 <div slot="header" class="clearfix">
                     <span>Worker</span>
                 </div>
-                <el-row :gutter=10>
-                    <el-col :span=4 v-for="(item,index) in workerOptions" :key="index">
-                        <SolidGauge :id="item.id" :data="item">
-                        </SolidGauge>
-                    </el-col>
-                    <el-col :span=12>
-                        <Ployline id="workerLine"></Ployline>
-                    </el-col>
-                </el-row>
-                <!-- <div class="charts">
-                    <SolidGauge v-for="(item,index) in workerOptions" :key="index" :id="item.id" :data="item">
-                    </SolidGauge>
-                </div> -->
+                <div class="charts">
+                    <MEM v-for="(item,index) in options" :key="index" 
+                    :id="item.id" :data="item"></MEM>
+                </div>
             </el-card>
         </div>
     </div>
+
 </template>
 
 <script>
-    import { SolidGauge, Ployline } from '@/components/charts'
+    import { CPU, MEM, POD } from '@/components/charts'
 
     export default {
         name: 'aaa',
         components: {
-            SolidGauge,
-            Ployline
+            CPU, MEM, POD
         },
         data() {
             return {
-                workerOptions: [
+                options: [
                     {
-                        id: 'wokerCpu',
-                        title: "CPU",
-                        backgroundNum: 3,
-                        series: [{
-                            name: 'Usage',
-                            value: 80
-                        }, {
-                            name: 'Limits',
-                            value: 65
-                        }, {
-                            name: 'Capacity',
-                            value: 50
-                        }]
-                    },
-                    {
-                        id: 'wokerMem',
+                        id:'mem',
                         title: "Memory",
                         backgroundNum: 3,
                         series: [{
-                            name: 'Usage',
+                            name: 'Move',
                             value: 80
                         }, {
-                            name: 'Limits',
+                            name: 'Exercise',
                             value: 65
                         }, {
-                            name: 'Capacity',
+                            name: 'Stand',
                             value: 50
                         }]
                     },
                     {
-                        id: 'workerPod',
+                        id:'pod',
                         title: "Pod",
-                        backgroundNum: 1,
+                        backgroundNum: 3,
                         series: [{
-                            name: 'Usage',
+                            name: '1',
                             value: 11
+                        }, {
+                            name: '2',
+                            value: 65
+                        }, {
+                            name: '3',
+                            value: 50
+                        }]
+                    },
+                    {
+                        id:'pod12312',
+                        title: "Pod",
+                        backgroundNum: 3,
+                        series: [{
+                            name: '1',
+                            value: 11
+                        }, {
+                            name: '2',
+                            value: 65
+                        }, {
+                            name: '3',
+                            value: 50
                         }]
                     }
                 ],
-                masterOptions: [
-                    {
-                        id: 'masterCpu',
-                        title: "CPU",
-                        backgroundNum: 3,
-                        series: [{
-                            name: 'Usage',
-                            value: 80
-                        }, {
-                            name: 'Limits',
-                            value: 65
-                        }, {
-                            name: 'Capacity',
-                            value: 50
-                        }]
-                    },
-                    {
-                        id: 'masterMem',
-                        title: "Memory",
-                        backgroundNum: 3,
-                        series: [{
-                            name: 'Usage',
-                            value: 80
-                        }, {
-                            name: 'Limits',
-                            value: 65
-                        }, {
-                            name: 'Capacity',
-                            value: 50
-                        }]
-                    },
-                    {
-                        id: 'masterPod',
-                        title: "Pod",
-                        backgroundNum: 1,
-                        series: [{
-                            name: 'Usage',
-                            value: 11
-                        }]
-                    }
-                ],
+
             }
         }
     }
@@ -226,7 +176,6 @@
 
     .box-card {
         width: 100%;
-        margin-top: 5px;
         /* bottom: 0; */
     }
 

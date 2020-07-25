@@ -14,51 +14,29 @@
                 <div slot="header" class="clearfix">
                     <span>Master</span>
                 </div>
-                <el-row :gutter=10>
-                    <el-col :span=4 v-for="(item,index) in masterOptions" :key="index">
-                        <SolidGauge :id="item.id" :data="item">
-                        </SolidGauge>
-                    </el-col>
-                    <el-col :span=12>
-                        <Ployline id="masterLine"></Ployline>
-                    </el-col>
-                </el-row>
-                <!-- <div class="charts">
-                    <SolidGauge v-for="(item,index) in masterOptions" :key="index" :id="item.id" :data="item">
-                    </SolidGauge>
-                </div> -->
-
+                <div class="charts">
+                    <SolidGauge v-for="(item,index) in masterOptions" :key="index" :id="item.id" :data="item"></SolidGauge>
+                </div>
             </el-card>
             <el-card class="box-card" shadow="hover">
                 <div slot="header" class="clearfix">
                     <span>Worker</span>
                 </div>
-                <el-row :gutter=10>
-                    <el-col :span=4 v-for="(item,index) in workerOptions" :key="index">
-                        <SolidGauge :id="item.id" :data="item">
-                        </SolidGauge>
-                    </el-col>
-                    <el-col :span=12>
-                        <Ployline id="workerLine"></Ployline>
-                    </el-col>
-                </el-row>
-                <!-- <div class="charts">
-                    <SolidGauge v-for="(item,index) in workerOptions" :key="index" :id="item.id" :data="item">
-                    </SolidGauge>
-                </div> -->
+                <div class="charts">
+                    <SolidGauge v-for="(item,index) in workerOptions" :key="index" :id="item.id" :data="item"></SolidGauge>
+                </div>
             </el-card>
         </div>
     </div>
 </template>
 
 <script>
-    import { SolidGauge, Ployline } from '@/components/charts'
+    import { SolidGauge } from '@/components/charts'
 
     export default {
         name: 'aaa',
         components: {
-            SolidGauge,
-            Ployline
+            SolidGauge
         },
         data() {
             return {

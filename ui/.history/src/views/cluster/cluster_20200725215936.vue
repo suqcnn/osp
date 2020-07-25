@@ -15,12 +15,12 @@
                     <span>Master</span>
                 </div>
                 <el-row :gutter=10>
-                    <el-col :span=4 v-for="(item,index) in masterOptions" :key="index">
+                    <el-col :span=2 v-for="(item,index) in masterOptions" :key="index">
                         <SolidGauge :id="item.id" :data="item">
                         </SolidGauge>
                     </el-col>
-                    <el-col :span=12>
-                        <Ployline id="masterLine"></Ployline>
+                    <el-col :span=18>
+                        <Ployline id="aaa"></Ployline>
                     </el-col>
                 </el-row>
                 <!-- <div class="charts">
@@ -33,19 +33,10 @@
                 <div slot="header" class="clearfix">
                     <span>Worker</span>
                 </div>
-                <el-row :gutter=10>
-                    <el-col :span=4 v-for="(item,index) in workerOptions" :key="index">
-                        <SolidGauge :id="item.id" :data="item">
-                        </SolidGauge>
-                    </el-col>
-                    <el-col :span=12>
-                        <Ployline id="workerLine"></Ployline>
-                    </el-col>
-                </el-row>
-                <!-- <div class="charts">
+                <div class="charts">
                     <SolidGauge v-for="(item,index) in workerOptions" :key="index" :id="item.id" :data="item">
                     </SolidGauge>
-                </div> -->
+                </div>
             </el-card>
         </div>
     </div>

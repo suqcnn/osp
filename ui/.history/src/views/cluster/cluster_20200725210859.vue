@@ -10,62 +10,40 @@
             </el-breadcrumb>
         </div>
         <div style="margin: 20px;">
-            <el-card class="box-card" shadow="hover">
+            <el-card class="box-card">
                 <div slot="header" class="clearfix">
                     <span>Master</span>
                 </div>
-                <el-row :gutter=10>
-                    <el-col :span=4 v-for="(item,index) in masterOptions" :key="index">
-                        <SolidGauge :id="item.id" :data="item">
-                        </SolidGauge>
-                    </el-col>
-                    <el-col :span=12>
-                        <Ployline id="masterLine"></Ployline>
-                    </el-col>
-                </el-row>
-                <!-- <div class="charts">
-                    <SolidGauge v-for="(item,index) in masterOptions" :key="index" :id="item.id" :data="item">
-                    </SolidGauge>
-                </div> -->
-
+                <div class="charts">
+                    <Charts v-for="(item,index) in masterOptions" :key="index" :id="item.id" :data="item"></Charts>
+                </div>
             </el-card>
-            <el-card class="box-card" shadow="hover">
+            <el-card class="box-card">
                 <div slot="header" class="clearfix">
                     <span>Worker</span>
                 </div>
-                <el-row :gutter=10>
-                    <el-col :span=4 v-for="(item,index) in workerOptions" :key="index">
-                        <SolidGauge :id="item.id" :data="item">
-                        </SolidGauge>
-                    </el-col>
-                    <el-col :span=12>
-                        <Ployline id="workerLine"></Ployline>
-                    </el-col>
-                </el-row>
-                <!-- <div class="charts">
-                    <SolidGauge v-for="(item,index) in workerOptions" :key="index" :id="item.id" :data="item">
-                    </SolidGauge>
-                </div> -->
+                <div class="charts">
+                    <Charts v-for="(item,index) in workerOptions" :key="index" :id="item.id" :data="item"></Charts>
+                </div>
             </el-card>
         </div>
     </div>
 </template>
 
 <script>
-    import { SolidGauge, Ployline } from '@/components/charts'
+    import charts from '@/components/charts'
 
     export default {
         name: 'aaa',
         components: {
-            SolidGauge,
-            Ployline
+            charts
         },
         data() {
             return {
                 workerOptions: [
                     {
                         id: 'wokerCpu',
-                        title: "CPU",
+                        title: "Memory",
                         backgroundNum: 3,
                         series: [{
                             name: 'Usage',
@@ -105,22 +83,7 @@
                 ],
                 masterOptions: [
                     {
-                        id: 'masterCpu',
-                        title: "CPU",
-                        backgroundNum: 3,
-                        series: [{
-                            name: 'Usage',
-                            value: 80
-                        }, {
-                            name: 'Limits',
-                            value: 65
-                        }, {
-                            name: 'Capacity',
-                            value: 50
-                        }]
-                    },
-                    {
-                        id: 'masterMem',
+                        id: 'wokerCpu',
                         title: "Memory",
                         backgroundNum: 3,
                         series: [{
@@ -135,7 +98,22 @@
                         }]
                     },
                     {
-                        id: 'masterPod',
+                        id: 'wokerMem',
+                        title: "Memory",
+                        backgroundNum: 3,
+                        series: [{
+                            name: 'Usage',
+                            value: 80
+                        }, {
+                            name: 'Limits',
+                            value: 65
+                        }, {
+                            name: 'Capacity',
+                            value: 50
+                        }]
+                    },
+                    {
+                        id: 'workerPod',
                         title: "Pod",
                         backgroundNum: 1,
                         series: [{
@@ -226,7 +204,6 @@
 
     .box-card {
         width: 100%;
-        margin-top: 5px;
         /* bottom: 0; */
     }
 

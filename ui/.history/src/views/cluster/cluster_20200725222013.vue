@@ -20,7 +20,7 @@
                         </SolidGauge>
                     </el-col>
                     <el-col :span=12>
-                        <Ployline id="masterLine"></Ployline>
+                        <Ployline id="aaa"></Ployline>
                     </el-col>
                 </el-row>
                 <!-- <div class="charts">
@@ -34,12 +34,12 @@
                     <span>Worker</span>
                 </div>
                 <el-row :gutter=10>
-                    <el-col :span=4 v-for="(item,index) in workerOptions" :key="index">
+                    <el-col :span=4 v-for="(item,index) in masterOptions" :key="index">
                         <SolidGauge :id="item.id" :data="item">
                         </SolidGauge>
                     </el-col>
                     <el-col :span=12>
-                        <Ployline id="workerLine"></Ployline>
+                        <Ployline id="aaa"></Ployline>
                     </el-col>
                 </el-row>
                 <!-- <div class="charts">

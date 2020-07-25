@@ -7,9 +7,9 @@
       <el-dropdown placement="bottom">
         <span class="el-dropdown-link">
           <img class="avatar-class" src="@/assets/user.png" />
-          user1<i class="el-icon-arrow-down el-icon--right"></i>
+          {{ username }}<i class="el-icon-arrow-down el-icon--right"></i>
         </span>
-        <el-dropdown-menu slot="dropdown">
+        <el-dropdown-menu slot="dropdown" @click.native="logout">
           <el-dropdown-item>Logout</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -18,12 +18,24 @@
 </template>
 
 <script>
-// import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import Logo from './Logo'
 import NavbarItem from './NavbarItem'
 
 export default {
-  components: { Logo, NavbarItem }
+  components: { Logo, NavbarItem },
+
+  computed: {
+    ...mapGetters([
+      'username',
+    ])
+  },
+  methods: {
+    async logout() {
+      await this.$store.dispatch('user/logout')
+      parent.location.href = `/ui/login?redirect=${this.$route.fullPath}`
+    }
+  }
 }
 </script>
 

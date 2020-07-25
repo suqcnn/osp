@@ -22,9 +22,13 @@ import api.views.user
 
 urlpatterns = [
     re_path('^/?$', api.views.index),
+    re_path('^ui/login/admin/?$', api.views.ui_login_admin),
+    re_path('^ui/login/?$', api.views.ui_login),
     re_path('^ui/.*?$', api.views.ui),
     re_path('health/?', api.views.health),
     re_path('osp/api/login/?', api.views.user.login),
+    re_path('osp/api/logout/?', api.views.user.logout),
+    re_path('osp/api/has_admin/?', api.views.user.has_admin),
     re_path('osp/api/cluster/agent/?', api.views.cluster.agent),
     path('osp/api/', include('api.urls')),
 ]

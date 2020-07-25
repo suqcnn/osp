@@ -6,7 +6,7 @@ const Routes = [
   {
     path: '',
     name: 'cluster',
-    component: () => import('@/views/cluster/cluster'),
+    component: () => import('@/views/dashboard/index'),
     meta: { title: '集群', icon: 'cluster', group: 'cluster' }
   },
 

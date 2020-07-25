@@ -10,6 +10,7 @@
   "dependencies": {
     "core-js": "^3.6.5",
     "element-ui": "^2.13.2",
+    "highcharts": "^8.1.2",
     "normalize.css": "^8.0.1",
     "sass": "^1.26.10",
     "sass-loader": "^9.0.2",

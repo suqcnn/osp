@@ -59,7 +59,7 @@ export const routes = [
     path: '/',
     component: Noop,
     hidden: true,
-    redirect: '/ui/settings/overview'
+    redirect: '/ui/settings/cluster'
   },
   {
   path: '/ui',

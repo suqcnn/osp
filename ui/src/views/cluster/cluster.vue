@@ -23,11 +23,6 @@
                         <Ployline id="masterLine"></Ployline>
                     </el-col>
                 </el-row>
-                <!-- <div class="charts">
-                    <SolidGauge v-for="(item,index) in masterOptions" :key="index" :id="item.id" :data="item">
-                    </SolidGauge>
-                </div> -->
-
             </el-card>
             <el-card class="box-card" shadow="hover">
                 <div slot="header" class="clearfix">

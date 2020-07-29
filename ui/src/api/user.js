@@ -37,3 +37,19 @@ export function hasAdmin() {
     method: 'get',
   })
 }
+
+export function createUser(data) {
+  return request({
+    url: '/user',
+    method: 'post',
+    data
+  })
+}
+
+export function getUser(data) {
+  return request({
+    url: '/user',
+    method: 'get',
+    data
+  })
+}

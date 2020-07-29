@@ -14,6 +14,12 @@ const Routes = [
     component: () => import('@/views/dashboard/index'),
     meta: { title: '集群管理', icon: 'settings_cluster', 'group': 'settings' }
   },
+  {
+    path: 'member',
+    name: 'member',
+    component: () => import('@/views/member/index'),
+    meta: { title: '用户管理', icon: 'member', 'group': 'settings' }
+  },
 ]
 
 const settingsRoutes = [{

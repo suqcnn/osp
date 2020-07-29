@@ -22,11 +22,13 @@ class UserViewSet(viewsets.GenericViewSet):
         encrypted_pwd = tools.encrypt(params.get('password'))
         u = User(name=params.get('name'),
                  email=params.get('email'),
+                 status='normal',
                  password=encrypted_pwd)
         u.save()
         res = {
             'name': u.name,
-            'email': u.email
+            'email': u.email,
+            'normal': u.status
         }
         return CommonReturn(Code.SUCCESS, 'Success', res)
 
@@ -60,7 +62,7 @@ class UserViewSet(viewsets.GenericViewSet):
     def retrieve(self, req):
         pk = req.get('pk')
         u = User.get(pk)
-        res = {'name': u.name, 'email': u.email}
+        res = {'name': u.name, 'email': u.email, 'status': u.status, 'last_login': u.last_login}
         return CommonReturn(Code.SUCCESS, data=res)
 
     @action(methods=['GET'], detail=False, url_path='token')
@@ -83,7 +85,9 @@ class UserViewSet(viewsets.GenericViewSet):
             if not name or u.name.contains(name):
                 ret.append({
                     'name': u.name,
-                    'email': u.email
+                    'email': u.email,
+                    'status': u.status,
+                    'last_login': u.last_login
                 })
         return CommonReturn(Code.SUCCESS, data=ret)
 

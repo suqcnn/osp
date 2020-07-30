@@ -65,6 +65,21 @@ class UserViewSet(viewsets.GenericViewSet):
         res = {'name': u.name, 'email': u.email, 'status': u.status, 'last_login': u.last_login}
         return CommonReturn(Code.SUCCESS, data=res)
 
+    @api_decorator("update user", serializer_class=user_serializers.UpdateUserSerializer)
+    def update(self, req):
+        pk = req.get("pk")
+        params = req.get("params")
+        status = params.get("status")
+        email = params.get("email")
+        u = User.get(pk)
+        if status:
+            u.status = status
+        if email:
+            u.email = email
+        u.save(add_sets=False)
+        return CommonReturn(Code.SUCCESS)
+
+
     @action(methods=['GET'], detail=False, url_path='token')
     @api_decorator('Get user')
     def token_user(self, req):

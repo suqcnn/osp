@@ -28,7 +28,6 @@ class ClusterViewSet(viewsets.GenericViewSet):
 
     @api_decorator('List cluster')
     def list(self, _):
-        sleep(3)
         clusters = Cluster.filter()
         data = []
         for cluster in clusters:

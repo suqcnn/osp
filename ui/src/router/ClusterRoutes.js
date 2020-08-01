@@ -32,7 +32,7 @@ const Routes = [
       {
         path: 'pods',
         name: 'pods',
-        component: () => import('@/views/dashboard/index'),
+        component: () => import('@/views/cluster/pod'),
         meta: { title: '容器组', group: 'cluster' }
       },
       {

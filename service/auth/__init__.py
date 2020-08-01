@@ -26,7 +26,7 @@ class Auth:
         if user.password != encrypted_pwd:
             return CommonReturn(Code.AUTH_ERROR, '密码不正确，请重新输入！')
         token = uuid.uuid4().hex
-        Token(token=token, username=username).save(expire=1800, add_sets=False)
+        Token(token=token, username=username).save(expire=43200, add_sets=False)
         user.last_login = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         user.save(add_sets=False)
         return CommonReturn(Code.SUCCESS, data={'token': token})

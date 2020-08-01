@@ -52,12 +52,56 @@ class MiddleMessage:
             except Exception as exc:
                 logger.error('websocket handle subscribe data error: %s' % exc, exc_info=True)
 
+    @classmethod
+    def cluster_watch_queue_key(cls, cluster):
+        return 'osp:cluster_watch:%s' % cluster
+
+    def get_watch(self, cluster):
+        watch_queue_key = self.cluster_watch_queue_key(cluster)
+        self.pubsub.subscribe(watch_queue_key)
+        for data in self.pubsub.listen():
+            try:
+                logger.info('receive watch data: %s' % data)
+                d = data.get('data')
+                if d == 1:
+                    continue
+                try:
+                    data = json.loads(d)
+                except Exception as exc:
+                    logger.error('subscribe data json error: %s' % exc, exc_info=True)
+                    continue
+                # watch_response = MiddleResponse.unserialize(data)
+                yield data
+            except Exception as exc:
+                logger.error('websocket handle subscribe data error: %s' % exc, exc_info=True)
+
     def send_response(self, middle_response):
         request_id = middle_response.request_id
         response_data = middle_response.serialize_data()
         pipeline = self.connection.pipeline()
         pipeline.lpush(request_id, response_data).expire(request_id, time=10)
         pipeline.execute()
+
+    def has_watch_client(self, cluster):
+        watch_queue_key = self.cluster_watch_queue_key(cluster)
+        subscribes = self.connection.pubsub_numsub(watch_queue_key)
+        logger.info('token %s current subscribes: %s' % (watch_queue_key, subscribes))
+        for s in subscribes:
+            if s[0].decode('utf-8') == watch_queue_key and s[1] > 0:
+                return True
+        return False
+
+    def send_watch(self, cluster, middle_response):
+        watch_queue_key = self.cluster_watch_queue_key(cluster)
+        subscribes = self.connection.pubsub_numsub(watch_queue_key)
+        logger.info('token %s current subscribes: %s' % (watch_queue_key, subscribes))
+        has_sub = False
+        for s in subscribes:
+            if s[0].decode('utf-8') == watch_queue_key and s[1] > 0:
+                has_sub = True
+                break
+        if has_sub:
+            self.connection.publish(watch_queue_key, middle_response.serialize_data())
 
     def send_request(self, middle_request):
         request_queue_key = self.cluster_request_queue_key(middle_request.cluster)
@@ -114,8 +158,9 @@ class MiddleRequest:
 
 class MiddleResponse:
 
-    def __init__(self, request_id=None, data=None):
+    def __init__(self, request_id=None, data=None, res_type=None):
         self.request_id = request_id
+        self.res_type = res_type
         self.data = data
 
     def serialize_data(self):
@@ -124,4 +169,11 @@ class MiddleResponse:
     @classmethod
     def unserialize(cls, data):
         return cls(request_id=data.get('request_id'),
+                   res_type=data.get('res_type'),
                    data=data.get('data'))
+
+    def is_request(self):
+        return self.res_type == 'request'
+
+    def is_watch(self):
+        return self.res_type == 'watch'

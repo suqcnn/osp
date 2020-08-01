@@ -1,6 +1,6 @@
 <template>
   <div>
-    <clusterbar />
+    <clusterbar titleName="Pod" :search="true" :namespace="true" />
     <div class="dashboard-container">
       <!-- <div class="dashboard-text"></div> -->
       <el-table
@@ -9,6 +9,7 @@
         class="table-fix"
         tooltip-effect="dark"
         style="width: 100%"
+        size="small"
         >
         <el-table-column
           type="selection"
@@ -17,13 +18,13 @@
         <el-table-column
           prop="name"
           label="名称"
-          width="200"
+          min-width="200"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           prop="namespace"
           label="命名空间"
-          width="120"
+          min-width="100"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column

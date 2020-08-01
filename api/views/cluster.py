@@ -1,4 +1,5 @@
 import logging
+from time import sleep
 
 from django.http import HttpResponse
 from rest_framework import viewsets
@@ -27,12 +28,14 @@ class ClusterViewSet(viewsets.GenericViewSet):
 
     @api_decorator('List cluster')
     def list(self, _):
+        sleep(3)
         clusters = Cluster.filter()
         data = []
         for cluster in clusters:
             data.append({
                 'name': cluster.name,
                 'token': cluster.token,
+                'status': '正常',
                 'create_time': cluster.create_time,
                 'update_time': cluster.update_time
             })

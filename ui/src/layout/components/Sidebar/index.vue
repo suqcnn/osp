@@ -30,6 +30,7 @@ export default {
       if (meta.activeMenu) {
         return meta.activeMenu
       }
+      if (meta && meta.sideName) return meta.sideName
       return name
     },
   }

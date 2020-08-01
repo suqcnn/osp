@@ -1,11 +1,9 @@
 <template>
   <div class="cluster-bar">
-    <el-breadcrumb class="app-breadcrumb" separator="/">
-      <transition-group name="breadcrumb">
-        <el-breadcrumb-item :key="titleName">
-          <span class="no-redirect">{{ titleName }}</span>
+    <el-breadcrumb class="app-breadcrumb" separator-class="el-icon-arrow-right">
+        <el-breadcrumb-item v-for="t in titleName" :key="t" class="no-redirect">
+          {{ t }}
         </el-breadcrumb-item>
-      </transition-group>
     </el-breadcrumb>
 
     <!-- <svg-icon class="icon-create" icon-class="create"/> -->
@@ -43,9 +41,9 @@ export default {
   name: 'Clusterbar',
   props: {
     titleName: {
-      type: String,
+      type: Array,
       required: true,
-      default: ""
+      default: () => {return []}
     },
     nsFunc: {
       type: Function,
@@ -124,21 +122,24 @@ export default {
   transition: width 0.28s;
   height: 55px;
   overflow: hidden;
-  box-shadow: inset 0 0 4px rgba(0, 21, 41, 0.1);
+  // box-shadow: inset 0 0 4px rgba(0, 21, 41, 0.1);
+  border: 1px solid #EBEEF5;
   margin: 20px 20px 0px;
 
   .app-breadcrumb.el-breadcrumb {
     display: inline-block;
     font-size: 20px;
-    line-height: 55px;
+    line-height: 58px;
     margin-left: 8px;
 
     .no-redirect {
       // color: #97a8be;
       cursor: text;
-      margin-left: 15px;
       font-size: 23px;
       font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
+    }
+    .no-redirect:first-child {
+      margin-left: 15px;
     }
   }
 
@@ -155,7 +156,7 @@ export default {
   .right {
     float: right;
     height: 100%;
-    line-height: 55px;
+    line-height: 52px;
     margin-right: 25px;
 
     .el-input {

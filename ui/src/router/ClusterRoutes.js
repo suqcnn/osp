@@ -36,6 +36,13 @@ const Routes = [
         meta: { title: '容器组', group: 'cluster' }
       },
       {
+        path: 'pods/:namespace/:podName',
+        name: 'podsDetail',
+        hidden: true,
+        component: () => import('@/views/cluster/podDetail'),
+        meta: { title: '容器组', group: 'cluster', sideName: "pods" }
+      },
+      {
         path: 'deployments',
         name: 'deployments',
         component: () => import('@/views/dashboard/index'),

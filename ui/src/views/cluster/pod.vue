@@ -1,6 +1,6 @@
 <template>
   <div>
-    <clusterbar titleName="Pod" :nsFunc="nsSearch" :nameFunc="nameSearch" />
+    <clusterbar :titleName="titleName" :nsFunc="nsSearch" :nameFunc="nameSearch" />
     <div class="dashboard-container">
       <!-- <div class="dashboard-text"></div> -->
       <el-table
@@ -22,6 +22,11 @@
           label="名称"
           min-width="200"
           show-overflow-tooltip>
+          <template slot-scope="scope">
+            <span class="name-class" v-on:click="nameClick(scope.row.namespace, scope.row.name)">
+              {{ scope.row.name }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column
           prop="namespace"
@@ -57,7 +62,27 @@
         <el-table-column
           prop="status"
           label="状态"
+          min-width="60"
           show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
+          label=""
+          show-overflow-tooltip
+          min-width="40">
+          <template slot-scope="scope">
+            <!-- <el-link :underline="false"
+              @click.native.prevent="deleteRow(scope.$index, tableData)">
+              <svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" />
+            </el-link> -->
+            <el-dropdown size="medium" >
+              <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item @click.native.prevent="deleteRow(scope.$index, tableData)">详情</el-dropdown-item>
+                <el-dropdown-item>修改</el-dropdown-item>
+                <el-dropdown-item>删除</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+          </template>
         </el-table-column>
       </el-table>
     </div>
@@ -76,6 +101,7 @@ export default {
   },
   data() {
       return {
+        titleName: ["Pods"],
         maxHeight: window.innerHeight - 150,
         loading: true,
         originPods: [],
@@ -223,6 +249,10 @@ export default {
         }
       }
       return c
+    },
+    nameClick: function(namespace, name) {
+      console.log(namespace, name)
+      this.$router.push({name: 'podsDetail', params: {namespace: namespace, podName: name}})
     }
   }
 }
@@ -241,6 +271,13 @@ export default {
   .table-fix {
     height: calc(100% - 100px);
   }
+}
+
+.name-class {
+  cursor: pointer;
+}
+.name-class:hover {
+  color: #409EFF;
 }
 
     .scrollbar-wrapper {

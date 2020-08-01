@@ -6,3 +6,10 @@ export function listPods(cluster) {
     method: 'get',
   })
 }
+
+export function getPod(cluster, namespace, name) {
+  return request({
+    url: `pods/${cluster}/${namespace}/${name}`,
+    method: 'get',
+  })
+}

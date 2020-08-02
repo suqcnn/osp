@@ -53,3 +53,11 @@ export function getUser(data) {
     data
   })
 }
+
+export function updateUser(pk, data) {
+  return request({
+    url: `/user/${pk}`,
+    method: 'put',
+    data
+  })
+}

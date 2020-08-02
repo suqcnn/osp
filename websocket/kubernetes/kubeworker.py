@@ -3,6 +3,7 @@ import logging
 import threading
 from queue import Queue
 
+from service.kuberesource.watch import WatchResource
 from service.middlemessage import MiddleMessage, MiddleResponse
 from utils import CommonReturn, Code
 
@@ -18,11 +19,12 @@ class KubeWorker(threading.Thread):
 
     def set_cluster(self, cluster):
         self.middle_request_handler.set_cluster(cluster)
+        self.ws_response_handler.set_cluster(cluster)
 
     def run(self):
         self.middle_request_handler.start()
         self.ws_response_handler.run()
-        logger.info('kube worker stoppped')
+        logger.info('kube worker stopped')
 
     def ws_handle(self, data):
         self.ws_response_handler.put_ws_response(data)
@@ -67,9 +69,10 @@ class MiddleRequestHandler(threading.Thread):
 
 class WSResponseHandler:
 
-    def __init__(self, max_worker_handlers=10):
+    def __init__(self, max_worker_handlers=10, cluster=None):
         self.queue = Queue(maxsize=1000)
         self.has_stopped = False
+        self.cluster = cluster
         pool = concurrent.futures.ThreadPoolExecutor(int(max_worker_handlers))
         self.pool = pool
         self.middle_message = MiddleMessage()
@@ -79,6 +82,9 @@ class WSResponseHandler:
 
     def put_stop(self):
         self.queue.put(0)
+
+    def set_cluster(self, cluster):
+        self.cluster = cluster
 
     def run(self):
         while not self.has_stopped:
@@ -90,7 +96,15 @@ class WSResponseHandler:
     def ws_handle(self, data):
         try:
             middle_response = MiddleResponse.unserialize(data)
-            self.middle_message.send_response(middle_response)
+            if middle_response.is_request():
+                self.middle_message.send_response(middle_response)
+            elif middle_response.is_watch():
+                has_watch_client = self.middle_message.has_watch_client(self.cluster)
+                if has_watch_client:
+                    self.middle_message.send_watch(self.cluster, middle_response)
+                else:
+                    watch_resource = WatchResource(self.cluster)
+                    watch_resource.close_watch()
         except Exception as exc:
             logger.error('send response error: %s' % exc, exc_info=True)
 

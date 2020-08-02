@@ -1,4 +1,5 @@
 import logging
+from time import sleep
 
 from django.http import HttpResponse
 from rest_framework import viewsets
@@ -33,6 +34,7 @@ class ClusterViewSet(viewsets.GenericViewSet):
             data.append({
                 'name': cluster.name,
                 'token': cluster.token,
+                'status': '正常',
                 'create_time': cluster.create_time,
                 'update_time': cluster.update_time
             })

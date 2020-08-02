@@ -10,7 +10,7 @@
                 <el-col :span="16" :offset="4">
                     <el-input 
                         placeholder="请输入用户名" name="username" tabindex="1"
-                        v-model="username" class="login-input" clearable>
+                        v-model="username" class="login-input" clearable autofocus>
                         <i slot="prefix" class="el-input__icon el-icon-user"></i>
                     </el-input>
                 </el-col>

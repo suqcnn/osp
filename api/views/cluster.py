@@ -1,5 +1,4 @@
 import logging
-from time import sleep
 
 from django.http import HttpResponse
 from rest_framework import viewsets

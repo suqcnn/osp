@@ -11,6 +11,7 @@
         :max-height="maxHeight"
         style="width: 100%"
         v-loading="loading"
+        :cell-style="cellStyle"
         :default-sort = "{prop: 'name'}"
         >
         <el-table-column
@@ -20,7 +21,7 @@
         <el-table-column
           prop="name"
           label="名称"
-          min-width="200"
+          min-width="180"
           show-overflow-tooltip>
           <template slot-scope="scope">
             <span class="name-class" v-on:click="nameClick(scope.row.namespace, scope.row.name)">
@@ -38,10 +39,25 @@
           prop="containerNum"
           label="容器"
           show-overflow-tooltip>
+          <template slot-scope="scope">
+            <template v-if="scope.row.init_containers">
+            <el-tooltip :content="`${c.name} (${c.status})`" placement="top" v-for="c in scope.row.init_containers" :key="c.name">
+              <svg-icon style="margin-top: 7px;" :class="containerClass(c.status)" icon-class="square" />
+            </el-tooltip>
+            </template>
+            <el-tooltip :content="`${c.name} (${c.status})`" placement="top" v-for="c in scope.row.containers" :key="c.name">
+              <svg-icon style="margin-top: 7px;" :class="containerClass(c.status)" icon-class="square" />
+            </el-tooltip>
+          </template>
         </el-table-column>
         <el-table-column
           prop="restarts"
           label="重启"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
+          prop="node_name"
+          label="节点"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
@@ -101,6 +117,7 @@ export default {
   },
   data() {
       return {
+        cellStyle: {border: 0},
         titleName: ["Pods"],
         maxHeight: window.innerHeight - 150,
         loading: true,
@@ -210,7 +227,7 @@ export default {
       let init_containers = []
       if (pod.spec.initContainers) {
         for (let c of pod.spec.initContainers) {
-          init_containers.push(this.buildContainer(c, pod.status.containerStatuses))
+          init_containers.push(this.buildContainer(c, pod.status.initContainerStatuses))
         }
       }
       let controlled = ''
@@ -253,6 +270,11 @@ export default {
     nameClick: function(namespace, name) {
       console.log(namespace, name)
       this.$router.push({name: 'podsDetail', params: {namespace: namespace, podName: name}})
+    },
+    containerClass: function(status) {
+      if (status === 'running') return 'running-class'
+      if (status === 'terminated') return 'terminate-class'
+      if (status === 'waiting') return 'waiting-class'
     }
   }
 }
@@ -280,14 +302,26 @@ export default {
   color: #409EFF;
 }
 
-    .scrollbar-wrapper {
-      overflow-x: hidden !important;
-    }
-    .el-scrollbar__bar.is-vertical {
-      right: 0px;
-    }
+.scrollbar-wrapper {
+  overflow-x: hidden !important;
+}
+.el-scrollbar__bar.is-vertical {
+  right: 0px;
+}
 
-    .el-scrollbar {
-      height: 100%;
-    }
+.el-scrollbar {
+  height: 100%;
+}
+
+.running-class {
+  color: #67C23A;
+}
+
+.terminate-class {
+  color: #909399;
+}
+
+.waiting-class {
+  color: #E6A23C;
+}
 </style>

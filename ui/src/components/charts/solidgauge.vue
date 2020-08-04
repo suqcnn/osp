@@ -8,6 +8,8 @@
     import Highcharts from 'highcharts';
     import HighchartsMore from 'highcharts/highcharts-more';
     import SolidGauge from 'highcharts/modules/solid-gauge.js'
+    // import resize from '@/components/charts/mixins/resize'
+
     HighchartsMore(Highcharts)
     SolidGauge(Highcharts);
 
@@ -31,6 +33,7 @@
     }
 
     export default {
+        // mixins: [resize],
         mounted() {
             this.init();
 

@@ -1,6 +1,19 @@
 <template>
   <div>
-    <clusterbar titleName="Cluster" />
+    <div class="member-bar">
+      <el-breadcrumb class="app-breadcrumb" separator="/">
+          <transition-group name="breadcrumb">
+              <el-breadcrumb-item key="pods">
+                  <span class="no-redirect">Cluster</span>
+              </el-breadcrumb-item>
+          </transition-group>
+      </el-breadcrumb>
+      <div class="right">
+          <el-button size="mini" @click="createUserFormVisible = true">创建集群</el-button>
+          <el-input size="small" placeholder="搜索" suffix-icon="el-icon-search">
+          </el-input>
+      </div>
+  </div>
     <div class="dashboard-container" ref="tableCot">
       <el-table
         v-loading="loading"
@@ -52,13 +65,13 @@
 </template>
 
 <script>
-import { Clusterbar } from '@/views/components'
+// import { Clusterbar } from '@/views/components'
 import { listCluster } from '@/api/cluster'
 
 export default {
   name: 'SettingsCluster',
   components: {
-    Clusterbar
+    // Clusterbar
   },
   created() {
     this.fetchData()
@@ -107,6 +120,58 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+      .member-bar {
+        transition: width 0.28s;
+        height: 55px;
+        overflow: hidden;
+        box-shadow: inset 0 0 4px rgba(0, 21, 41, 0.1);
+        margin: 20px 20px 0px;
+
+        .app-breadcrumb.el-breadcrumb {
+            display: inline-block;
+            font-size: 20px;
+            line-height: 55px;
+            margin-left: 8px;
+
+            .no-redirect {
+                // color: #97a8be;
+                cursor: text;
+                margin-left: 15px;
+                font-size: 23px;
+                font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
+            }
+        }
+
+        .icon-create {
+            display: inline-block;
+            line-height: 55px;
+            margin-left: 20px;
+            width: 1.8em;
+            height: 1.8em;
+            vertical-align: 0.8em;
+            color: #bfbfbf;
+        }
+
+        .right {
+            float: right;
+            height: 100%;
+            line-height: 55px;
+            margin-right: 25px;
+
+            .el-input {
+                width: 195px;
+                margin-left: 15px;
+            }
+
+            .el-select {
+                .el-select__tags {
+                    white-space: nowrap;
+                    overflow: hidden;
+                }
+            }
+
+        }
+    }
 .dashboard {
   &-container {
     margin: 10px 30px;

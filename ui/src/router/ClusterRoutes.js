@@ -13,7 +13,7 @@ const Routes = [
   {
     path: 'node',
     name: 'node',
-    component: () => import('@/views/dashboard/index'),
+    component: () => import('@/views/cluster/node'),
     meta: { title: '节点', icon: 'node', group: 'cluster' }
   },
     

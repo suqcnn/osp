@@ -9,7 +9,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import '@/permissions'
-import '@/websocket'
+// import '@/websocket'
 
 import '@/styles/index.scss' // global css
 import '@/icons' // icon

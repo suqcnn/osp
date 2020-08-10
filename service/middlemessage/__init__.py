@@ -61,7 +61,7 @@ class MiddleMessage:
         self.pubsub.subscribe(watch_queue_key)
         for data in self.pubsub.listen():
             try:
-                logger.info('receive watch data: %s' % data)
+                logger.debug('receive watch data: %s' % data)
                 d = data.get('data')
                 if d == 1:
                     continue
@@ -85,7 +85,7 @@ class MiddleMessage:
     def has_watch_client(self, cluster):
         watch_queue_key = self.cluster_watch_queue_key(cluster)
         subscribes = self.connection.pubsub_numsub(watch_queue_key)
-        logger.info('token %s current subscribes: %s' % (watch_queue_key, subscribes))
+        logger.debug('token %s current subscribes: %s' % (watch_queue_key, subscribes))
         for s in subscribes:
             if s[0].decode('utf-8') == watch_queue_key and s[1] > 0:
                 return True
@@ -94,7 +94,7 @@ class MiddleMessage:
     def send_watch(self, cluster, middle_response):
         watch_queue_key = self.cluster_watch_queue_key(cluster)
         subscribes = self.connection.pubsub_numsub(watch_queue_key)
-        logger.info('token %s current subscribes: %s' % (watch_queue_key, subscribes))
+        logger.debug('token %s current subscribes: %s' % (watch_queue_key, subscribes))
         has_sub = False
         for s in subscribes:
             if s[0].decode('utf-8') == watch_queue_key and s[1] > 0:

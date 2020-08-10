@@ -131,12 +131,10 @@ export default {
   },
   mounted() {
     const that = this
-    // let heightStyle = that.$refs.tableCot.offsetHeight
-    // that.maxHeight = heightStyle
     window.onresize = () => {
       return (() => {
         let heightStyle = window.innerHeight - 150
-        console.log(heightStyle)
+        // console.log(heightStyle)
         that.maxHeight = heightStyle
       })()
     }
@@ -155,7 +153,7 @@ export default {
             if (p.uid === newUid && p.resource_version < newRv) {
               let newPod = this.buildPods(newObj.resource)
               this.$set(this.originPods, i, newPod)
-              console.log(newPod.status)
+              // console.log(newPod.status)
               break
             }
           }
@@ -213,7 +211,6 @@ export default {
       }
     },
     nameSearch: function(val) {
-      console.log(val)
       this.search_name = val
     },
     buildPods: function(pod) {
@@ -221,7 +218,6 @@ export default {
       let containers = []
       for (let c of pod.spec.containers) {
         let bc = this.buildContainer(c, pod.status.containerStatuses)
-        console.log(bc)
         containers.push(bc)
       }
       let init_containers = []
@@ -248,7 +244,6 @@ export default {
         node_name: pod.spec.nodeName,
         resource_version: pod.metadata.resourceVersion,
       }
-      console.log(p)
       return p
     },
     buildContainer: function(container, statuses) {
@@ -268,7 +263,6 @@ export default {
       return c
     },
     nameClick: function(namespace, name) {
-      console.log(namespace, name)
       this.$router.push({name: 'podsDetail', params: {namespace: namespace, podName: name}})
     },
     containerClass: function(status) {

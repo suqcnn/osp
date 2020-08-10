@@ -6,6 +6,7 @@
 
 <script>
 import { getToken } from '@/utils/auth'
+import { Message } from 'element-ui'
 
 export default {
   name: 'Logs',

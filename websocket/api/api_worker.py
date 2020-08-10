@@ -2,6 +2,7 @@ import json
 import logging
 import threading
 from queue import Queue
+from time import sleep
 
 from service.kuberesource.watch import WatchResource
 from service.middlemessage import MiddleMessage
@@ -15,7 +16,7 @@ class ApiWorker(threading.Thread):
         self.queue = Queue(maxsize=1000)
         self.ws = ws
         self.has_stopped = False
-        self.cluster_worker = ClusterWorker(ws)
+        self.cluster_worker = None
         super().__init__(*args, **kwargs)
 
     def put_ws_action(self, data):
@@ -28,18 +29,25 @@ class ApiWorker(threading.Thread):
                 if data != 0 and isinstance(data, dict):
                     if data.get('action') == 'watchCluster':
                         cluster = data.get('params').get('cluster')
-                        if self.cluster_worker.is_alive():
-                            self.cluster_worker.stop()
-                        self.cluster_worker.set_cluster(cluster)
-                        self.cluster_worker.start()
+                        if hasattr(self, 'cluster_worker'):
+                            if self.cluster_worker and self.cluster_worker.is_alive():
+                                self.cluster_worker.stop()
+                            del self.cluster_worker
+                        if cluster:
+                            self.cluster_worker = ClusterWorker(self.ws, cluster)
+                            self.cluster_worker.start()
         except Exception as exc:
             logger.error("run worker error: %s" % exc, exc_info=True)
         logger.info('api worker stopped')
 
     def stop(self):
-        self.cluster_worker.stop()
         self.has_stopped = True
         self.put_stop()
+        while self.is_alive():
+            logger.info('api worker is alive')
+            sleep(1)
+        if self.cluster_worker:
+            self.cluster_worker.stop()
         logger.info('api worker stopped success')
 
     def put_stop(self):
@@ -84,4 +92,7 @@ class ClusterWorker(threading.Thread):
         if self.cluster:
             watch_resource = WatchResource(self.cluster)
             watch_resource.close_watch()
+        while self.is_alive():
+            logger.info('cluster worker is alive')
+            sleep(1)
         logger.info("cluster worker stopped success")

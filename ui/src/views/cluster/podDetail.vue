@@ -101,17 +101,18 @@
             <el-dropdown size="medium" >
               <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item @click.native.prevent="deleteRow(scope.$index, tableData)">日志</el-dropdown-item>
-                <el-dropdown-item>终端</el-dropdown-item>
+                <el-dropdown-item @click.native.prevent="sContainer = scope.row.name; log = true">
+                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px" icon-class="log" /> &nbsp; &nbsp;日志
+                </el-dropdown-item>
+                <el-dropdown-item @click.native.prevent="sContainer = scope.row.name; terminal = true">
+                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px" icon-class="terminal" /> &nbsp; &nbsp;终端
+                </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
 
-      <div>
-        
-      </div>
       <el-collapse value="detail">
         <el-collapse-item name="detail">
           <template slot="title">
@@ -182,6 +183,14 @@
           </template>
         </el-collapse-item>
       </el-collapse>
+
+      <el-dialog title="终端" :visible.sync="terminal" :close-on-click-modal="false" width="80%" top="55px">
+        <terminal v-if="terminal" :cluster="cluster" :namespace="namespace" :pod="podName" :container="sContainer"></terminal>
+      </el-dialog>
+
+      <el-dialog title="日志" :visible.sync="log" :close-on-click-modal="false" width="80%" top="55px">
+        <log v-if="log" :cluster="cluster" :namespace="namespace" :pod="podName" :container="sContainer"></log>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -190,17 +199,24 @@
 import { Clusterbar } from '@/views/components'
 import { getPod } from '@/api/pods'
 import { Message } from 'element-ui'
+import { Terminal } from '@/views/components'
+import { Log } from '@/views/components'
 
 export default {
   name: 'PodDetail',
   components: {
-    Clusterbar
+    Clusterbar,
+    Terminal,
+    Log
   },
   data() {
     return {
+      log: false,
+      terminal: false,
       cellStyle: {border: 0},
       loading: true,
       originPod: undefined,
+      sContainer: ''
     }
   },
   created() {
@@ -219,6 +235,9 @@ export default {
     pod: function() {
       let p = this.buildPods(this.originPod)
       return p
+    },
+    cluster: function() {
+      return this.$store.state.cluster
     },
     containers: function() {
       let c = []
@@ -438,5 +457,8 @@ export default {
 .volume-class .el-collapse-item__content {
   padding: 0px 10px 15px;
   font-size: 13px;
+}
+.el-dialog__body {
+  padding-top: 5px;
 }
 </style>

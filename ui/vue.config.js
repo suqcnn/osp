@@ -38,7 +38,7 @@ module.exports = {
     // before: require('./mock/mock-server.js')
     proxy: {
       '/osp/api': {
-        target: 'http://127.0.0.1:5689',
+        target: 'http://127.0.0.1:8090',
         ws: true,
         changeOrigin: true,
       }

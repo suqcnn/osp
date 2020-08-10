@@ -45,7 +45,7 @@ class KubeConsumer(WebsocketConsumer):
 
     def receive(self, text_data=None, bytes_data=None):
         try:
-            logger.info("Receive data: %s, %s" % (text_data, bytes_data))
+            logger.debug("Receive data: %s, %s" % (text_data, bytes_data))
             json_data = json.loads(text_data)
             self.kube_worker.ws_handle(json_data)
         except Exception as exc:

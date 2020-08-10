@@ -18,13 +18,6 @@ const getters = {
   }
 }
 
-const getDefaultState = () => {
-  return {
-    token: getToken(),
-    name: '',
-  }
-}
-
 const state = {
   cluster: "",
 }

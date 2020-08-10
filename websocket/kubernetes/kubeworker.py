@@ -1,4 +1,3 @@
-import concurrent.futures
 import logging
 import threading
 from queue import Queue
@@ -69,12 +68,14 @@ class MiddleRequestHandler(threading.Thread):
 
 class WSResponseHandler:
 
-    def __init__(self, max_worker_handlers=10, cluster=None):
+    def __init__(self, cluster=None,
+                 # max_worker_handlers=1
+                 ):
         self.queue = Queue(maxsize=1000)
         self.has_stopped = False
         self.cluster = cluster
-        pool = concurrent.futures.ThreadPoolExecutor(int(max_worker_handlers))
-        self.pool = pool
+        # pool = concurrent.futures.ThreadPoolExecutor(int(max_worker_handlers))
+        # self.pool = pool
         self.middle_message = MiddleMessage()
 
     def put_ws_response(self, data):
@@ -90,7 +91,8 @@ class WSResponseHandler:
         while not self.has_stopped:
             data = self.queue.get()
             if data != 0:
-                self.pool.submit(self.ws_handle, data)
+                # self.pool.submit(self.ws_handle, data)
+                self.ws_handle(data)
         logger.info('ws response handler stopped')
 
     def ws_handle(self, data):
@@ -105,6 +107,10 @@ class WSResponseHandler:
                 else:
                     watch_resource = WatchResource(self.cluster)
                     watch_resource.close_watch()
+            elif middle_response.is_exec():
+                self.middle_message.send_stdout(middle_response)
+            elif middle_response.is_log():
+                self.middle_message.send_log(middle_response)
         except Exception as exc:
             logger.error('send response error: %s' % exc, exc_info=True)
 

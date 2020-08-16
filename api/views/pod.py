@@ -43,30 +43,28 @@ class PodViewSet(viewsets.GenericViewSet):
         res = pod_resource.list(req_params)
         return res
 
-    @action(['POST'], detail=False, url_path='(?P<namespace>[^/.]+)/(?P<name>[^/.]+)/exec')
-    @api_decorator('Exec pods', serializer_class=pod_serializers.ExecPodSerializer)
-    def exec(self, req):
+    @action(methods=['POST'], detail=False, url_path='delete', url_name='delete_pod')
+    @api_decorator('Delete pods', serializer_class=serializers.DeleteResourcesSerializer)
+    def delete(self, req):
+        params = req.get('params')
+        req_params = {
+            'resources': params.get('resources')
+        }
+        pod_resource = PodResource(req.get('cluster'))
+        res = pod_resource.delete(req_params)
+        if not res.is_success():
+            return res
+        return CommonReturn(Code.SUCCESS, msg="删除成功")
+
+    @action(methods=['POST'], detail=False, url_path='(?P<namespace>[^/.]+)/(?P<name>[^/.]+)', url_name='update_pod')
+    @api_decorator('Update pod', serializer_class=serializers.UpdateResourcesSerializer)
+    def do_update(self, req):
         params = req.get('params')
         req_params = {
             'name': req.get('name'),
             'namespace': req.get('namespace'),
-            'container': params.get('container'),
-            'session_id': str(uuid.uuid4())
+            'yaml': params.get('yaml')
         }
         pod_resource = PodResource(req.get('cluster'))
-        res = pod_resource.exec(req_params)
-        if not res.is_success():
-            return res
-        return CommonReturn(Code.SUCCESS, data={'session_id': req_params.get('session_id')})
-
-    @action(['POST'], detail=False, url_path='stdin')
-    @api_decorator('Stdin container', serializer_class=pod_serializers.PodStdinSerializer)
-    def stdin(self, req):
-        params = req.get('params')
-        req_params = {
-            'session_id': params.get('session_id'),
-            'input': params.get('input')
-        }
-        pod_resource = PodResource(req.get('cluster'))
-        res = pod_resource.stdin(req_params)
+        res = pod_resource.update(req_params)
         return res

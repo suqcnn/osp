@@ -123,7 +123,7 @@ class MiddleMessage:
 
     @classmethod
     def term_stdout_queue_key(cls, session_id):
-        return 'osp:term_stdout:%s' % session_id
+        return 'osp:term:%s' % session_id
 
     def get_stdout(self, session_id):
         logger.info('get stdout from session id: %s' % session_id)
@@ -138,7 +138,7 @@ class MiddleMessage:
         request_id = middle_response.request_id
         session_key = self.term_stdout_queue_key(request_id)
         pipeline = self.connection.pipeline()
-        pipeline.lpush(session_key, middle_response.data)
+        pipeline.lpush(session_key, middle_response.data).expire(session_key, 60)
         pipeline.execute()
 
     def close_stdout(self, session_id):
@@ -163,7 +163,7 @@ class MiddleMessage:
         request_id = middle_response.request_id
         session_key = self.log_queue_key(request_id)
         pipeline = self.connection.pipeline()
-        pipeline.lpush(session_key, middle_response.data)
+        pipeline.lpush(session_key, middle_response.data).expire(session_key, 60)
         pipeline.execute()
 
     def close_log(self, session_id):

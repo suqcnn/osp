@@ -13,3 +13,11 @@ class ImplementSerializer(serializers.Serializer):
 class GeneralSerializer(ImplementSerializer):
     name = serializers.CharField(required=False, allow_blank=True)
     namespace = serializers.CharField(required=False, allow_blank=True)
+
+
+class DeleteResourcesSerializer(ImplementSerializer):
+    resources = serializers.ListField(child=GeneralSerializer(), allow_empty=True)
+
+
+class UpdateResourcesSerializer(ImplementSerializer):
+    yaml = serializers.CharField(required=True, allow_blank=False)

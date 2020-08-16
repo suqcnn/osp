@@ -57,6 +57,12 @@ const oRoutes = [
     component: () => import('@/views/404'),
     hidden: true
   },
+
+  {
+    path: 'test_yaml',
+    component: () => import('@/views/yaml'),
+    hidden: true
+  },
 ]
 
 const constantRoutes = [...ClusterRoutes, ...SettingsRoutes, ...oRoutes]

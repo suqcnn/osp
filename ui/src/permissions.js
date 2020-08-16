@@ -6,7 +6,7 @@ import { getToken } from '@/utils/auth' // get token from cookie
 
 const loginPath = '/ui/login'
 const loginAdminPath = '/ui/login/admin'
-const whiteList = [loginPath, loginAdminPath] // no redirect whitelist
+const whiteList = [loginPath, loginAdminPath, '/ui/test_yaml'] // no redirect whitelist
 
 router.beforeEach(async(to, from, next) => {
 

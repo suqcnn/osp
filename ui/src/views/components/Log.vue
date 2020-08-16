@@ -1,5 +1,5 @@
 <template>
-  <div class="log-class" :style="{height: logHeight + 'px'}" id="test">
+  <div class="log-class" :style="{height: logHeight + 'px'}" id="logDiv">
     <p style="white-space: pre-line">{{ logs }}</p>
   </div>
 </template>
@@ -14,6 +14,7 @@ export default {
     return {
       logs: '',
       socket: null,
+      scrollToBottom: true,
     }
   },
   props: {
@@ -44,6 +45,15 @@ export default {
     }
   },
   mounted() {
+    let logDiv = document.getElementById('logDiv')
+    let that = this;
+    logDiv.addEventListener('scroll', () => {
+      that.scrollToBottom = false
+      // console.log(logDiv.scrollHeight, logDiv.scrollTop, logDiv.clientHeight)
+      if (logDiv.scrollTop + logDiv.clientHeight === logDiv.scrollHeight) {
+        that.scrollToBottom = true
+      }
+    }, true)
     this.initSocket()
   },
   beforeDestroy() {
@@ -95,6 +105,13 @@ export default {
         // let t = document.getElementById('test').innerHTML
         // document.getElementById('test').innerHTML = t + '<br/>' + e.data
         this.logs += e.data
+        let that = this
+        this.$nextTick(() => {
+          if (that.scrollToBottom) {
+            let logDiv = document.getElementById('logDiv')
+            logDiv.scrollTop = logDiv.scrollHeight // 滚动高度
+          }
+        })
       }
     }
   }

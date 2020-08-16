@@ -86,37 +86,56 @@
           show-overflow-tooltip
           min-width="40">
           <template slot-scope="scope">
-            <!-- <el-link :underline="false"
-              @click.native.prevent="deleteRow(scope.$index, tableData)">
-              <svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" />
-            </el-link> -->
             <el-dropdown size="medium" >
               <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item @click.native.prevent="deleteRow(scope.$index, tableData)">详情</el-dropdown-item>
-                <el-dropdown-item>修改</el-dropdown-item>
-                <el-dropdown-item>删除</el-dropdown-item>
+                <el-dropdown-item @click.native.prevent="nameClick(scope.row.namespace, scope.row.name)">
+                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px" icon-class="detail" />
+                  <span style="margin-left: 7px;">详情</span>
+                </el-dropdown-item>
+                <el-dropdown-item @click.native.prevent="getPodYaml(scope.row.namespace, scope.row.name)">
+                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px" icon-class="edit" />
+                  <span style="margin-left: 7px;">修改</span>
+                </el-dropdown-item>
+                <el-dropdown-item @click.native.prevent="deletePods([{namespace: scope.row.namespace, name: scope.row.name}])">
+                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px" icon-class="delete" />
+                  <span style="margin-left: 7px;">删除</span>
+                </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
     </div>
+    <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
+      <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
+      <span slot="footer" class="dialog-footer">
+        <el-button plain @click="yamlDialog = false" size="small">取 消</el-button>
+        <el-button plain @click="updatePod()" size="small">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { Clusterbar } from '@/views/components'
-import { listPods } from '@/api/pods'
+import { listPods, getPod, deletePods, updatePod } from '@/api/pods'
 import { Message } from 'element-ui'
+import { Yaml } from '@/views/components'
 
 export default {
   name: 'Pod',
   components: {
-    Clusterbar
+    Clusterbar,
+    Yaml
   },
   data() {
       return {
+        yamlDialog: false,
+        yamlNamespace: "",
+        yamlName: "",
+        yamlValue: "",
+        yamlLoading: true,
         cellStyle: {border: 0},
         titleName: ["Pods"],
         maxHeight: window.innerHeight - 150,
@@ -269,6 +288,74 @@ export default {
       if (status === 'running') return 'running-class'
       if (status === 'terminated') return 'terminate-class'
       if (status === 'waiting') return 'waiting-class'
+    },
+    getPodYaml: function(namespace, podName) {
+      this.yamlNamespace = ""
+      this.yamlName = ""
+      const cluster = this.$store.state.cluster
+      if (!cluster) {
+        Message.error("获取集群参数异常，请刷新重试")
+        return
+      }
+      if (!namespace) {
+        Message.error("获取命名空间参数异常，请刷新重试")
+        return
+      }
+      if (!podName) {
+        Message.error("获取Pod名称参数异常，请刷新重试")
+        return
+      }
+      this.yamlValue = ""
+      this.yamlDialog = true
+      this.yamlLoading = true
+      getPod(cluster, namespace, podName, "yaml").then(response => {
+        this.yamlLoading = false
+        this.yamlValue = response.data
+        this.yamlNamespace = namespace
+        this.yamlName = podName
+      }).catch(() => {
+        this.yamlLoading = false
+      })
+    },
+    deletePods: function(pods) {
+      const cluster = this.$store.state.cluster
+      if (!cluster) {
+        Message.error("获取集群参数异常，请刷新重试")
+        return
+      }
+      if ( pods.length <= 0 ){
+        Message.error("请选择要删除的POD")
+        return
+      }
+      let params = {
+        resources: pods
+      }
+      deletePods(cluster, params).then(response => {
+        Message.success("删除成功")
+      }).catch(() => {
+        // console.log(e)
+      })
+    },
+    updatePod: function() {
+      const cluster = this.$store.state.cluster
+      if (!cluster) {
+        Message.error("获取集群参数异常，请刷新重试")
+        return
+      }
+      if (!this.yamlNamespace) {
+        Message.error("获取命名空间参数异常，请刷新重试")
+        return
+      }
+      if (!this.yamlName) {
+        Message.error("获取POD参数异常，请刷新重试")
+        return
+      }
+      console.log(this.yamlValue)
+      updatePod(cluster, this.yamlNamespace, this.yamlName, this.yamlValue).then(response => {
+        Message.success("更新成功")
+      }).catch(() => {
+        // console.log(e)
+      })
     }
   }
 }
@@ -317,5 +404,12 @@ export default {
 
 .waiting-class {
   color: #E6A23C;
+}
+</style>
+
+<style>
+.el-dialog__body {
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 </style>

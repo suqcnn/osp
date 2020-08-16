@@ -13,6 +13,8 @@ class KubeResource:
 
     LIST_ACTION = 'list'
     GET_ACTION = 'get'
+    DELETE_ACTION = 'delete'
+    UPDATE_ACTION = 'update'
 
     def __init__(self, cluster=None):
         self.cluster = cluster
@@ -24,6 +26,14 @@ class KubeResource:
 
     def get(self, params=None):
         res = self.request(self.GET_ACTION, params=params)
+        return res
+
+    def delete(self, params=None):
+        res = self.request(self.DELETE_ACTION, params=params)
+        return res
+
+    def update(self, params=None):
+        res = self.request(self.UPDATE_ACTION, params=params)
         return res
 
     def request(self, action, params=None, timeout=30):

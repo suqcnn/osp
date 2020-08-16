@@ -15,7 +15,6 @@ export default {
   data() {
     return {
       title: 'OpenSpace',
-      logo: 'https://wpimg.wallstcn.com/69a1c46c-eb1c-4b46-8bd4-e9e686ef5251.png'
     }
   }
 }
@@ -32,12 +31,15 @@ export default {
 }
 
 .navbar-logo-container {
-  position: relative;
+  // position: relative;
+  // float: left;
   display: inline-block;
   // width: 100%;
   height: 50px;
   line-height: 50px;
   overflow: hidden;
+  min-width: auto;
+  vertical-align: top;
 
   & .navbar-logo-link {
     height: 100%;
@@ -48,7 +50,7 @@ export default {
       font-weight: 500;
       font-size: 20px;
       font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
-      vertical-align: middle;
+      vertical-align: top;
     }
   }
 

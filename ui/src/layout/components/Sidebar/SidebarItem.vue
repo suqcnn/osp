@@ -6,7 +6,6 @@
           v-for="child in item.children"
           :key="child.path"
           :item="child"
-          class="nest-menu"
         />
       </template>
     </template>
@@ -20,16 +19,15 @@
             v-for="child in item.children"
             :key="child.path"
             :item="child"
-            class="nest-menu"
           />
         </el-submenu>
       </template>
       <template v-else>
-        <a v-on:click="routeTo(item)">
+        <span v-on:click="routeTo(item)">
           <el-menu-item :index="item.name">
             <item :icon="item.meta && item.meta.icon" :title="item.meta.title" />
           </el-menu-item>
-        </a>
+        </span>
       </template>
     </template>
   </div>
@@ -50,9 +48,6 @@ export default {
     },
   },
   data() {
-    // To fix https://github.com/PanJiaChen/vue-admin-template/issues/237
-    // TODO: refactor with render function
-    // this.onlyOneChild = null
     return {}
   },
   computed: {
@@ -76,3 +71,12 @@ export default {
   }
 }
 </script>
+
+<style >
+.sidebar-container .el-menu-item:focus {
+  background-color: rgba(255,255,255,0);
+}
+.sidebar-container .el-menu-item:hover {
+  background-color: #ecf5ff;
+}
+</style>

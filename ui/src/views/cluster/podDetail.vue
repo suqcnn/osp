@@ -94,18 +94,14 @@
           show-overflow-tooltip
           min-width="20">
           <template slot-scope="scope">
-            <!-- <el-link :underline="false"
-              @click.native.prevent="deleteRow(scope.$index, tableData)">
-              <svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" />
-            </el-link> -->
             <el-dropdown size="medium" >
               <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item @click.native.prevent="sContainer = scope.row.name; log = true">
-                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px" icon-class="log" /> &nbsp; &nbsp;日志
+                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px" icon-class="log" /> <span style="margin-left: 5px;">日志</span>
                 </el-dropdown-item>
                 <el-dropdown-item @click.native.prevent="sContainer = scope.row.name; terminal = true">
-                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px" icon-class="terminal" /> &nbsp; &nbsp;终端
+                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px" icon-class="terminal" /> <span style="margin-left: 5px;">终端</span>
                 </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
@@ -425,7 +421,7 @@ export default {
   font-size: 0;
 }
 .pod-item label {
-  width: 120px;
+  width: 90px;
   color: #99a9bf;
   font-weight: 400;
 }

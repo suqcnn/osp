@@ -5,13 +5,14 @@
           {{ t }}
         </el-breadcrumb-item>
     </el-breadcrumb>
-
     <!-- <svg-icon class="icon-create" icon-class="create"/> -->
-    <!-- <svg-icon class="icon-create" icon-class="delete"/> -->
+    <!-- <svg-icon class="icon-create" icon-class="edit"/> -->
+    <el-link v-if="typeof editFunc !== 'undefined'" class="icon-create" @click="editFunc()"><svg-icon icon-class="edit"/></el-link>
+    <el-link v-if="typeof delFunc !== 'undefined'" class="icon-create" @click="delFunc()"><svg-icon icon-class="delete"/></el-link>
 
     <div class="right">
+      <!-- <el-button v-if="typeof delFunc !== 'undefined'"  size="small" plain @click="delFunc()">删 除</el-button> -->
 
-      <!-- <el-button plain size="small">添加集群</el-button> -->
       <el-select v-if="typeof nsFunc !== 'undefined'" v-model="nsInput" @change="nsChange" multiple placeholder="命名空间" size="small">
         <el-option
           v-for="item in namespaces"
@@ -54,6 +55,16 @@ export default {
       type: Function,
       required: false,
       default: undefined
+    },
+    delFunc: {
+      type: Function,
+      required: false,
+      default: undefined,
+    },
+    editFunc: {
+      type: Function,
+      required: false,
+      default: undefined,
     }
   },
   data() {
@@ -100,7 +111,6 @@ export default {
     },
     fetchNamespace: function() {
       this.namespaces = []
-      console.log('asdfe')
       const cluster = this.$store.state.cluster
       if (cluster) {
         listNamespace(cluster).then(response => {
@@ -124,7 +134,7 @@ export default {
   overflow: hidden;
   // box-shadow: inset 0 0 4px rgba(0, 21, 41, 0.1);
   border: 1px solid #EBEEF5;
-  margin: 20px 20px 0px;
+  margin: 15px 20px 0px;
 
   .app-breadcrumb.el-breadcrumb {
     display: inline-block;
@@ -143,14 +153,16 @@ export default {
     }
   }
 
+  .icon-create:first {
+    margin-left: 15px;
+  }
+
   .icon-create {
     display: inline-block;
     line-height: 55px;
-    margin-left: 20px;
-    width: 1.8em;
-    height: 1.8em;
-    vertical-align: 0.8em;
-    color: #bfbfbf;
+    margin-left: 15px;
+    vertical-align: 0.95em;
+    font-size: 23px;
   }
 
   .right {
@@ -173,5 +185,19 @@ export default {
     }
 
   }
+}
+</style>
+<style >
+.right .el-button.is-plain {
+  border-color: #f78989;
+  color: #f78989;
+}
+.right .el-button.is-plain:hover {
+  border-color: #f56c6c;
+  color: #f56c6c;
+}
+.right .el-button.is-plain:focus {
+  border-color: #f56c6c;
+  color: #f56c6c;
 }
 </style>

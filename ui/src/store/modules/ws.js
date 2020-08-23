@@ -19,13 +19,19 @@ const getters = {
       return state.clusterWatch
     }
   },
-  uidWatch: (state) => (uid) => {
-    if (state.clusterWatch && state.clusterWatch.resource && state.clusterWatch.resource.metadata.uid == uid) {
-      return state.clusterWatch
-    }
-  },
+  // uidWatch: (state) => (uid) => {
+  //   if (state.clusterWatch && state.clusterWatch.resource && state.clusterWatch.resource.metadata.uid == uid) {
+  //     return state.clusterWatch
+  //   }
+  // },
   podWatch: ( _, getters ) => {
     return getters.resourceWatch("pods")
+  },
+  eventWatch: ( _, getters ) => {
+    return getters.resourceWatch("event")
+  },
+  deploymentWatch: ( _, getters ) => {
+    return getters.resourceWatch("deployment")
   }
 }
 

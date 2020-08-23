@@ -38,7 +38,7 @@ export default {
   height: 50px;
   line-height: 50px;
   overflow: hidden;
-  min-width: auto;
+  min-width: 130px;
   vertical-align: top;
 
   & .navbar-logo-link {

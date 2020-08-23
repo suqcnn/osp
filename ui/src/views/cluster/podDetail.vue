@@ -1,6 +1,6 @@
 <template>
   <div>
-    <clusterbar :titleName="titleName" />
+    <clusterbar :titleName="titleName" :delFunc="deletePods" :editFunc="getPodYaml"/>
     <div class="dashboard-container">
       <!-- <div class="dashboard-text"></div> -->
       <el-table
@@ -37,20 +37,20 @@
               </el-form-item>
               <el-form-item label="端口" v-if="props.row.ports.length">
                 <template v-for="a in props.row.ports">
-                  <span :key="a">{{a.name ? `${a.name}:` : ''}} {{a.containerPort}}/{{a.protocol}}<br/></span>
+                  <span :key="a.name">{{a.name ? `${a.name}:` : ''}} {{a.containerPort}}/{{a.protocol}}<br/></span>
                 </template>
               </el-form-item>
               <el-form-item label="环境变量" v-if="props.row.env.length">
                 <!-- <span>{{ props.row.env }}</span> -->
-                <template v-for="a in props.row.env">
+                <template v-for="(i, a) in props.row.env">
                   <span :key="a">
-                    {{ envStr(a) }}<br/>
+                    {{ envStr(i) }}<br/>
                   </span>
                 </template>
               </el-form-item>
               <el-form-item label="目录挂载" v-if="props.row.volume_mounts.length">
                 <template v-for="a in props.row.volume_mounts">
-                  <span :key="a">{{a.name}} -> {{a.mountPath}} ({{a.readOnly ? "ro" : "rw"}})<br/></span>
+                  <span :key="a.name">{{a.name}} -> {{a.mountPath}} ({{a.readOnly ? "ro" : "rw"}})<br/></span>
                 </template>
               </el-form-item>
             </el-form>
@@ -98,10 +98,12 @@
               <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item @click.native.prevent="sContainer = scope.row.name; log = true">
-                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px" icon-class="log" /> <span style="margin-left: 5px;">日志</span>
+                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.2em" icon-class="log" /> 
+                  <span style="margin-left: 5px;">日志</span>
                 </el-dropdown-item>
                 <el-dropdown-item @click.native.prevent="sContainer = scope.row.name; terminal = true">
-                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px" icon-class="terminal" /> <span style="margin-left: 5px;">终端</span>
+                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.2em" icon-class="terminal" /> 
+                  <span style="margin-left: 5px;">终端</span>
                 </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
@@ -109,8 +111,7 @@
         </el-table-column>
       </el-table>
 
-      <el-collapse value="detail">
-        <el-collapse-item name="detail">
+        <!-- <el-collapse-item name="detail"> -->
           <template slot="title">
             <span class="title-class">{{pod.name}}</span>
           </template>
@@ -152,31 +153,141 @@
               </template>
             </el-form-item>
           </el-form>
-        </el-collapse-item>
+        <!-- </el-collapse-item> -->
+      <el-collapse class="podCollapse">
         <el-collapse-item title="Volumes" name="volumes">
           <template slot="title">
             <span class="title-class">Volumes</span>
           </template>
-          <el-collapse class="volume-class">
-            <el-collapse-item :title="v.name" :name="v.name" v-for="v in pod.volumes" :key="v.name">
-              <template v-for="(val, key) in v">
-                <div v-if="key !== 'name'" :key="key">
-                  <div>type: {{key}}</div>
-                  <div v-for="(val, key) in val" :key="key">{{key}}: {{val}}</div>
-                </div>
+          <div v-for="v in pod.volumes" :key="v.name" style="margin: 5px 25px; font-size: 14px; color: #606266">
+            <span><b>{{v.name}}</b></span>
+            (<template v-for="(val, key) in v">
+                <span v-if="key !== 'name'" :key="key"> 
+                  type: {{key}}
+                  <template v-for="(ival, ikey) in val">
+                    / {{ikey}}: {{ival}}
+                  </template>
+                </span>
               </template>
-            </el-collapse-item>
-          </el-collapse>
+            )
+          </div>
         </el-collapse-item>
         <el-collapse-item title="Conditions" name="conditions">
           <template slot="title">
             <span class="title-class">Conditions</span>
           </template>
+          <div class="msgClass">
+            <el-table
+              :data="pod.conditions"
+              class="table-fix"
+              tooltip-effect="dark"
+              style="width: 100%"
+              :cell-style="cellStyle"
+              :default-sort = "{prop: 'lastProbeTime'}"
+              >
+              <el-table-column
+                prop="type"
+                label="类型"
+                show-overflow-tooltip>
+              </el-table-column>
+              <el-table-column
+                prop="status"
+                label="状态"
+                show-overflow-tooltip>
+              </el-table-column>
+              <el-table-column
+                prop="reason"
+                label="原因"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.row.reason ? scope.row.reason : "——" }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="message"
+                label="信息"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.row.message ? scope.row.message : "——" }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="触发时间"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.row.lastProbeTime ? scope.row.lastProbeTime : scope.row.lastTransitionTime }}
+                  </span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
         </el-collapse-item>
         <el-collapse-item title="Events" name="events">
           <template slot="title">
             <span class="title-class">Events</span>
           </template>
+          <div class="msgClass">
+            <el-table
+              :data="podEvents"
+              class="table-fix"
+              tooltip-effect="dark"
+              style="width: 100%"
+              v-loading="eventLoading"
+              :cell-style="cellStyle"
+              :default-sort = "{prop: 'event_time', order: 'descending'}"
+              >
+              <el-table-column
+                prop="type"
+                label="类型"
+                min-width="30"
+                show-overflow-tooltip>
+              </el-table-column>
+              <el-table-column
+                prop="object"
+                label="对象"
+                min-width="70"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.row.object.kind }}/{{ scope.row.object.name }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="reason"
+                label="原因"
+                min-width="30"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.row.reason ? scope.row.reason : "——" }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="message"
+                label="信息"
+                min-width="120"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.row.message ? scope.row.message : "——" }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="event_time"
+                label="触发时间"
+                min-width="50"
+                show-overflow-tooltip>
+              </el-table-column>
+            </el-table>
+          </div>
         </el-collapse-item>
       </el-collapse>
 
@@ -187,13 +298,22 @@
       <el-dialog title="日志" :visible.sync="log" :close-on-click-modal="false" width="80%" top="55px">
         <log v-if="log" :cluster="cluster" :namespace="namespace" :pod="podName" :container="sContainer"></log>
       </el-dialog>
+
+      <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
+        <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
+        <span slot="footer" class="dialog-footer">
+          <el-button plain @click="yamlDialog = false" size="small">取 消</el-button>
+          <el-button plain @click="updatePod()" size="small">确 定</el-button>
+        </span>
+      </el-dialog>
     </div>
   </div>
 </template>
 
 <script>
-import { Clusterbar } from '@/views/components'
-import { getPod } from '@/api/pods'
+import { Clusterbar, Yaml } from '@/views/components'
+import { getPod, deletePods, updatePod } from '@/api/pods'
+import { listEvents, buildEvent } from '@/api/event'
 import { Message } from 'element-ui'
 import { Terminal } from '@/views/components'
 import { Log } from '@/views/components'
@@ -203,20 +323,52 @@ export default {
   components: {
     Clusterbar,
     Terminal,
-    Log
+    Log,
+    Yaml
   },
   data() {
     return {
+      yamlDialog: false,
+      yamlValue: "",
+      yamlLoading: true,
       log: false,
       terminal: false,
       cellStyle: {border: 0},
       loading: true,
       originPod: undefined,
-      sContainer: ''
+      sContainer: '',
+      podEvents: [],
+      eventLoading: true,
     }
   },
   created() {
     this.fetchData()
+  },
+  watch: {
+    podWatch: function (newObj) {
+      if (newObj && this.pod) {
+        let newUid = newObj.resource.metadata.uid
+        if (newUid !== this.pod.uid) {
+          return
+        }
+        console.log("watch pod obj", newObj)
+        let newRv = newObj.resource.metadata.resourceVersion
+        if (this.pod.resource_version < newRv) {
+          // this.$set(this.originPod, newPod)
+          this.originPod = newObj.resource
+        }
+      }
+    },
+    eventWatch: function (newObj) {
+      if (newObj && this.pod) {
+        let event = newObj.resource
+        if (event.involvedObject.namespace !== this.pod.namespace) return
+        if (event.involvedObject.uid !== this.pod.uid) return
+        if (newObj.event === 'add') {
+          this.podEvents.push(buildEvent(event))
+        }
+      }
+    }
   },
   computed: {
     titleName: function() {
@@ -240,33 +392,54 @@ export default {
       if (this.pod && this.pod.containers) c = this.pod.containers
       if (this.pod && this.pod.init_containers) c = [...this.pod.init_containers, ...c]
       return c
+    },
+    podWatch: function() {
+      return this.$store.getters["ws/podWatch"]
+    },
+    eventWatch: function() {
+      return this.$store.getters["ws/eventWatch"]
     }
   },
   methods: {
     fetchData: function() {
       this.originPods = []
+      this.podEvents = []
       this.loading = true
+      this.eventLoading = true
       const cluster = this.$store.state.cluster
       if (!cluster) {
         Message.error("获取集群参数异常，请刷新重试")
         this.loading = false
+        this.eventLoading = false
         return
       }
       if (!this.namespace) {
         Message.error("获取命名空间参数异常，请刷新重试")
         this.loading = false
+        this.eventLoading = false
         return
       }
       if (!this.podName) {
         Message.error("获取Pod名称参数异常，请刷新重试")
         this.loading = false
+        this.eventLoading = false
         return
       }
       getPod(cluster, this.namespace, this.podName).then(response => {
         this.loading = false
         this.originPod = response.data
+
+        listEvents(cluster, this.originPod.metadata.uid).then(response => {
+          this.eventLoading = false
+          if (response.data) {
+            this.podEvents = response.data.length > 0 ? response.data : []
+          }
+        }).catch(() => {
+          this.eventLoading = false
+        })
       }).catch(() => {
         this.loading = false
+        this.eventLoading = false
       })
     },
     buildPods: function(pod) {
@@ -368,7 +541,66 @@ export default {
         }
       }
       return s
-    }
+    },
+    deletePods: function() {
+      const cluster = this.$store.state.cluster
+      if (!cluster) {
+        Message.error("获取集群参数异常，请刷新重试")
+        return
+      }
+      if ( !this.pod ) {
+        Message.error("获取POD参数异常，请刷新重试")
+      }
+      let pods = [{
+        namespace: this.pod.namespace,
+        name: this.pod.name,
+      }]
+      let params = {
+        resources: pods
+      }
+      deletePods(cluster, params).then(response => {
+        Message.success("删除成功")
+      }).catch(() => {
+        // console.log(e)
+      })
+    },
+    getPodYaml: function() {
+      if (!this.pod) {
+        Message.error("获取Pod参数异常，请刷新重试")
+        return
+      }
+      const cluster = this.$store.state.cluster
+      if (!cluster) {
+        Message.error("获取集群参数异常，请刷新重试")
+        return
+      }
+      this.yamlValue = ""
+      this.yamlDialog = true
+      this.yamlLoading = true
+      getPod(cluster, this.pod.namespace, this.pod.name, "yaml").then(response => {
+        this.yamlLoading = false
+        this.yamlValue = response.data
+      }).catch(() => {
+        this.yamlLoading = false
+      })
+    },
+    updatePod: function() {
+      if (!this.pod) {
+        Message.error("获取Pod参数异常，请刷新重试")
+        return
+      }
+      const cluster = this.$store.state.cluster
+      if (!cluster) {
+        Message.error("获取集群参数异常，请刷新重试")
+        return
+      }
+      console.log(this.yamlValue)
+      updatePod(cluster, this.pod.namespace, this.pod.name, this.yamlValue).then(response => {
+        Message.success("更新成功")
+      }).catch(() => {
+        // console.log(e) 
+      })
+    },
   }
 }
 </script>
@@ -417,7 +649,7 @@ export default {
 }
 
 .pod-item {
-  margin: 0px 20px 0px 25px;
+  margin: 20px 20px 20px 5px;
   font-size: 0;
 }
 .pod-item label {
@@ -433,28 +665,25 @@ export default {
 .pod-item span {
   color: #606266;
 }
-.el-collapse {
+/* .el-collapse {
   border-top: 0px;
-}
+} */
 .title-class {
   margin-left: 5px;
   color: #606266;
   font-size: 13px;
 }
-.volume-class {
-  margin: 0px 25px;
-}
-.volume-class .el-collapse-item__arrow {
-  display: none;
-}
-.volume-class .el-collapse-item__header {
-  border-bottom: 0px;
-}
-.volume-class .el-collapse-item__content {
+.podCollapse .el-collapse-item__content {
   padding: 0px 10px 15px;
-  font-size: 13px;
+  /* font-size: 13px; */
 }
 .el-dialog__body {
   padding-top: 5px;
+}
+.msgClass {
+  margin: 0px 25px;
+}
+.msgClass .el-table::before {
+  height: 0px;
 }
 </style>

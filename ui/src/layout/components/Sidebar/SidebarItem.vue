@@ -34,7 +34,6 @@
 </template>
 
 <script>
-import path from 'path'
 import Item from './Item'
 
 export default {
@@ -61,9 +60,6 @@ export default {
     }
   },
   methods: {
-    resolvePath(routePath) {
-      return path.resolve(this.basePath, routePath)
-    },
     routeTo(item) {
       const route = this.$route
       this.$router.push({name: item.name, params: route.params})

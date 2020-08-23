@@ -5,7 +5,7 @@
       <!-- <div class="dashboard-text"></div> -->
       <el-table
         ref="multipleTable"
-        :data="pods"
+        :data="deployments"
         class="table-fix"
         tooltip-effect="dark"
         :max-height="maxHeight"
@@ -23,7 +23,7 @@
         <el-table-column
           prop="name"
           label="名称"
-          min-width="170"
+          min-width="100"
           show-overflow-tooltip>
           <template slot-scope="scope">
             <span class="name-class" v-on:click="nameClick(scope.row.namespace, scope.row.name)">
@@ -34,56 +34,48 @@
         <el-table-column
           prop="namespace"
           label="命名空间"
-          min-width="90"
+          min-width="60"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
-          prop="containerNum"
-          label="容器"
-          min-width="65"
+          prop="ready_replicas"
+          label="Pods"
+          min-width="40"
           show-overflow-tooltip>
           <template slot-scope="scope">
-            <template v-if="scope.row.init_containers">
-            <el-tooltip :content="`${c.name} (${c.status})`" placement="top" v-for="c in scope.row.init_containers" :key="c.name">
-              <svg-icon style="margin-top: 7px;" :class="containerClass(c.status)" icon-class="square" />
-            </el-tooltip>
-            </template>
-            <el-tooltip :content="`${c.name} (${c.status})`" placement="top" v-for="c in scope.row.containers" :key="c.name">
-              <svg-icon style="margin-top: 7px;" :class="containerClass(c.status)" icon-class="square" />
-            </el-tooltip>
+            <span>
+              {{ scope.row.ready_replicas }}/{{ scope.row.status_replicas }}
+            </span>
           </template>
         </el-table-column>
         <el-table-column
-          prop="restarts"
-          label="重启"
-          min-width="45"
+          prop="replicas"
+          label="副本"
+          min-width="30"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
-          prop="node_name"
-          label="节点"
+          prop="strategy"
+          label="更新策略"
+          min-width="55"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
-          prop="ip"
-          label="IP"
+          prop="conditions"
+          label="状态"
           show-overflow-tooltip>
-        </el-table-column>
-        <el-table-column
-          prop="controlled"
-          label="控制器"
-          show-overflow-tooltip>
+          <template slot-scope="scope">
+            <template v-if="scope.row.conditions">
+              <span v-for="c in scope.row.conditions" :key="c">
+                {{ c }}
+              </span>
+            </template>
+          </template>
         </el-table-column>
         <el-table-column
           prop="created"
           label="创建时间"
-          min-width="140"
-          show-overflow-tooltip>
-        </el-table-column>
-        <el-table-column
-          prop="status"
-          label="状态"
-          min-width="60"
+          min-width="70"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
@@ -98,7 +90,11 @@
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="detail" />
                   <span style="margin-left: 5px;">详情</span>
                 </el-dropdown-item>
-                <el-dropdown-item @click.native.prevent="getPodYaml(scope.row.namespace, scope.row.name)">
+                <el-dropdown-item @click.native.prevent="nameClick(scope.row.namespace, scope.row.name)">
+                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="scale" />
+                  <span style="margin-left: 5px;">扩缩容</span>
+                </el-dropdown-item>
+                <el-dropdown-item @click.native.prevent="getDeploymentYaml(scope.row.namespace, scope.row.name)">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="edit" />
                   <span style="margin-left: 5px;">修改</span>
                 </el-dropdown-item>
@@ -124,12 +120,12 @@
 
 <script>
 import { Clusterbar } from '@/views/components'
-import { listPods, getPod, deletePods, updatePod } from '@/api/pods'
+import { listDeployments, getDeployment, deleteDeployments, updateDeployment } from '@/api/deployment'
 import { Message } from 'element-ui'
 import { Yaml } from '@/views/components'
 
 export default {
-  name: 'Pod',
+  name: 'Deployment',
   components: {
     Clusterbar,
     Yaml
@@ -142,14 +138,14 @@ export default {
         yamlValue: "",
         yamlLoading: true,
         cellStyle: {border: 0},
-        titleName: ["Pods"],
+        titleName: ["Deployments"],
         maxHeight: window.innerHeight - 150,
         loading: true,
-        originPods: [],
+        originDeployments: [],
         search_ns: [],
         search_name: '',
         delFunc: undefined,
-        delPods: [],
+        delDeployment: [],
       }
   },
   created() {
@@ -166,62 +162,53 @@ export default {
     }
   },
   watch: {
-    podsWatch: function (newObj) {
-      console.log("watch pod obj", newObj)
+    deploymentsWatch: function (newObj) {
+      console.log("watch deployment obj", newObj)
       if (newObj) {
-        let newUid = newObj.resource.metadata.uid
-        let newRv = newObj.resource.metadata.resourceVersion
-        if (newObj.event === 'add') {
-          this.originPods.push(this.buildPods(newObj.resource))
-        } else if (newObj.event === 'update') {
-          for (let i in this.originPods) {
-            let p = this.originPods[i]
-            if (p.uid === newUid && p.resource_version < newRv) {
-              let newPod = this.buildPods(newObj.resource)
-              this.$set(this.originPods, i, newPod)
-              // console.log(newPod.status)
-              break
-            }
-          }
-        } else if (newObj.event === 'delete') {
-          this.originPods = this.originPods.filter(( { uid } ) => uid !== newUid)
-        }
+        // let newUid = newObj.resource.metadata.uid
+        // let newRv = newObj.resource.metadata.resourceVersion
+        // if (newObj.event === 'add') {
+        //   this.originPods.push(this.buildPods(newObj.resource))
+        // } else if (newObj.event === 'update') {
+        //   for (let i in this.originPods) {
+        //     let p = this.originPods[i]
+        //     if (p.uid === newUid && p.resource_version < newRv) {
+        //       let newPod = this.buildPods(newObj.resource)
+        //       this.$set(this.originPods, i, newPod)
+        //       // console.log(newPod.status)
+        //       break
+        //     }
+        //   }
+        // } else if (newObj.event === 'delete') {
+        //   this.originPods = this.originPods.filter(( { uid } ) => uid !== newUid)
+        // }
       }
     }
   },
   computed: {
-    pods: function() {
-      let plist = []
-      for (let p of this.originPods) {
+    deployments: function() {
+      let dlist = []
+      for (let p of this.originDeployments) {
         if (this.search_ns.length > 0 && this.search_ns.indexOf(p.namespace) < 0) continue
         if (this.search_name && !p.name.includes(this.search_name)) continue
-        p['containerNum'] = p.containers.length
-        if (p.init_containers){
-          p['containerNum'] += p.init_containers.length
-        }
-        p['restarts'] = 0
-        for (let c of p.containers) {
-          if (c.restarts > p['restarts']) {
-            p['restarts'] = c.restarts
-          }
-        }
-        plist.push(p)
+        if (p.conditions.length > 0) p.conditions.sort()
+        dlist.push(p)
       }
-      return plist
+      return dlist
     },
-    podsWatch: function() {
-      return this.$store.getters["ws/podWatch"]
+    deploymentsWatch: function() {
+      return this.$store.getters["ws/deploymentWatch"]
     }
   },
   methods: {
     fetchData: function() {
       this.loading = true
-      this.originPods = []
+      this.originDeployments = []
       const cluster = this.$store.state.cluster
       if (cluster) {
-        listPods(cluster).then(response => {
+        listDeployments(cluster).then(response => {
           this.loading = false
-          this.originPods = response.data
+          this.originDeployments = response.data
         }).catch(() => {
           this.loading = false
         })
@@ -239,64 +226,15 @@ export default {
     nameSearch: function(val) {
       this.search_name = val
     },
-    buildPods: function(pod) {
-      if (!pod) return
-      let containers = []
-      for (let c of pod.spec.containers) {
-        let bc = this.buildContainer(c, pod.status.containerStatuses)
-        containers.push(bc)
-      }
-      let init_containers = []
-      if (pod.spec.initContainers) {
-        for (let c of pod.spec.initContainers) {
-          init_containers.push(this.buildContainer(c, pod.status.initContainerStatuses))
-        }
-      }
-      let controlled = ''
-      if (pod.metadata.ownerReferences.length > 0) {
-        controlled = pod.metadata.ownerReferences[0].kind
-      }
-      let p = {
-        uid: pod.metadata.uid,
-        name: pod.metadata.name,
-        namespace: pod.metadata.namespace,
-        containers: containers,
-        init_containers: init_containers,
-        controlled: controlled,
-        qos: pod.status.qosClass,
-        status: pod.status.phase,
-        ip: pod.status.podIP,
-        created: pod.metadata.creationTimestamp,
-        node_name: pod.spec.nodeName,
-        resource_version: pod.metadata.resourceVersion,
-      }
+    buildDeployments: function(deployment) {
+      if (!deployment) return
+      let p = {}
       return p
-    },
-    buildContainer: function(container, statuses) {
-      if (!container) return {}
-      if (!statuses) return {}
-      let c = {name: container.name, status: 'unknown', restarts: 0}
-      for (let s of statuses) {
-        if (s.name == container.name) {
-          c.restarts = s.restartCount
-          if (s.state.running) c.status = 'running'
-          else if (s.state.terminated) c.status = 'terminated'
-          else if (s.state.waiting) c.status = 'waiting'
-          c.ready = s.ready
-          break
-        }
-      }
-      return c
     },
     nameClick: function(namespace, name) {
       this.$router.push({name: 'podsDetail', params: {namespace: namespace, podName: name}})
     },
-    containerClass: function(status) {
-      if (status === 'running') return 'running-class'
-      if (status === 'terminated') return 'terminate-class'
-      if (status === 'waiting') return 'waiting-class'
-    },
-    getPodYaml: function(namespace, podName) {
+    getDeploymentYaml: function(namespace, name) {
       this.yamlNamespace = ""
       this.yamlName = ""
       const cluster = this.$store.state.cluster
@@ -308,23 +246,23 @@ export default {
         Message.error("获取命名空间参数异常，请刷新重试")
         return
       }
-      if (!podName) {
-        Message.error("获取Pod名称参数异常，请刷新重试")
+      if (!name) {
+        Message.error("获取Deployment名称参数异常，请刷新重试")
         return
       }
       this.yamlValue = ""
       this.yamlDialog = true
       this.yamlLoading = true
-      getPod(cluster, namespace, podName, "yaml").then(response => {
+      getDeployment(cluster, namespace, name, "yaml").then(response => {
         this.yamlLoading = false
         this.yamlValue = response.data
         this.yamlNamespace = namespace
-        this.yamlName = podName
+        this.yamlName = name
       }).catch(() => {
         this.yamlLoading = false
       })
     },
-    deletePods: function(pods) {
+    deleteDeployments: function(deployments) {
       const cluster = this.$store.state.cluster
       if (!cluster) {
         Message.error("获取集群参数异常，请刷新重试")
@@ -335,15 +273,15 @@ export default {
         return
       }
       let params = {
-        resources: pods
+        resources: deployments
       }
-      deletePods(cluster, params).then(response => {
+      deleteDeployments(cluster, params).then(response => {
         Message.success("删除成功")
       }).catch(() => {
         // console.log(e)
       })
     },
-    updatePod: function() {
+    updateDeployment: function() {
       const cluster = this.$store.state.cluster
       if (!cluster) {
         Message.error("获取集群参数异常，请刷新重试")
@@ -354,35 +292,32 @@ export default {
         return
       }
       if (!this.yamlName) {
-        Message.error("获取POD参数异常，请刷新重试")
+        Message.error("获取Deployment参数异常，请刷新重试")
         return
       }
       console.log(this.yamlValue)
-      updatePod(cluster, this.yamlNamespace, this.yamlName, this.yamlValue).then(response => {
+      updateDeployment(cluster, this.yamlNamespace, this.yamlName, this.yamlValue).then(response => {
         Message.success("更新成功")
       }).catch(() => {
         // console.log(e) 
       })
     },
-    _delPodsFunc: function() {
-      console.log('delete ', this.delPods)
-      if (this.delPods.length > 0){
-        let delPods = []
-        for (var p of this.delPods) {
-          delPods.push({namespace: p.namespace, name: p.name})
+    _delDeploymentsFunc: function() {
+      if (this.delDeployments.length > 0){
+        let delDeployments = []
+        for (var p of this.delDeployments) {
+          delDeployments.push({namespace: p.namespace, name: p.name})
         }
-        this.deletePods(delPods)
+        this.deleteDeployments(delPods)
       }
     },
     handleSelectionChange(val) {
-      console.log(val);
-      this.delPods = val;
+      this.delDeployments = val;
       if (val.length > 0){
-        this.delFunc = this._delPodsFunc
+        this.delFunc = this._delDeploymentsFunc
       } else {
         this.delFunc = undefined
       }
-      // this.multipleSelection = val;
     }
   }
 }

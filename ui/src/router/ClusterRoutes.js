@@ -45,7 +45,7 @@ const Routes = [
       {
         path: 'deployments',
         name: 'deployments',
-        component: () => import('@/views/dashboard/index'),
+        component: () => import('@/views/cluster/deployment'),
         meta: { title: '无状态', group: 'cluster' }
       },
       {

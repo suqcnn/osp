@@ -558,7 +558,7 @@ export default {
       let params = {
         resources: pods
       }
-      deletePods(cluster, params).then(response => {
+      deletePods(cluster, params).then(() => {
         Message.success("删除成功")
       }).catch(() => {
         // console.log(e)
@@ -595,7 +595,7 @@ export default {
         return
       }
       console.log(this.yamlValue)
-      updatePod(cluster, this.pod.namespace, this.pod.name, this.yamlValue).then(response => {
+      updatePod(cluster, this.pod.namespace, this.pod.name, this.yamlValue).then(() => {
         Message.success("更新成功")
       }).catch(() => {
         // console.log(e) 

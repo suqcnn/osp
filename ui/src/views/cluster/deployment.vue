@@ -92,7 +92,7 @@
                 </el-dropdown-item>
                 <el-dropdown-item @click.native.prevent="nameClick(scope.row.namespace, scope.row.name)">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="scale" />
-                  <span style="margin-left: 5px;">扩缩容</span>
+                  <span style="margin-left: 5px;">副本</span>
                 </el-dropdown-item>
                 <el-dropdown-item @click.native.prevent="getDeploymentYaml(scope.row.namespace, scope.row.name)">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="edit" />
@@ -112,7 +112,7 @@
       <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
       <span slot="footer" class="dialog-footer">
         <el-button plain @click="yamlDialog = false" size="small">取 消</el-button>
-        <el-button plain @click="updatePod()" size="small">确 定</el-button>
+        <el-button plain @click="updateDeployment()" size="small">确 定</el-button>
       </span>
     </el-dialog>
   </div>

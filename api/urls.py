@@ -1,5 +1,5 @@
 from api import SlashOptionRouter
-from api.views import user, cluster, pod, namespace, node, event, deployment
+from api.views import user, cluster, pod, namespace, node, event, deployment, config_map
 
 router = SlashOptionRouter()
 
@@ -10,5 +10,6 @@ router.register('nodes/(?P<cluster>[^/.]+)', node.NodeViewSet, basename='node')
 router.register('namespace/(?P<cluster>[^/.]+)', namespace.NamespaceViewSet, basename='namespace')
 router.register('event/(?P<cluster>[^/.]+)', event.EventViewSet, basename='event')
 router.register('deployment/(?P<cluster>[^/.]+)', deployment.DeploymentViewSet, basename='deployment')
+router.register('config_map/(?P<cluster>[^/.]+)', config_map.ConfigMapViewSet, basename='config_map')
 
 urlpatterns = router.urls

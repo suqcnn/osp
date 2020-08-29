@@ -84,7 +84,7 @@ const Routes = [
         {
         path: 'configmaps',
         name: 'configmaps',
-        component: () => import('@/views/dashboard/index'),
+        component: () => import('@/views/cluster/configMap'),
         meta: { title: '配置项', group: 'cluster' }
         },
         {

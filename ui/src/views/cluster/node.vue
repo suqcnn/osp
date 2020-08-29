@@ -1,6 +1,6 @@
 <template>
     <div>
-        <clusterbar :titleName="titleName" :nsFunc="nsSearch" :nameFunc="nameSearch" />
+        <clusterbar :titleName="titleName" :nameFunc="nameSearch" />
 
 
         <div>
@@ -10,6 +10,12 @@
                 <el-table-column prop="name" label="名称" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="taints" label="Taints" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="os" label="OS" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="os_image" label="OS Image" show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column prop="kernel_version" label="Kernel Version" show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column prop="version" label="Version" show-overflow-tooltip>
                 </el-table-column>

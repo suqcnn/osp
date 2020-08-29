@@ -6,3 +6,11 @@ export function listCluster() {
     method: 'get',
   })
 }
+
+export function createCluster(data) {
+  return request({
+    url: '/cluster',
+    method: 'post',
+    data,
+  })
+}

@@ -32,15 +32,20 @@ class PodViewSet(viewsets.GenericViewSet):
         res = pod_resource.get(req_params)
         return res
 
-    @api_decorator('List pods', serializer_class=serializers.GeneralSerializer)
-    def list(self, req):
+    @action(methods=['POST'], detail=False, url_path='list', url_name='list_pods')
+    @api_decorator('List pods', serializer_class=pod_serializers.ListPodSerializer)
+    def list_pods(self, req):
         params = req.get('params')
         req_params = {
             'name': params.get('name'),
-            'namespace': params.get('namespace')
+            'namespace': params.get('namespace'),
+            'label_selector': params.get('label_selector')
         }
         pod_resource = PodResource(req.get('cluster'))
         res = pod_resource.list(req_params)
+        logger.info(res.data)
+        if res.is_success() and not res.data:
+            res.data = []
         return res
 
     @action(methods=['POST'], detail=False, url_path='delete', url_name='delete_pod')

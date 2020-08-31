@@ -15,8 +15,8 @@ export function listEvents(cluster, uid='', kind='', name='', namespace='') {
 
 export function buildEvent(event) {
   if (!event) return
-  let eventTime = event.firstTimestamp
-  if (!eventTime) eventTime = event.LastTimestamp
+  let eventTime = event.lastTimestamp
+  if (!eventTime) eventTime = event.firstTimestamp
   if (!eventTime) eventTime = event.metadata.creationTimestamp
   return {
     uid: event.metadata.uid,
@@ -25,6 +25,7 @@ export function buildEvent(event) {
     type: event.type,
     object: event.involvedObject,
     source: event.source,
-    event_time: eventTime
+    event_time: eventTime,
+    resource_version: event.metadata.resourceVersion,
   }
 }

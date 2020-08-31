@@ -49,6 +49,13 @@ const Routes = [
         meta: { title: '无状态', group: 'cluster' }
       },
       {
+        path: 'deployments/:namespace/:deploymentName',
+        name: 'deploymentDetail',
+        hidden: true,
+        component: () => import('@/views/cluster/deploymentDetail'),
+        meta: { title: '无状态', group: 'cluster', sideName: "deployments" }
+      },
+      {
         path: 'statefulsets',
         name: 'statefulsets',
         component: () => import('@/views/dashboard/index'),

@@ -15,6 +15,7 @@
     "highcharts": "^8.1.2",
     "js-cookie": "^2.2.1",
     "js-yaml": "^3.14.0",
+    "k8s-selector": "^1.0.1",
     "normalize.css": "^8.0.1",
     "sass": "^1.26.10",
     "sass-loader": "^9.0.2",

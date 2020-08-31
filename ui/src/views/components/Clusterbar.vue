@@ -71,19 +71,7 @@ export default {
     return {
       nameInput: "",
       nsInput: [],
-      namespaces: [{
-        value: 'default',
-        label: 'default'
-      }, {
-        value: 'kube-system',
-        label: 'kube-system'
-      }, {
-        value: 'kube-public',
-        label: 'kube-public'
-      }, {
-        value: 'osp',
-        label: 'osp'
-      }],
+      namespaces: [],
     }
   },
   created() {

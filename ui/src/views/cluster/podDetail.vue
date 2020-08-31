@@ -97,11 +97,11 @@
             <el-dropdown size="medium" >
               <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item @click.native.prevent="sContainer = scope.row.name; log = true">
+                <el-dropdown-item @click.native.prevent="selectContainer = scope.row.name; log = true">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.2em" icon-class="log" /> 
                   <span style="margin-left: 5px;">日志</span>
                 </el-dropdown-item>
-                <el-dropdown-item @click.native.prevent="sContainer = scope.row.name; terminal = true">
+                <el-dropdown-item @click.native.prevent="selectContainer = scope.row.name; terminal = true">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.2em" icon-class="terminal" /> 
                   <span style="margin-left: 5px;">终端</span>
                 </el-dropdown-item>
@@ -112,9 +112,9 @@
       </el-table>
 
         <!-- <el-collapse-item name="detail"> -->
-          <template slot="title">
+          <!-- <template slot="title">
             <span class="title-class">{{pod.name}}</span>
-          </template>
+          </template> -->
           <el-form label-position="left" inline class="pod-item">
             <el-form-item label="状态">
               <span>{{ pod.status }}</span>
@@ -292,11 +292,11 @@
       </el-collapse>
 
       <el-dialog title="终端" :visible.sync="terminal" :close-on-click-modal="false" width="80%" top="55px">
-        <terminal v-if="terminal" :cluster="cluster" :namespace="namespace" :pod="podName" :container="sContainer"></terminal>
+        <terminal v-if="terminal" :cluster="cluster" :namespace="namespace" :pod="podName" :container="selectContainer"></terminal>
       </el-dialog>
 
       <el-dialog title="日志" :visible.sync="log" :close-on-click-modal="false" width="80%" top="55px">
-        <log v-if="log" :cluster="cluster" :namespace="namespace" :pod="podName" :container="sContainer"></log>
+        <log v-if="log" :cluster="cluster" :namespace="namespace" :pod="podName" :container="selectContainer"></log>
       </el-dialog>
 
       <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
@@ -312,7 +312,7 @@
 
 <script>
 import { Clusterbar, Yaml } from '@/views/components'
-import { getPod, deletePods, updatePod } from '@/api/pods'
+import { getPod, deletePods, updatePod, buildPods } from '@/api/pods'
 import { listEvents, buildEvent } from '@/api/event'
 import { Message } from 'element-ui'
 import { Terminal } from '@/views/components'
@@ -336,7 +336,7 @@ export default {
       cellStyle: {border: 0},
       loading: true,
       originPod: undefined,
-      sContainer: '',
+      selectContainer: '',
       podEvents: [],
       eventLoading: true,
     }
@@ -360,12 +360,27 @@ export default {
       }
     },
     eventWatch: function (newObj) {
-      if (newObj && this.pod) {
+      if (newObj && this.originPod) {
         let event = newObj.resource
         if (event.involvedObject.namespace !== this.pod.namespace) return
         if (event.involvedObject.uid !== this.pod.uid) return
+        let newUid = newObj.resource.metadata.uid
         if (newObj.event === 'add') {
           this.podEvents.push(buildEvent(event))
+        } else if (newObj.event == 'update') {
+          let newRv = newObj.resource.metadata.resourceVersion
+          for (let i in this.podEvents) {
+            let d = this.podEvents[i]
+            if (d.uid === newUid) {
+              if (d.resource_version < newRv){
+                let newEvent = buildEvent(newObj.resource)
+                this.$set(this.podEvents, i, newEvent)
+              }
+              break
+            }
+          }
+        } else if (newObj.event === 'delete') {
+          this.podEvents = this.podEvents.filter(( { uid } ) => uid !== newUid)
         }
       }
     }
@@ -381,7 +396,7 @@ export default {
       return this.$route.params ? this.$route.params.namespace : ''
     },
     pod: function() {
-      let p = this.buildPods(this.originPod)
+      let p = buildPods(this.originPod)
       return p
     },
     cluster: function() {
@@ -441,85 +456,6 @@ export default {
         this.loading = false
         this.eventLoading = false
       })
-    },
-    buildPods: function(pod) {
-      if (!pod) return {}
-      let containers = []
-      for (let c of pod.spec.containers) {
-        let bc = this.buildContainer(c, pod.status.containerStatuses)
-        console.log(bc)
-        containers.push(bc)
-      }
-      let init_containers = []
-      if (pod.spec.initContainers) {
-        for (let c of pod.spec.initContainers) {
-          init_containers.push(this.buildContainer(c, pod.status.initContainerStatuses))
-        }
-      }
-      let controlled
-      if (pod.metadata.ownerReferences.length > 0) {
-        controlled = pod.metadata.ownerReferences[0]
-      }
-      let p = {
-        uid: pod.metadata.uid,
-        name: pod.metadata.name,
-        namespace: pod.metadata.namespace,
-        containers: containers,
-        init_containers: init_containers,
-        controlled: controlled ? controlled.kind : '',
-        controlled_name: controlled ? controlled.name : '',
-        qos: pod.status.qosClass,
-        status: pod.status.phase,
-        ip: pod.status.podIP,
-        created: pod.metadata.creationTimestamp,
-        node_name: pod.spec.nodeName,
-        resource_version: pod.metadata.resourceVersion,
-        labels: pod.metadata.labels,
-        annonations: pod.metadata.annotations,
-        service_account: pod.spec.serviceAccountName || pod.spec.serviceAccount,
-        node_selector: pod.spec.nodeSelector,
-        volumes: pod.spec.volumes,
-        conditions: pod.status.conditions,
-      }
-      console.log(p)
-      return p
-    },
-    buildContainer: function(container, statuses) {
-      if (!container) return {}
-      if (!statuses) return {}
-      let c = {
-        name: container.name,
-        status: 'unknown',
-        image: container.image,
-        restarts: 0,
-        command: container.command ? container.command : [],
-        args: container.args ? container.args : [],
-        ports: container.ports ? container.ports : [],
-        env: container.env ? container.env : [],
-        volume_mounts: container.volumeMounts ? container.volumeMounts : [],
-        image_pull_policy: container.imagePullPolicy ? container.imagePullPolicy : '',
-        resources: container.resources ? container.resources : {},
-        start_time: '',
-      }
-      for (let s of statuses) {
-        if (s.name == container.name) {
-          c.restarts = s.restartCount
-          if (s.state.running) {
-            c.status = 'running'
-            c.start_time = s.state.running.startedAt
-          }
-          else if (s.state.terminated) {
-            c.status = 'terminated'
-            c.start_time = s.state.terminated.startedAt
-          }
-          else if (s.state.waiting) {
-            c.status = 'waiting'
-          }
-          c.ready = s.ready
-          break
-        }
-      }
-      return c
     },
     toogleExpand: function(row) {
       let $table = this.$refs.table;

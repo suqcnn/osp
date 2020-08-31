@@ -44,7 +44,7 @@
           show-overflow-tooltip>
           <template slot-scope="scope">
             <span>
-              {{ scope.row.ready_replicas }}/{{ scope.row.status_replicas }}
+              {{ scope.row.ready_replicas }}/{{ scope.row.replicas }}
             </span>
           </template>
         </el-table-column>
@@ -163,25 +163,25 @@ export default {
   },
   watch: {
     deploymentsWatch: function (newObj) {
-      console.log("watch deployment obj", newObj)
       if (newObj) {
-        // let newUid = newObj.resource.metadata.uid
-        // let newRv = newObj.resource.metadata.resourceVersion
-        // if (newObj.event === 'add') {
-        //   this.originPods.push(this.buildPods(newObj.resource))
-        // } else if (newObj.event === 'update') {
-        //   for (let i in this.originPods) {
-        //     let p = this.originPods[i]
-        //     if (p.uid === newUid && p.resource_version < newRv) {
-        //       let newPod = this.buildPods(newObj.resource)
-        //       this.$set(this.originPods, i, newPod)
-        //       // console.log(newPod.status)
-        //       break
-        //     }
-        //   }
-        // } else if (newObj.event === 'delete') {
-        //   this.originPods = this.originPods.filter(( { uid } ) => uid !== newUid)
-        // }
+        let newUid = newObj.resource.metadata.uid
+        let newRv = newObj.resource.metadata.resourceVersion
+        if (newObj.event === 'add') {
+          this.originDeployments.push(this.buildDeployments(newObj.resource))
+        } else if (newObj.event === 'update') {
+          for (let i in this.originDeployments) {
+            let d = this.originDeployments[i]
+            if (d.uid === newUid) {
+              if (d.resource_version < newRv){
+                let newDp = this.buildDeployments(newObj.resource)
+                this.$set(this.originDeployments, i, newDp)
+              }
+              break
+            }
+          }
+        } else if (newObj.event === 'delete') {
+          this.originDeployments = this.originDeployments.filter(( { uid } ) => uid !== newUid)
+        }
       }
     }
   },
@@ -228,11 +228,31 @@ export default {
     },
     buildDeployments: function(deployment) {
       if (!deployment) return
-      let p = {}
+      var conditions = []
+      for (let c of deployment.status.conditions) {
+        if (c.status === "True") {
+          conditions.push(c.type)
+        }
+      }
+      let p = {
+        uid: deployment.metadata.uid,
+        namespace: deployment.metadata.namespace,
+        name: deployment.metadata.name,
+        replicas: deployment.spec.replicas,
+        status_replicas: deployment.status.replicas || 0,
+        ready_replicas: deployment.status.readyReplicas || 0,
+        update_replicas: deployment.status.updateReplicas,
+        available_replicas: deployment.status.availableReplicas,
+        unavailable_replicas: deployment.status.unavailabelReplicas,
+        resource_version: deployment.metadata.resourceVersion,
+        strategy: deployment.spec.strategy.type,
+        conditions: conditions,
+        created: deployment.metadata.creationTimestamp
+      }
       return p
     },
     nameClick: function(namespace, name) {
-      this.$router.push({name: 'podsDetail', params: {namespace: namespace, podName: name}})
+      this.$router.push({name: 'deploymentDetail', params: {namespace: namespace, deploymentName: name}})
     },
     getDeploymentYaml: function(namespace, name) {
       this.yamlNamespace = ""
@@ -268,14 +288,14 @@ export default {
         Message.error("获取集群参数异常，请刷新重试")
         return
       }
-      if ( pods.length <= 0 ){
-        Message.error("请选择要删除的POD")
+      if ( deployments.length <= 0 ){
+        Message.error("请选择要删除的Deployment")
         return
       }
       let params = {
         resources: deployments
       }
-      deleteDeployments(cluster, params).then(response => {
+      deleteDeployments(cluster, params).then(() => {
         Message.success("删除成功")
       }).catch(() => {
         // console.log(e)
@@ -296,7 +316,7 @@ export default {
         return
       }
       console.log(this.yamlValue)
-      updateDeployment(cluster, this.yamlNamespace, this.yamlName, this.yamlValue).then(response => {
+      updateDeployment(cluster, this.yamlNamespace, this.yamlName, this.yamlValue).then(() => {
         Message.success("更新成功")
       }).catch(() => {
         // console.log(e) 
@@ -308,7 +328,7 @@ export default {
         for (var p of this.delDeployments) {
           delDeployments.push({namespace: p.namespace, name: p.name})
         }
-        this.deleteDeployments(delPods)
+        this.deleteDeployments(delDeployments)
       }
     },
     handleSelectionChange(val) {

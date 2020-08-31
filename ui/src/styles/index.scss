@@ -63,3 +63,18 @@ div:focus {
 .app-container {
   padding: 20px;
 }
+
+.app-main {
+  
+  .running-class {
+    color: #67C23A;
+  }
+
+  .terminate-class {
+    color: #909399;
+  }
+
+  .waiting-class {
+    color: #E6A23C;
+  }
+}

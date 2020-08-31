@@ -40,7 +40,6 @@ export default {
       gutters: ['CodeMirror-lint-markers'],  // 语法检查器
       theme: '3024-day', // 编辑器主题
       lint: true, // 开启语法检查
-      lineNumbers: true,
     })
 
     this.yamlEditor.setValue(this.value)

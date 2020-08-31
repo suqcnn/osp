@@ -124,7 +124,7 @@
 
 <script>
 import { Clusterbar } from '@/views/components'
-import { listPods, getPod, deletePods, updatePod } from '@/api/pods'
+import { listPods, getPod, deletePods, updatePod, buildPods } from '@/api/pods'
 import { Message } from 'element-ui'
 import { Yaml } from '@/views/components'
 
@@ -167,19 +167,17 @@ export default {
   },
   watch: {
     podsWatch: function (newObj) {
-      console.log("watch pod obj", newObj)
       if (newObj) {
         let newUid = newObj.resource.metadata.uid
         let newRv = newObj.resource.metadata.resourceVersion
         if (newObj.event === 'add') {
-          this.originPods.push(this.buildPods(newObj.resource))
+          this.originPods.push(buildPods(newObj.resource))
         } else if (newObj.event === 'update') {
           for (let i in this.originPods) {
             let p = this.originPods[i]
             if (p.uid === newUid && p.resource_version < newRv) {
-              let newPod = this.buildPods(newObj.resource)
+              let newPod = buildPods(newObj.resource)
               this.$set(this.originPods, i, newPod)
-              // console.log(newPod.status)
               break
             }
           }
@@ -195,16 +193,6 @@ export default {
       for (let p of this.originPods) {
         if (this.search_ns.length > 0 && this.search_ns.indexOf(p.namespace) < 0) continue
         if (this.search_name && !p.name.includes(this.search_name)) continue
-        p['containerNum'] = p.containers.length
-        if (p.init_containers){
-          p['containerNum'] += p.init_containers.length
-        }
-        p['restarts'] = 0
-        for (let c of p.containers) {
-          if (c.restarts > p['restarts']) {
-            p['restarts'] = c.restarts
-          }
-        }
         plist.push(p)
       }
       return plist
@@ -238,55 +226,6 @@ export default {
     },
     nameSearch: function(val) {
       this.search_name = val
-    },
-    buildPods: function(pod) {
-      if (!pod) return
-      let containers = []
-      for (let c of pod.spec.containers) {
-        let bc = this.buildContainer(c, pod.status.containerStatuses)
-        containers.push(bc)
-      }
-      let init_containers = []
-      if (pod.spec.initContainers) {
-        for (let c of pod.spec.initContainers) {
-          init_containers.push(this.buildContainer(c, pod.status.initContainerStatuses))
-        }
-      }
-      let controlled = ''
-      if (pod.metadata.ownerReferences.length > 0) {
-        controlled = pod.metadata.ownerReferences[0].kind
-      }
-      let p = {
-        uid: pod.metadata.uid,
-        name: pod.metadata.name,
-        namespace: pod.metadata.namespace,
-        containers: containers,
-        init_containers: init_containers,
-        controlled: controlled,
-        qos: pod.status.qosClass,
-        status: pod.status.phase,
-        ip: pod.status.podIP,
-        created: pod.metadata.creationTimestamp,
-        node_name: pod.spec.nodeName,
-        resource_version: pod.metadata.resourceVersion,
-      }
-      return p
-    },
-    buildContainer: function(container, statuses) {
-      if (!container) return {}
-      if (!statuses) return {}
-      let c = {name: container.name, status: 'unknown', restarts: 0}
-      for (let s of statuses) {
-        if (s.name == container.name) {
-          c.restarts = s.restartCount
-          if (s.state.running) c.status = 'running'
-          else if (s.state.terminated) c.status = 'terminated'
-          else if (s.state.waiting) c.status = 'waiting'
-          c.ready = s.ready
-          break
-        }
-      }
-      return c
     },
     nameClick: function(namespace, name) {
       this.$router.push({name: 'podsDetail', params: {namespace: namespace, podName: name}})
@@ -337,7 +276,7 @@ export default {
       let params = {
         resources: pods
       }
-      deletePods(cluster, params).then(response => {
+      deletePods(cluster, params).then(() => {
         Message.success("删除成功")
       }).catch(() => {
         // console.log(e)
@@ -358,7 +297,7 @@ export default {
         return
       }
       console.log(this.yamlValue)
-      updatePod(cluster, this.yamlNamespace, this.yamlName, this.yamlValue).then(response => {
+      updatePod(cluster, this.yamlNamespace, this.yamlName, this.yamlValue).then(() => {
         Message.success("更新成功")
       }).catch(() => {
         // console.log(e) 

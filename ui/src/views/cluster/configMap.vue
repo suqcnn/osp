@@ -59,11 +59,11 @@
                       <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="detail" />
                       <span style="margin-left: 5px;">详情</span>
                     </el-dropdown-item>
-                    <el-dropdown-item @click.native.prevent="getPodYaml(scope.row.namespace, scope.row.name)">
+                    <el-dropdown-item @click.native.prevent="getConfigMapYaml(scope.row.namespace, scope.row.name)">
                       <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="edit" />
                       <span style="margin-left: 5px;">修改</span>
                     </el-dropdown-item>
-                    <el-dropdown-item @click.native.prevent="deletePods([{namespace: scope.row.namespace, name: scope.row.name}])">
+                    <el-dropdown-item @click.native.prevent="deleteConfigMaps([{namespace: scope.row.namespace, name: scope.row.name}])">
                       <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="delete" />
                       <span style="margin-left: 5px;">删除</span>
                     </el-dropdown-item>
@@ -73,18 +73,26 @@
             </el-table-column>
           </el-table>
         </div>
+        <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
+          <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
+          <span slot="footer" class="dialog-footer">
+            <el-button plain @click="yamlDialog = false" size="small">取 消</el-button>
+            <el-button plain @click="updatePod()" size="small">确 定</el-button>
+          </span>
+        </el-dialog>
     </div>
 </template>
 
 <script>
-import { Clusterbar } from '@/views/components'
+import { Clusterbar, Yaml } from '@/views/components'
 import { Message } from 'element-ui'
-import { listConfigMaps } from '@/api/config_map'
+import { listConfigMaps, getConfigMap } from '@/api/config_map'
 
 export default {
     name: "ConfigMap",
     components: {
         Clusterbar,
+        Yaml
     },
     data() {
         return {
@@ -94,7 +102,12 @@ export default {
             search_ns: [],
             cellStyle: {border: 0},
             maxHeight: window.innerHeight - 150,
-            loading: true
+            loading: true,
+            yamlDialog: false,
+            yamlNamespace: "",
+            yamlName: "",
+            yamlValue: "",
+            yamlLoading: true
         }
     },
     created() {
@@ -145,6 +158,32 @@ export default {
                 this.loading = false
                 Message.error("获取集群异常，请刷新重试.")
             }
+        },
+        getConfigMapYaml: function(namespace, name) {
+          const cluster = this.$store.state.cluster
+          console.log("xxxxxxx", namespace, name)
+          if (!cluster) {
+            Message.error("获取集群参数异常，请刷新重试")
+            return
+          }
+          if (!namespace) {
+            Message.error("获取命名空间参数异常，请刷新重试")
+            return
+          }
+          if (!name) {
+            Message.error("获取Pod名称参数异常，请刷新重试")
+            return
+          }
+          this.yamlLoading = true
+          this.yamlDialog = true
+          getConfigMap(cluster, namespace, name, "yaml").then(response => {
+            this.yamlLoading = false
+            this.yamlValue = response.data
+            this.yamlNamespace = namespace
+            this.yamlName = name
+          }).catch(() => {
+            this.yamlLoading = false
+          })
         }
     }
 }

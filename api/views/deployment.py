@@ -40,7 +40,7 @@ class DeploymentViewSet(viewsets.GenericViewSet):
     @action(methods=['POST'], detail=False, url_path='(?P<namespace>[^/.]+)/(?P<name>[^/.]+)',
             url_name='update_deployment')
     @api_decorator('Update deployment', serializer_class=serializers.UpdateResourcesSerializer)
-    def do_update(self, req):
+    def update_yaml(self, req):
         params = req.get('params')
         req_params = {
             'name': req.get('name'),
@@ -49,6 +49,20 @@ class DeploymentViewSet(viewsets.GenericViewSet):
         }
         dp_resource = DeploymentResource(req.get('cluster'))
         res = dp_resource.update(req_params)
+        return res
+
+    @action(methods=['POST'], detail=False, url_path='(?P<namespace>[^/.]+)/(?P<name>[^/.]+)/update_obj',
+            url_name='update_deployment_obj')
+    @api_decorator('Update deployment', serializer_class=deployment_serializers.UpdateDeploymentObjSerializer)
+    def update_obj(self, req):
+        params = req.get('params')
+        req_params = {
+            'name': req.get('name'),
+            'namespace': req.get('namespace'),
+            'replicas': params.get('replicas')
+        }
+        dp_resource = DeploymentResource(req.get('cluster'))
+        res = dp_resource.update_obj(req_params)
         return res
 
     @action(methods=['POST'], detail=False, url_path='delete', url_name='delete_deployments')

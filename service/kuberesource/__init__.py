@@ -14,7 +14,8 @@ class KubeResource:
     LIST_ACTION = 'list'
     GET_ACTION = 'get'
     DELETE_ACTION = 'delete'
-    UPDATE_ACTION = 'update'
+    UPDATEYAML_ACTION = 'update_yaml'
+    UPDATEOBJ_ACTION = 'update_obj'
 
     def __init__(self, cluster=None):
         self.cluster = cluster
@@ -33,7 +34,11 @@ class KubeResource:
         return res
 
     def update(self, params=None):
-        res = self.request(self.UPDATE_ACTION, params=params)
+        res = self.request(self.UPDATEYAML_ACTION, params=params)
+        return res
+
+    def update_obj(self, params=None):
+        res = self.request(self.UPDATEOBJ_ACTION, params=params)
         return res
 
     def request(self, action, params=None, timeout=30):

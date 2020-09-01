@@ -90,7 +90,7 @@
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="detail" />
                   <span style="margin-left: 5px;">详情</span>
                 </el-dropdown-item>
-                <el-dropdown-item @click.native.prevent="nameClick(scope.row.namespace, scope.row.name)">
+                <el-dropdown-item @click.native.prevent="update_replicas_deployment = scope.row; update_replicas = scope.row.replicas; replicaDialog = true;">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="scale" />
                   <span style="margin-left: 5px;">副本</span>
                 </el-dropdown-item>
@@ -115,12 +115,33 @@
         <el-button plain @click="updateDeployment()" size="small">确 定</el-button>
       </span>
     </el-dialog>
+    <el-dialog title="扩缩容" :visible.sync="replicaDialog" :close-on-click-modal="false" width="380px" top="14%" class="replicaDialog" >
+      <div slot="title">
+        <span style="line-height: 24px; font-size: 18px; color: #303133;">扩缩容:</span>
+        <span style="line-height: 24px; font-size: 15px; color: #606266;">{{ update_replicas_deployment ? update_replicas_deployment.name : '' }}</span>
+      </div>
+      <!-- <label style="margin-bottom: 10px;">{{ update_replicas_deployment ? update_replicas_deployment.name : '' }}</label> -->
+      <el-form ref="form" label-position="left" label-width="100px">
+        <el-form-item label="当前副本数">
+          <label>{{ update_replicas_deployment ? update_replicas_deployment.replicas : 0 }}</label>
+        </el-form-item>
+      </el-form>
+      <el-form ref="form" label-position="left" label-width="100px">
+        <el-form-item label="期望副本数">
+          <el-input-number size="medium" v-model="update_replicas" :min="1" :max="100"></el-input-number>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button plain @click="replicaDialog = false" size="small">取 消</el-button>
+        <el-button plain @click="updateDeploymentObj({deployment: update_replicas_deployment, replicas: update_replicas})" size="small">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { Clusterbar } from '@/views/components'
-import { listDeployments, getDeployment, deleteDeployments, updateDeployment } from '@/api/deployment'
+import { listDeployments, getDeployment, deleteDeployments, updateDeployment, updateDeploymentObj } from '@/api/deployment'
 import { Message } from 'element-ui'
 import { Yaml } from '@/views/components'
 
@@ -132,6 +153,7 @@ export default {
   },
   data() {
       return {
+        replicaDialog: false,
         yamlDialog: false,
         yamlNamespace: "",
         yamlName: "",
@@ -146,6 +168,8 @@ export default {
         search_name: '',
         delFunc: undefined,
         delDeployment: [],
+        update_replicas: 0,
+        update_replicas_deployment: null,
       }
   },
   created() {
@@ -322,6 +346,49 @@ export default {
         // console.log(e) 
       })
     },
+    updateDeploymentObj: function(update_obj) {
+      console.log(update_obj)
+      const cluster = this.$store.state.cluster
+      if (!cluster) {
+        Message.error("获取集群参数异常，请刷新重试")
+        return
+      }
+      if (!update_obj || !update_obj.deployment) {
+        Message.error("获取更新参数异常，请刷新重试")
+        return
+      }
+      let deployment = update_obj.deployment
+      if (!deployment.namespace) {
+        Message.error("获取命名空间参数异常，请刷新重试")
+        return
+      }
+      if (!deployment.name) {
+        Message.error("获取Deployment参数异常，请刷新重试")
+        return
+      }
+      let update_params = {}
+      if (update_obj.replicas) {
+        if (update_obj.replicas < 1) {
+          Message.error("副本数不能小于1，请重新输入")
+          return
+        }
+        if (parseInt(update_obj.replicas) === parseInt(deployment.replicas)) {
+          Message.error("副本数与当前值相同，请重新输入")
+          return
+        }
+        update_params["replicas"] = update_obj.replicas
+      }
+      if (Object.keys(update_params).length === 0) {
+        Message.error("更新参数为空")
+        return
+      }
+      updateDeploymentObj(cluster, deployment.namespace, deployment.name, update_params).then(() => {
+        Message.success("更新成功")
+        this.replicaDialog = false;
+      }).catch(() => {
+        // console.log(e) 
+      })
+    },
     _delDeploymentsFunc: function() {
       if (this.delDeployments.length > 0){
         let delDeployments = []
@@ -389,9 +456,17 @@ export default {
 }
 </style>
 
-<style>
+<style lang="scss">
 .el-dialog__body {
   padding-top: 5px;
   padding-bottom: 5px;
+}
+.replicaDialog {
+  .el-form-item {
+    margin-bottom: 10px;
+  }
+  .el-dialog--center .el-dialog__body {
+    padding: 5px 25px;
+  }
 }
 </style>

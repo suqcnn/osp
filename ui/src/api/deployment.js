@@ -30,3 +30,11 @@ export function updateDeployment(cluster, namespace, name, yaml) {
     data: { yaml }
   })
 }
+
+export function updateDeploymentObj(cluster, namespace, name, data) {
+  return request({
+    url: `deployment/${cluster}/${namespace}/${name}/update_obj`,
+    method: 'post',
+    data: data
+  })
+}

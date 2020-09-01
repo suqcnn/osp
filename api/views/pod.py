@@ -63,7 +63,7 @@ class PodViewSet(viewsets.GenericViewSet):
 
     @action(methods=['POST'], detail=False, url_path='(?P<namespace>[^/.]+)/(?P<name>[^/.]+)', url_name='update_pod')
     @api_decorator('Update pod', serializer_class=serializers.UpdateResourcesSerializer)
-    def do_update(self, req):
+    def update_yaml(self, req):
         params = req.get('params')
         req_params = {
             'name': req.get('name'),

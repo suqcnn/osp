@@ -40,7 +40,7 @@ class DeploymentViewSet(viewsets.GenericViewSet):
     @action(methods=['POST'], detail=False, url_path='(?P<namespace>[^/.]+)/(?P<name>[^/.]+)',
             url_name='update_deployment')
     @api_decorator('Update deployment', serializer_class=serializers.UpdateResourcesSerializer)
-    def update_yaml(self, req):
+    def do_update_yaml(self, req):
         params = req.get('params')
         req_params = {
             'name': req.get('name'),

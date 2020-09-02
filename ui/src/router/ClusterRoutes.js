@@ -58,14 +58,28 @@ const Routes = [
       {
         path: 'statefulsets',
         name: 'statefulsets',
-        component: () => import('@/views/dashboard/index'),
+        component: () => import('@/views/cluster/statefulset'),
         meta: { title: '有状态', group: 'cluster' }
+      },
+      {
+        path: 'statefulsets/:namespace/:statefulsetName',
+        name: 'statefulsetDetail',
+        hidden: true,
+        component: () => import('@/views/cluster/statefulsetDetail'),
+        meta: { title: '有状态', group: 'cluster', sideName: "statefulsets" }
       },
       {
         path: 'daemonsets',
         name: 'daemonsets',
-        component: () => import('@/views/dashboard/index'),
+        component: () => import('@/views/cluster/daemonset'),
         meta: { title: '守护进程集', group: 'cluster' }
+      },
+      {
+        path: 'daemonsets/:namespace/:daemonsetName',
+        name: 'daemonsetDetail',
+        hidden: true,
+        component: () => import('@/views/cluster/daemonsetDetail'),
+        meta: { title: '守护进程集', group: 'cluster', sideName: "daemonsets" }
       },
       {
         path: 'job',

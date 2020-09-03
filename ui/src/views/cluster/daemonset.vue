@@ -5,7 +5,7 @@
       <!-- <div class="dashboard-text"></div> -->
       <el-table
         ref="multipleTable"
-        :data="deployments"
+        :data="daemonsets"
         class="table-fix"
         tooltip-effect="dark"
         :max-height="maxHeight"
@@ -23,7 +23,7 @@
         <el-table-column
           prop="name"
           label="名称"
-          min-width="100"
+          min-width="70"
           show-overflow-tooltip>
           <template slot-scope="scope">
             <span class="name-class" v-on:click="nameClick(scope.row.namespace, scope.row.name)">
@@ -34,48 +34,58 @@
         <el-table-column
           prop="namespace"
           label="命名空间"
-          min-width="60"
+          min-width="45"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           prop="ready_replicas"
           label="Pods"
-          min-width="40"
+          min-width="30"
           show-overflow-tooltip>
           <template slot-scope="scope">
             <span>
-              {{ scope.row.ready_replicas }}/{{ scope.row.status_replicas }}
+              {{ scope.row.number_ready }}/{{ scope.row.desired_number_scheduled }}
             </span>
           </template>
         </el-table-column>
         <el-table-column
-          prop="replicas"
-          label="副本"
-          min-width="30"
+          prop="strategy"
+          label="更新策略"
+          min-width="45"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
-          prop="strategy"
-          label="更新策略"
-          min-width="55"
+          prop="node_selector"
+          label="节点选择"
+          min-width="70"
           show-overflow-tooltip>
+          <template slot-scope="scope">
+            <template v-if="scope.row.node_selector">
+              <span v-for="(val, key) in scope.row.node_selector" :key="key" class="back-class">
+                {{ key + '=' + val }} 
+              </span>
+            </template>
+            <!-- <span v-else>--</span> -->
+          </template>
         </el-table-column>
         <el-table-column
           prop="conditions"
           label="状态"
+          min-width="40"
           show-overflow-tooltip>
           <template slot-scope="scope">
-            <template v-if="scope.row.conditions">
+            <template v-if="scope.row.conditions && scope.row.conditions.length > 0">
               <span v-for="c in scope.row.conditions" :key="c">
                 {{ c }}
               </span>
             </template>
+            <span v-else>——</span>
           </template>
         </el-table-column>
         <el-table-column
           prop="created"
           label="创建时间"
-          min-width="70"
+          min-width="60"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
@@ -90,15 +100,11 @@
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="detail" />
                   <span style="margin-left: 5px;">详情</span>
                 </el-dropdown-item>
-                <el-dropdown-item @click.native.prevent="update_replicas_deployment = scope.row; update_replicas = scope.row.replicas; replicaDialog = true;">
-                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="scale" />
-                  <span style="margin-left: 5px;">副本</span>
-                </el-dropdown-item>
-                <el-dropdown-item @click.native.prevent="getDeploymentYaml(scope.row.namespace, scope.row.name)">
+                <el-dropdown-item @click.native.prevent="getDaemonSetYaml(scope.row.namespace, scope.row.name)">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="edit" />
                   <span style="margin-left: 5px;">修改</span>
                 </el-dropdown-item>
-                <el-dropdown-item @click.native.prevent="deleteDeployments([{namespace: scope.row.namespace, name: scope.row.name}])">
+                <el-dropdown-item @click.native.prevent="deleteDaemonSets([{namespace: scope.row.namespace, name: scope.row.name}])">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="delete" />
                   <span style="margin-left: 5px;">删除</span>
                 </el-dropdown-item>
@@ -112,28 +118,7 @@
       <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
       <span slot="footer" class="dialog-footer">
         <el-button plain @click="yamlDialog = false" size="small">取 消</el-button>
-        <el-button plain @click="updateDeployment()" size="small">确 定</el-button>
-      </span>
-    </el-dialog>
-    <el-dialog title="扩缩容" :visible.sync="replicaDialog" :close-on-click-modal="false" width="380px" top="14%" class="replicaDialog" >
-      <div slot="title">
-        <span style="line-height: 24px; font-size: 18px; color: #303133;">扩缩容:</span>
-        <span style="line-height: 24px; font-size: 15px; color: #606266;">{{ update_replicas_deployment ? update_replicas_deployment.name : '' }}</span>
-      </div>
-      <!-- <label style="margin-bottom: 10px;">{{ update_replicas_deployment ? update_replicas_deployment.name : '' }}</label> -->
-      <el-form ref="form" label-position="left" label-width="100px">
-        <el-form-item label="当前副本数">
-          <label>{{ update_replicas_deployment ? update_replicas_deployment.replicas : 0 }}</label>
-        </el-form-item>
-      </el-form>
-      <el-form ref="form" label-position="left" label-width="100px">
-        <el-form-item label="期望副本数">
-          <el-input-number size="medium" v-model="update_replicas" :min="1" :max="100"></el-input-number>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button plain @click="replicaDialog = false" size="small">取 消</el-button>
-        <el-button plain @click="updateDeploymentObj({deployment: update_replicas_deployment, replicas: update_replicas})" size="small">确 定</el-button>
+        <el-button plain @click="updateDaemonSet()" size="small">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -141,35 +126,32 @@
 
 <script>
 import { Clusterbar } from '@/views/components'
-import { listDeployments, getDeployment, deleteDeployments, updateDeployment, updateDeploymentObj } from '@/api/deployment'
+import { listDaemonSets, getDaemonSet, deleteDaemonSets, updateDaemonSet, updateDaemonSetObj } from '@/api/daemonset'
 import { Message } from 'element-ui'
 import { Yaml } from '@/views/components'
 
 export default {
-  name: 'Deployment',
+  name: 'DaemonSet',
   components: {
     Clusterbar,
     Yaml
   },
   data() {
       return {
-        replicaDialog: false,
         yamlDialog: false,
         yamlNamespace: "",
         yamlName: "",
         yamlValue: "",
         yamlLoading: true,
         cellStyle: {border: 0},
-        titleName: ["Deployments"],
+        titleName: ["DaemonSets"],
         maxHeight: window.innerHeight - 150,
         loading: true,
-        originDeployments: [],
+        originDaemonSets: [],
         search_ns: [],
         search_name: '',
         delFunc: undefined,
-        delDeployment: [],
-        update_replicas: 0,
-        update_replicas_deployment: null,
+        delDaemonSets: [],
       }
   },
   created() {
@@ -186,53 +168,57 @@ export default {
     }
   },
   watch: {
-    deploymentsWatch: function (newObj) {
+    daemonsetsWatch: function (newObj) {
       if (newObj) {
         let newUid = newObj.resource.metadata.uid
         let newRv = newObj.resource.metadata.resourceVersion
         if (newObj.event === 'add') {
-          this.originDeployments.push(this.buildDeployments(newObj.resource))
+          this.originDaemonSets.push(this.buildDaemonSets(newObj.resource))
         } else if (newObj.event === 'update') {
-          for (let i in this.originDeployments) {
-            let d = this.originDeployments[i]
+          for (let i in this.originDaemonSets) {
+            let d = this.originDaemonSets[i]
             if (d.uid === newUid) {
               if (d.resource_version < newRv){
-                let newDp = this.buildDeployments(newObj.resource)
-                this.$set(this.originDeployments, i, newDp)
+                let newDp = this.buildDaemonSets(newObj.resource)
+                this.$set(this.originDaemonSets, i, newDp)
               }
               break
             }
           }
         } else if (newObj.event === 'delete') {
-          this.originDeployments = this.originDeployments.filter(( { uid } ) => uid !== newUid)
+          this.originDaemonSets = this.originDaemonSets.filter(( { uid } ) => uid !== newUid)
         }
       }
     }
   },
   computed: {
-    deployments: function() {
+    daemonsets: function() {
       let dlist = []
-      for (let p of this.originDeployments) {
+      for (let p of this.originDaemonSets) {
         if (this.search_ns.length > 0 && this.search_ns.indexOf(p.namespace) < 0) continue
         if (this.search_name && !p.name.includes(this.search_name)) continue
-        if (p.conditions.length > 0) p.conditions.sort()
+        if (p.conditions && p.conditions.length > 0) {
+          p.conditions.sort()
+        } else {
+          p.conditions = []
+        }
         dlist.push(p)
       }
       return dlist
     },
-    deploymentsWatch: function() {
-      return this.$store.getters["ws/deploymentWatch"]
+    daemonsetsWatch: function() {
+      return this.$store.getters["ws/daemonsetsWatch"]
     }
   },
   methods: {
     fetchData: function() {
       this.loading = true
-      this.originDeployments = []
+      this.originDaemonSets = []
       const cluster = this.$store.state.cluster
       if (cluster) {
-        listDeployments(cluster).then(response => {
+        listDaemonSets(cluster).then(response => {
           this.loading = false
-          this.originDeployments = response.data
+          this.originDaemonSets = response.data
         }).catch(() => {
           this.loading = false
         })
@@ -250,35 +236,34 @@ export default {
     nameSearch: function(val) {
       this.search_name = val
     },
-    buildDeployments: function(deployment) {
-      if (!deployment) return
+    buildDaemonSets: function(daemonset) {
+      if (!daemonset) return
       var conditions = []
-      for (let c of deployment.status.conditions) {
-        if (c.status === "True") {
-          conditions.push(c.type)
+      if(daemonset.status.conditions) {
+        for (let c of daemonset.status.conditions) {
+          if (c.status === "True") {
+            conditions.push(c.type)
+          }
         }
       }
       let p = {
-        uid: deployment.metadata.uid,
-        namespace: deployment.metadata.namespace,
-        name: deployment.metadata.name,
-        replicas: deployment.spec.replicas,
-        status_replicas: deployment.status.replicas || 0,
-        ready_replicas: deployment.status.readyReplicas || 0,
-        update_replicas: deployment.status.updateReplicas,
-        available_replicas: deployment.status.availableReplicas,
-        unavailable_replicas: deployment.status.unavailabelReplicas,
-        resource_version: deployment.metadata.resourceVersion,
-        strategy: deployment.spec.strategy.type,
+        uid: daemonset.metadata.uid,
+        namespace: daemonset.metadata.namespace,
+        name: daemonset.metadata.name,
+        desired_number_scheduled: daemonset.status.desiredNumberScheduled || 0,
+        number_ready: daemonset.status.numberReady || 0,
+        resource_version: daemonset.metadata.resourceVersion,
+        strategy: daemonset.spec.updateStrategy.type,
         conditions: conditions,
-        created: deployment.metadata.creationTimestamp
+        node_selector: daemonset.spec.template.spec.nodeSelector,
+        created: daemonset.metadata.creationTimestamp
       }
       return p
     },
     nameClick: function(namespace, name) {
-      this.$router.push({name: 'deploymentDetail', params: {namespace: namespace, deploymentName: name}})
+      this.$router.push({name: 'daemonsetDetail', params: {namespace: namespace, daemonsetName: name}})
     },
-    getDeploymentYaml: function(namespace, name) {
+    getDaemonSetYaml: function(namespace, name) {
       this.yamlNamespace = ""
       this.yamlName = ""
       const cluster = this.$store.state.cluster
@@ -297,7 +282,7 @@ export default {
       this.yamlValue = ""
       this.yamlDialog = true
       this.yamlLoading = true
-      getDeployment(cluster, namespace, name, "yaml").then(response => {
+      getDaemonSet(cluster, namespace, name, "yaml").then(response => {
         this.yamlLoading = false
         this.yamlValue = response.data
         this.yamlNamespace = namespace
@@ -306,26 +291,26 @@ export default {
         this.yamlLoading = false
       })
     },
-    deleteDeployments: function(deployments) {
+    deleteDaemonSets: function(daemonsets) {
       const cluster = this.$store.state.cluster
       if (!cluster) {
         Message.error("获取集群参数异常，请刷新重试")
         return
       }
-      if ( deployments.length <= 0 ){
-        Message.error("请选择要删除的Deployment")
+      if ( daemonsets.length <= 0 ){
+        Message.error("请选择要删除的DaemonSets")
         return
       }
       let params = {
-        resources: deployments
+        resources: daemonsets
       }
-      deleteDeployments(cluster, params).then(() => {
+      deleteDaemonSets(cluster, params).then(() => {
         Message.success("删除成功")
       }).catch(() => {
         // console.log(e)
       })
     },
-    updateDeployment: function() {
+    updateDaemonSet: function() {
       const cluster = this.$store.state.cluster
       if (!cluster) {
         Message.error("获取集群参数异常，请刷新重试")
@@ -336,72 +321,29 @@ export default {
         return
       }
       if (!this.yamlName) {
-        Message.error("获取Deployment参数异常，请刷新重试")
+        Message.error("获取DaemonSet参数异常，请刷新重试")
         return
       }
       console.log(this.yamlValue)
-      updateDeployment(cluster, this.yamlNamespace, this.yamlName, this.yamlValue).then(() => {
+      updateDaemonSet(cluster, this.yamlNamespace, this.yamlName, this.yamlValue).then(() => {
         Message.success("更新成功")
       }).catch(() => {
         // console.log(e) 
       })
     },
-    updateDeploymentObj: function(update_obj) {
-      console.log(update_obj)
-      const cluster = this.$store.state.cluster
-      if (!cluster) {
-        Message.error("获取集群参数异常，请刷新重试")
-        return
-      }
-      if (!update_obj || !update_obj.deployment) {
-        Message.error("获取更新参数异常，请刷新重试")
-        return
-      }
-      let deployment = update_obj.deployment
-      if (!deployment.namespace) {
-        Message.error("获取命名空间参数异常，请刷新重试")
-        return
-      }
-      if (!deployment.name) {
-        Message.error("获取Deployment参数异常，请刷新重试")
-        return
-      }
-      let update_params = {}
-      if (update_obj.replicas) {
-        if (update_obj.replicas < 1) {
-          Message.error("副本数不能小于1，请重新输入")
-          return
+    _delDaemonSetsFunc: function() {
+      if (this.delDaemonSets.length > 0){
+        let delDaemonSets = []
+        for (var p of this.delDaemonSets) {
+          delDaemonSets.push({namespace: p.namespace, name: p.name})
         }
-        if (parseInt(update_obj.replicas) === parseInt(deployment.replicas)) {
-          Message.error("副本数与当前值相同，请重新输入")
-          return
-        }
-        update_params["replicas"] = update_obj.replicas
-      }
-      if (Object.keys(update_params).length === 0) {
-        Message.error("更新参数为空")
-        return
-      }
-      updateDeploymentObj(cluster, deployment.namespace, deployment.name, update_params).then(() => {
-        Message.success("更新成功")
-        this.replicaDialog = false;
-      }).catch(() => {
-        // console.log(e) 
-      })
-    },
-    _delDeploymentsFunc: function() {
-      if (this.delDeployments.length > 0){
-        let delDeployments = []
-        for (var p of this.delDeployments) {
-          delDeployments.push({namespace: p.namespace, name: p.name})
-        }
-        this.deleteDeployments(delDeployments)
+        this.deleteDaemonSets(delDaemonSets)
       }
     },
     handleSelectionChange(val) {
-      this.delDeployments = val;
+      this.delDaemonSets = val;
       if (val.length > 0){
-        this.delFunc = this._delDeploymentsFunc
+        this.delFunc = this._delDaemonSetsFunc
       } else {
         this.delFunc = undefined
       }
@@ -454,6 +396,7 @@ export default {
 .waiting-class {
   color: #E6A23C;
 }
+
 </style>
 
 <style lang="scss">

@@ -160,16 +160,16 @@
             <span class="title-class">Volumes</span>
           </template>
           <div v-for="v in pod.volumes" :key="v.name" style="margin: 5px 25px; font-size: 14px; color: #606266">
-            <span><b>{{v.name}}</b></span>
-            (<template v-for="(val, key) in v">
+            <span style="margin-right: 8px;"><b>{{v.name}}</b></span><br/>
+            <template v-for="(val, key) in v">
                 <span v-if="key !== 'name'" :key="key"> 
-                  type: {{key}}
-                  <template v-for="(ival, ikey) in val">
-                    / {{ikey}}: {{ival}}
-                  </template>
+                  <span class="back-class">type: {{key}}</span>
+                  <span v-for="(ival, ikey) in val" :key="ikey" class="back-class">
+                    {{ikey}}: {{ival}}
+                  </span>
                 </span>
               </template>
-            )
+            
           </div>
         </el-collapse-item>
         <el-collapse-item title="Conditions" name="conditions">

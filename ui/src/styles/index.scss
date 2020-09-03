@@ -65,7 +65,7 @@ div:focus {
 }
 
 .app-main {
-  
+
   .running-class {
     color: #67C23A;
   }
@@ -76,5 +76,12 @@ div:focus {
 
   .waiting-class {
     color: #E6A23C;
+  }
+
+  .back-class {
+    background-color: #EBEEF5;
+    border-radius: 30px;
+    padding: 3px 6px;
+    margin-right: 2px;
   }
 }

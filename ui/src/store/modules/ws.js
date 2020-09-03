@@ -32,6 +32,12 @@ const getters = {
   },
   deploymentWatch: ( _, getters ) => {
     return getters.resourceWatch("deployment")
+  },
+  statefulsetsWatch: ( _, getters ) => {
+    return getters.resourceWatch("statefulset")
+  },
+  daemonsetsWatch: ( _, getters ) => {
+    return getters.resourceWatch("daemonset")
   }
 }
 

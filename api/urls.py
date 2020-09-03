@@ -1,5 +1,5 @@
 from api import SlashOptionRouter
-from api.views import user, cluster, pod, namespace, node, event, deployment, config_map, statefulset, daemonset
+from api.views import user, cluster, pod, namespace, node, event, deployment, config_map, statefulset, daemonset, persistent_volume
 
 router = SlashOptionRouter()
 
@@ -13,5 +13,6 @@ router.register('deployment/(?P<cluster>[^/.]+)', deployment.DeploymentViewSet, 
 router.register('config_map/(?P<cluster>[^/.]+)', config_map.ConfigMapViewSet, basename='config_map')
 router.register('statefulset/(?P<cluster>[^/.]+)', statefulset.StatefulSetViewSet, basename='statefulset')
 router.register('daemonset/(?P<cluster>[^/.]+)', daemonset.DaemonSetViewSet, basename='daemonset')
+router.register('persistent_volume/(?P<cluster>[^/.]+)', persistent_volume.PersistentVolumeViewSet, basename='pv')
 
 urlpatterns = router.urls

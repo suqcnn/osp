@@ -165,7 +165,7 @@ const Routes = [
       {
         path: 'pv',
         name: 'pv',
-        component: () => import('@/views/dashboard/index'),
+        component: () => import('@/views/cluster/persistentVolume'),
         meta: { title: '存储卷', group: 'cluster' }
       },
       {

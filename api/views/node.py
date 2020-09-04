@@ -16,4 +16,6 @@ class NodeViewSet(viewsets.GenericViewSet):
     def list(self, req):
         pod_resource = NodeResource(req.get("cluster"))
         res = pod_resource.list()
+        if not res.data:
+            res.data = []
         return res

@@ -24,4 +24,6 @@ class EventViewSet(viewsets.GenericViewSet):
         if params.get('namespace'):
             query_params['namespace'] = params.get('namespace')
         res = event_resource.list(query_params)
+        if not res.data:
+            res.data = []
         return res

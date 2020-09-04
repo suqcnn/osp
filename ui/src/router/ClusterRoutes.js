@@ -84,16 +84,30 @@ const Routes = [
       {
         path: 'job',
         name: 'job',
-        component: () => import('@/views/dashboard/index'),
+        component: () => import('@/views/cluster/job'),
         meta: { title: '任务', group: 'cluster' },
+      },
+      {
+        path: 'job/:namespace/:jobName',
+        name: 'jobDetail',
+        hidden: true,
+        component: () => import('@/views/cluster/jobDetail'),
+        meta: { title: '任务', group: 'cluster', sideName: "job" }
       },
       {
         path: 'cronjob',
         name: 'cronjob',
-        component: () => import('@/views/dashboard/index'),
-        meta: { title: '定时任务', group: 'cluster' },
+        component: () => import('@/views/cluster/cronjob'),
+        meta: { title: '定时任务', group: 'cluster' }
       },
-    ],
+      {
+        path: 'cronjob/:namespace/:cronjobName',
+        name: 'cronjobDetail',
+        hidden: true,
+        component: () => import('@/views/cluster/cronjobDetail'),
+        meta: { title: '定时任务', group: 'cluster', sideName: "cronjob" }
+      },
+    ]
   },
 
   {

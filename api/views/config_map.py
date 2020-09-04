@@ -24,6 +24,8 @@ class ConfigMapViewSet(viewsets.GenericViewSet):
         }
         config_map_resource = ConfigMapResource(req.get('cluster'))
         res = config_map_resource.list(req_params)
+        if not res.data:
+            res.data = []
         return res
 
     @action(methods=['GET'], detail=False, url_path='(?P<namespace>[^/.]+)')

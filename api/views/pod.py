@@ -43,8 +43,7 @@ class PodViewSet(viewsets.GenericViewSet):
         }
         pod_resource = PodResource(req.get('cluster'))
         res = pod_resource.list(req_params)
-        logger.info(res.data)
-        if res.is_success() and not res.data:
+        if not res.data:
             res.data = []
         return res
 

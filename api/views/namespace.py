@@ -24,4 +24,6 @@ class NamespaceViewSet(viewsets.GenericViewSet):
         }
         ns_resource = NamespaceResource(req.get('cluster'))
         res = ns_resource.list(req_params)
+        if not res.data:
+            res.data = []
         return res

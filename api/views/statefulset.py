@@ -22,6 +22,8 @@ class StatefulSetViewSet(viewsets.GenericViewSet):
         if params.get('namespace'):
             query_params['namespace'] = params.get('namespace')
         res = dp_resource.list(query_params)
+        if not res.data:
+            res.data = []
         return res
 
     @action(methods=['GET'], detail=False, url_path='(?P<namespace>[^/.]+)/(?P<name>[^/.]+)', url_name='get_statefulset')

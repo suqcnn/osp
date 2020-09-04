@@ -36,7 +36,7 @@ class CommonReturn:
     def __init__(self, code='', msg='', data=None, response=None):
         self.code = code
         self.msg = msg
-        self.data = data or {}
+        self.data = data
         self.response = response
 
     def is_success(self):
@@ -45,8 +45,10 @@ class CommonReturn:
         return False
 
     def to_json(self):
-        return {
+        r = {
             'code': self.code,
             'msg': self.msg,
-            'data': self.data
         }
+        if self.data is not None:
+            r['data'] = self.data
+        return r

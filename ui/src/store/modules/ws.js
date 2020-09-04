@@ -38,6 +38,12 @@ const getters = {
   },
   daemonsetsWatch: ( _, getters ) => {
     return getters.resourceWatch("daemonset")
+  },
+  jobsWatch: ( _, getters ) => {
+    return getters.resourceWatch("job")
+  },
+  cronjobsWatch: ( _, getters ) => {
+    return getters.resourceWatch("cronjob")
   }
 }
 

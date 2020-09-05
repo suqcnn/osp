@@ -1,95 +1,65 @@
 <template>
   <div>
-    <clusterbar :titleName="titleName" :editFunc="getPodYaml" />
+    <clusterbar :titleName="titleName" :editFunc="getConfigMapYaml" />
     <div class="dashboard-container">
       <el-form label-position="left" inline class="pod-item">
-        <el-form-item label="状态">
-          <span>{{ pod.status }}</span>
+        <el-form-item label="名称">
+          <span>{{ configMap.metadata.name }}</span>
         </el-form-item>
         <el-form-item label="创建时间">
-          <span>{{ pod.created }}</span>
+          <span>{{ configMap.metadata.creationTimestamp }}</span>
         </el-form-item>
         <el-form-item label="命名空间">
-          <span>{{ pod.namespace }}</span>
-        </el-form-item>
-        <el-form-item label="节点">
-          <span>{{ pod.node_name }}</span>
-        </el-form-item>
-        <el-form-item label="服务账户">
-          <span>{{ pod.service_account }}</span>
-        </el-form-item>
-        <el-form-item label="Pod IP">
-          <span>{{ pod.ip }}</span>
-        </el-form-item>
-        <el-form-item label="控制器">
-          <span>{{ pod.controlled }}/{{ pod.controlled_name }}</span>
-        </el-form-item>
-        <el-form-item label="QoS Class">
-          <span>{{ pod.qos }}</span>
-        </el-form-item>
-        <el-form-item label="标签">
-          <template v-for="(val, key) in pod.labels">
-            <span :key="key">{{ key }}: {{ val }}<br /></span>
-          </template>
-        </el-form-item>
-        <el-form-item label="注解">
-          <span v-if="!pod.annonations">——</span>
-
-          <template v-else v-for="(val, key) in pod.annonations">
-            <span :key="key">{{ key }}: {{ val }}<br /></span>
-          </template>
+          <span>{{ configMap.metadata.namespace }}</span>
         </el-form-item>
       </el-form>
 
-      <el-dialog
-        title="终端"
-        :visible.sync="terminal"
-        :close-on-click-modal="false"
-        width="80%"
-        top="55px"
-      >
-        <terminal
-          v-if="terminal"
-          :cluster="cluster"
-          :namespace="namespace"
-          :pod="podName"
-          :container="selectContainer"
-        ></terminal>
-      </el-dialog>
+      <el-collapse v-model="activeNames" @change="handleChange">
+        <el-collapse-item title="配置信息" name="1">
+          <div class="my-table">
+            <el-table
+              :data="configData"
+              style="width: 100%">
+              <el-table-column
+                prop="key"
+                label="Key">
+              </el-table-column>
+              <el-table-column
+                prop="value"
+                label="Value">
+              </el-table-column>
+            </el-table>
+          </div>
+        </el-collapse-item>
+        <el-collapse-item title="标签" name="2">
+          <div class="my-table">
+            <el-table
+              :data="labels"
+              style="width: 100%">
+              <el-table-column
+                prop="key"
+                label="Key">
+              </el-table-column>
+              <el-table-column
+                prop="value"
+                label="Value">
+              </el-table-column>
+            </el-table>
+          </div>
+        </el-collapse-item>
+        <el-collapse-item title="Event" name="3">
+          <div>简化流程：设计简洁直观的操作流程；</div>
+          <div>清晰明确：语言表达清晰且表意明确，让用户快速理解进而作出决策；</div>
+          <div>帮助用户识别：界面简单直白，让用户快速识别而非回忆，减少用户记忆负担。</div>
+        </el-collapse-item>
+      </el-collapse>
 
-      <el-dialog
-        title="日志"
-        :visible.sync="log"
-        :close-on-click-modal="false"
-        width="80%"
-        top="55px"
-      >
-        <log
-          v-if="log"
-          :cluster="cluster"
-          :namespace="namespace"
-          :pod="podName"
-          :container="selectContainer"
-        ></log>
-      </el-dialog>
 
-      <el-dialog
-        title="编辑"
-        :visible.sync="yamlDialog"
-        :close-on-click-modal="false"
-        width="60%"
-        top="55px"
-      >
-        <yaml
-          v-if="yamlDialog"
-          v-model="yamlValue"
-          :loading="yamlLoading"
-        ></yaml>
+      <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
+        <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
         <span slot="footer" class="dialog-footer">
-          <el-button plain @click="yamlDialog = false" size="small"
-            >取 消</el-button
-          >
-          <el-button plain @click="updatePod()" size="small">确 定</el-button>
+          <el-button plain @click="yamlDialog = false" size="small">取 消</el-button>
+          <el-button plain @click="updateConfigMap()" size="small">确 定</el-button>
         </span>
       </el-dialog>
     </div>
@@ -98,17 +68,13 @@
 
 <script>
 import { Clusterbar, Yaml } from '@/views/components'
-import { getConfigMap } from '@/api/config_map'
+import { getConfigMap, updateConfigMap } from '@/api/config_map'
 import { Message } from 'element-ui'
-import { Terminal } from '@/views/components'
-import { Log } from '@/views/components'
 
 export default {
-  name: 'PodDetail',
+  name: 'ConfigMapDetail',
   components: {
     Clusterbar,
-    Terminal,
-    Log,
     Yaml,
   },
   data() {
@@ -116,13 +82,13 @@ export default {
       yamlDialog: false,
       yamlValue: '',
       yamlLoading: true,
-      log: false,
-      terminal: false,
       cellStyle: { border: 0 },
       loading: true,
-      originConfigMap: undefined,
+      originConfigMap: {},
+      // configData :[],
       selectContainer: '',
       eventLoading: true,
+      activeNames: ["1"]
     }
   },
   created() {
@@ -143,15 +109,40 @@ export default {
       return this.$store.state.cluster
     },
     configMap: function() {
-      return {}
+      console.log("####", this.originConfigMap)
+      return this.originConfigMap
     },
+    configData: function() {
+      if (!this.originConfigMap.data) return []
+      let d = this.originConfigMap.data
+      let dataTable = []
+      Object.keys(d).forEach(key => {
+      dataTable.push({
+          key: key,
+          value: d[key]
+        })
+      })
+      return dataTable
+    },
+    labels: function() {
+      if (!this.originConfigMap.metadata.labels) return []
+      let la = []
+      Object.keys(this.originConfigMap.metadata.labels).forEach(key => {
+        la.push({
+          key: key,
+          value: this.originConfigMap.metadata.labels[key]
+        })
+      })
+      return la
+    }
   },
   methods: {
+    handleChange(val) {
+        console.log(val);
+    },
     fetchData: function() {
-      this.originPods = []
-      this.podEvents = []
+      this.originConfigMap = {}
       this.loading = true
-      this.eventLoading = true
       const cluster = this.$store.state.cluster
       if (!cluster) {
         Message.error('获取集群参数异常，请刷新重试')
@@ -171,31 +162,17 @@ export default {
         this.eventLoading = false
         return
       }
+      getConfigMap(cluster, this.namespace, this.configMapName).then(response => {
+        this.loading = false
+        this.originConfigMap = response.data
+        console.log("******", response.data)
+        console.log("******", this.originConfigMap)
+      }).catch(() => {
+        this.loading = false
+      })
     },
-    toogleExpand: function(row) {
-      let $table = this.$refs.table
-      $table.toggleRowExpansion(row)
-    },
-    envStr: function(env) {
-      let s = env.name + ': '
-      if (env.value) {
-        s += env.value
-      } else if (env.valueFrom) {
-        if (env.valueFrom.configMapKeyRef) {
-          s += `configmap(${env.valueFrom.configMapKeyRef.key}:${env.valueFrom.configMapKeyRef.name})`
-        } else if (env.valueFrom.fieldRef) {
-          s += `fieldRef(${env.valueFrom.fieldRef.apiVersion}:${env.valueFrom.fieldRef.fieldPath})`
-        } else if (env.valueFrom.secretKeyRef) {
-          s += `secret(${env.valueFrom.secretKeyRef.key}:${env.valueFrom.secretKeyRef.name})`
-        } else {
-          s += String(env.valueFrom)
-        }
-      }
-      return s
-    },
-
     getConfigMapYaml: function() {
-      if (!this.pod) {
+      if (!this.configMap) {
         Message.error('获取Pod参数异常，请刷新重试')
         return
       }
@@ -207,7 +184,7 @@ export default {
       this.yamlValue = ''
       this.yamlDialog = true
       this.yamlLoading = true
-      getConfigMap(cluster, this.pod.namespace, this.pod.name, 'yaml')
+      getConfigMap(cluster, this.configMap.metadata.namespace, this.configMap.metadata.name, 'yaml')
         .then((response) => {
           this.yamlLoading = false
           this.yamlValue = response.data
@@ -216,11 +193,37 @@ export default {
           this.yamlLoading = false
         })
     },
+    updateConfigMap: function() {
+      if (!this.configMap) {
+        Message.error("获取ConfigMap参数异常，请刷新重试")
+        return
+      }
+      const cluster = this.$store.state.cluster
+      if (!cluster) {
+        Message.error("获取集群参数异常，请刷新重试")
+        return
+      }
+      console.log(this.yamlValue)
+      updateConfigMap(cluster, this.configMap.metadata.namespace, this.configMap.metadata.name, this.yamlValue).then(() => {
+        Message.success("更新成功")
+      }).catch(() => {
+        // console.log(e) 
+      })
+    },
   },
 }
 </script>
 
 <style lang="scss" scoped>
+  .my-table >>> .el-table__row>td{
+  /* 去除表格线 */
+  border: none;
+}
+
+.my-table >>> .el-table::before {
+	height: 0px;
+}
+
 .dashboard {
   &-container {
     margin: 10px 30px;
@@ -275,7 +278,7 @@ export default {
 .pod-item .el-form-item {
   margin-right: 0;
   margin-bottom: 0;
-  width: 50%;
+  width: 33%;
 }
 .pod-item span {
   color: #606266;

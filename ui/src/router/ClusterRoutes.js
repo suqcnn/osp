@@ -180,7 +180,7 @@ const Routes = [
       {
         path: 'pvc',
         name: 'pvc',
-        component: () => import('@/views/dashboard/index'),
+        component: () => import('@/views/cluster/persistentVolumeClaim'),
         meta: { title: '存储声明', group: 'cluster' },
       },
       {

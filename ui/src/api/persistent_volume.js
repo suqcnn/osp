@@ -7,9 +7,9 @@ export function listPersistentVolume(cluster) {
   })
 }
 
-export function getPersistentVolume(cluster, namespace, name, output='') {
+export function getPersistentVolume(cluster, name, output='') {
   return request({
-    url: `persistent_volume/${cluster}/${namespace}/${name}`,
+    url: `persistent_volume/${cluster}/${name}`,
     method: 'get',
     params: { output }
   })

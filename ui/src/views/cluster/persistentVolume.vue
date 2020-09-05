@@ -1,6 +1,6 @@
 <template>
     <div>
-        <clusterbar :titleName="titleName" :nsFunc="nsSearch" :nameFunc="nameSearch" />
+        <clusterbar :titleName="titleName" :nameFunc="nameSearch" />
         <div class="dashboard-container">
             <el-table
             ref="multipleTable"
@@ -30,24 +30,36 @@
               </template>
             </el-table-column>
             <el-table-column
-              prop="namespace"
-              label="命名空间"
+              prop="storage_class"
+              label="Storage Class"
               min-width="40"
               show-overflow-tooltip>
             </el-table-column>
             <el-table-column
-              prop="keys"
-              label="Keys"
-              min-width="45"
-              show-overflow-tooltip>
-            </el-table-column>
-            <el-table-column
-            prop="create_time"
-            label="创建时间"
+            prop="capacity"
+            label="Capacity"
             min-width="45"
             show-overflow-tooltip>
           </el-table-column>
-            <el-table-column
+          <el-table-column
+            prop="claim"
+            label="Claim"
+            min-width="45"
+            show-overflow-tooltip>
+          </el-table-column>
+          <el-table-column
+            prop="status"
+            label="Status"
+            min-width="45"
+            show-overflow-tooltip>
+          </el-table-column>          
+          <el-table-column
+            prop="create_time"
+            label="Create Time"
+            min-width="45"
+            show-overflow-tooltip>
+          </el-table-column>
+          <el-table-column
               label=""
               show-overflow-tooltip
               width="45">
@@ -55,11 +67,11 @@
                 <el-dropdown size="medium" >
                   <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
                   <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item @click.native.prevent="nameClick(scope.row.namespace, scope.row.name)">
+                    <el-dropdown-item @click.native.prevent="nameClick(scope.row.name)">
                       <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="detail" />
                       <span style="margin-left: 5px;">详情</span>
                     </el-dropdown-item>
-                    <el-dropdown-item @click.native.prevent="getPersistentVolumeYaml(scope.row.namespace, scope.row.name)">
+                    <el-dropdown-item @click.native.prevent="getPersistentVolumeYaml(scope.row.name)">
                       <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="edit" />
                       <span style="margin-left: 5px;">修改</span>
                     </el-dropdown-item>
@@ -104,7 +116,6 @@ export default {
             maxHeight: window.innerHeight - 150,
             loading: true,
             yamlDialog: false,
-            yamlNamespace: "",
             yamlName: "",
             yamlValue: "",
             yamlLoading: true
@@ -125,6 +136,9 @@ export default {
         }
     },
     methods: {
+        nameClick: function(name) {
+          console.log(name)
+        },
         nsSearch: function(vals) {
             this.search_ns = []
             for(let ns of vals) {
@@ -150,27 +164,26 @@ export default {
                 Message.error("获取集群异常，请刷新重试.")
             }
         },
-        getPersistentVolumeYaml: function(namespace, name) {
+        getPersistentVolumeYaml: function(name) {
           const cluster = this.$store.state.cluster
-          console.log("xxxxxxx", namespace, name)
+          console.log("xxxxxxx", name)
           if (!cluster) {
             Message.error("获取集群参数异常，请刷新重试")
             return
           }
-          if (!namespace) {
-            Message.error("获取命名空间参数异常，请刷新重试")
-            return
-          }
+          // if (!namespace) {
+          //   Message.error("获取命名空间参数异常，请刷新重试")
+          //   return
+          // }
           if (!name) {
             Message.error("获取Pod名称参数异常，请刷新重试")
             return
           }
           this.yamlLoading = true
           this.yamlDialog = true
-          getPersistentVolume(cluster, namespace, name, "yaml").then(response => {
+          getPersistentVolume(cluster, name, "yaml").then(response => {
             this.yamlLoading = false
             this.yamlValue = response.data
-            this.yamlNamespace = namespace
             this.yamlName = name
           }).catch(() => {
             this.yamlLoading = false

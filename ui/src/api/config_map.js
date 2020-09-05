@@ -9,8 +9,16 @@ export function listConfigMaps(cluster) {
 
 export function getConfigMap(cluster, namespace, name, output='') {
   return request({
-    url: `config_map/${cluster}/${namespace}`,
+    url: `config_map/${cluster}/${namespace}/${name}`,
     method: 'get',
-    params: { output, name }
+    params: { output }
+  })
+}
+
+export function updateConfigMap(cluster, namespace, name, yaml) {
+  return request({
+    url: `config_map/${cluster}/update_config_map`,
+    method: 'post',
+    data: { yaml, name, namespace }
   })
 }

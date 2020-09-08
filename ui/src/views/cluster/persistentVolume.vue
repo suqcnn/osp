@@ -24,7 +24,7 @@
               min-width="45"
               show-overflow-tooltip>
               <template slot-scope="scope">
-                <span class="name-class" v-on:click="nameClick(scope.row.namespace, scope.row.name)">
+                <span class="name-class" v-on:click="nameClick(scope.row.name)">
                   {{ scope.row.name }}
                 </span>
               </template>
@@ -137,7 +137,11 @@ export default {
     },
     methods: {
         nameClick: function(name) {
-          console.log(name)
+          console.log("****", name)
+          this.$router.push({
+            name: 'pvDetail',
+            params: { persistentVolumeName: name },
+          })
         },
         nsSearch: function(vals) {
             this.search_ns = []

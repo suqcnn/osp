@@ -190,9 +190,16 @@ const Routes = [
         meta: { title: '存储卷', group: 'cluster' }
       },
       {
+        path: 'pv/:persistentVolumeName',
+        name: 'pvDetail',
+        hidden: true,
+        component: () => import('@/views/cluster/persistentVolumeDetail'),
+        meta: { title: '配置项', group: 'cluster', sideName: 'pv' },
+      },
+      {
         path: 'storageclass',
         name: 'storageclass',
-        component: () => import('@/views/dashboard/index'),
+        component: () => import('@/views/cluster/storageClass'),
         meta: { title: '存储类', group: 'cluster' },
       },
     ],

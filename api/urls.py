@@ -1,6 +1,6 @@
 from api import SlashOptionRouter
 from api.views import user, cluster, pod, namespace, node, event, deployment, config_map, statefulset, \
-     daemonset, job, cronjob, persistent_volume, persistent_volume_claim
+     daemonset, job, cronjob, persistent_volume, persistent_volume_claim, storage_class
 
 router = SlashOptionRouter()
 
@@ -18,5 +18,6 @@ router.register('job/(?P<cluster>[^/.]+)', job.JobViewSet, basename='job')
 router.register('cronjob/(?P<cluster>[^/.]+)', cronjob.CronJobViewSet, basename='cronjob')
 router.register('persistent_volume/(?P<cluster>[^/.]+)', persistent_volume.PersistentVolumeViewSet, basename='pv')
 router.register('persistent_volume_claim/(?P<cluster>[^/.]+)', persistent_volume_claim.PersistentVolumeClaimViewSet, basename='pvc')
+router.register('storage_class/(?P<cluster>[^/.]+)', storage_class.StorageClassViewSet, basename='storage class')
 
 urlpatterns = router.urls

@@ -2,7 +2,7 @@
   <div>
     <clusterbar :titleName="titleName" :editFunc="getConfigMapYaml" />
     <div class="dashboard-container">
-      <el-form label-position="left" inline class="pod-item">
+      <el-form label-position="left" inline class="pod-item" v-if="configMap.metadata">
         <el-form-item label="名称">
           <span>{{ configMap.metadata.name }}</span>
         </el-form-item>
@@ -85,10 +85,10 @@ export default {
       cellStyle: { border: 0 },
       loading: true,
       originConfigMap: {},
-      // configData :[],
       selectContainer: '',
       eventLoading: true,
-      activeNames: ["1"]
+      activeNames: ["1"],
+      labels: []
     }
   },
   created() {
@@ -124,17 +124,17 @@ export default {
       })
       return dataTable
     },
-    labels: function() {
-      if (!this.originConfigMap.metadata.labels) return []
-      let la = []
-      Object.keys(this.originConfigMap.metadata.labels).forEach(key => {
-        la.push({
-          key: key,
-          value: this.originConfigMap.metadata.labels[key]
-        })
-      })
-      return la
-    }
+    // labels: function() {
+    //   if (!this.originConfigMap.metadata.labels) return []
+    //   let la = []
+    //   Object.keys(this.originConfigMap.metadata.labels).forEach(key => {
+    //     la.push({
+    //       key: key,
+    //       value: this.originConfigMap.metadata.labels[key]
+    //     })
+    //   })
+    //   return la
+    // }
   },
   methods: {
     handleChange(val) {
@@ -162,9 +162,18 @@ export default {
         this.eventLoading = false
         return
       }
+      console.log("******************************")
       getConfigMap(cluster, this.namespace, this.configMapName).then(response => {
         this.loading = false
         this.originConfigMap = response.data
+        if (this.originConfigMap.metadata) {
+        Object.keys(this.originConfigMap.metadata.labels).forEach(key => {
+            this.labels.push({
+              key: key,
+              value: this.originConfigMap.metadata.labels[key]
+            })
+          })
+        }
         console.log("******", response.data)
         console.log("******", this.originConfigMap)
       }).catch(() => {

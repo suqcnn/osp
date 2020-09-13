@@ -18,11 +18,10 @@ router.register('daemonset/(?P<cluster>[^/.]+)', daemonset.DaemonSetViewSet, bas
 router.register('job/(?P<cluster>[^/.]+)', job.JobViewSet, basename='job')
 router.register('cronjob/(?P<cluster>[^/.]+)', cronjob.CronJobViewSet, basename='cronjob')
 router.register('persistent_volume/(?P<cluster>[^/.]+)', persistent_volume.PersistentVolumeViewSet, basename='pv')
-router.register('persistent_volume_claim/(?P<cluster>[^/.]+)', persistent_volume_claim.PersistentVolumeClaimViewSet, basename='pvc')
-router.register('storage_class/(?P<cluster>[^/.]+)', storage_class.StorageClassViewSet, basename='storage class')
 router.register('persistent_volume_claim/(?P<cluster>[^/.]+)',
                 persistent_volume_claim.PersistentVolumeClaimViewSet,
                 basename='pvc')
+router.register('storage_class/(?P<cluster>[^/.]+)', storage_class.StorageClassViewSet, basename='storage class')
 router.register('service/(?P<cluster>[^/.]+)', service.ServiceViewSet, basename='service')
 router.register('ingress/(?P<cluster>[^/.]+)', ingress.IngressViewSet, basename='ingress')
 router.register('endpoints/(?P<cluster>[^/.]+)', endpoints.EndpointsViewSet, basename='endpoints')

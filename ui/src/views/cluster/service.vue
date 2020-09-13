@@ -245,6 +245,7 @@ export default {
         ports: service.spec.ports,
         external_ip: service.spec.externalIPs,
         selector: service.spec.selector,
+        resource_version: service.metadata.resourceVersion,
         created: service.metadata.creationTimestamp
       }
       return p

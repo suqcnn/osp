@@ -222,7 +222,7 @@ const Routes = [
   {
     path: 'namespace',
     name: 'namespace',
-    component: () => import('@/views/dashboard/index'),
+    component: () => import('@/views/cluster/namespace'),
     meta: { title: '命名空间', icon: 'namespace', group: 'cluster' },
   },
 ]

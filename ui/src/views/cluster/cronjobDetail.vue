@@ -115,13 +115,13 @@
               <span>{{ cronjob.concurrency_policy }}</span>
             </el-form-item>
             <el-form-item label="标签">
-              <span v-if="!cronjob.labels">——</span>
+              <span v-if="!cronjob.labels">—</span>
               <template v-else v-for="(val, key) in cronjob.labels">
                 <span :key="key">{{key}}: {{val}}<br/></span>
               </template>
             </el-form-item>
             <el-form-item label="注解">
-              <span v-if="!cronjob.annotations">——</span>
+              <span v-if="!cronjob.annotations">—</span>
               
               <template v-else v-for="(val, key) in cronjob.annotations">
                 <span :key="key">{{key}}: {{val}}<br/></span>
@@ -136,6 +136,7 @@
           </template>
           <div class="msgClass">
             <el-table
+              v-if="cronjobEvents && cronjobEvents.length > 0"
               :data="cronjobEvents"
               class="table-fix"
               tooltip-effect="dark"
@@ -168,7 +169,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.reason ? scope.row.reason : "——" }}
+                    {{ scope.row.reason ? scope.row.reason : "—" }}
                   </span>
                 </template>
               </el-table-column>
@@ -179,7 +180,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.message ? scope.row.message : "——" }}
+                    {{ scope.row.message ? scope.row.message : "—" }}
                   </span>
                 </template>
               </el-table-column>
@@ -190,6 +191,7 @@
                 show-overflow-tooltip>
               </el-table-column>
             </el-table>
+            <div v-else style="color: #909399; text-align: center">暂无数据</div>
           </div>
         </el-collapse-item>
       </el-collapse>

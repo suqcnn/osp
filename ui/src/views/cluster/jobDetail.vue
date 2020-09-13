@@ -152,19 +152,19 @@
               </span>
             </el-form-item>
             <el-form-item label="选择器">
-              <span v-if="!job.label_selector">——</span>
+              <span v-if="!job.label_selector">—</span>
               <template v-else v-for="(val, key) in job.label_selector.matchLabels">
                 <span :key="key">{{key}}: {{val}}<br/></span>
               </template>
             </el-form-item>
             <el-form-item label="标签">
-              <span v-if="!job.labels">——</span>
+              <span v-if="!job.labels">—</span>
               <template v-else v-for="(val, key) in job.labels">
                 <span :key="key">{{key}}: {{val}}<br/></span>
               </template>
             </el-form-item>
             <el-form-item label="注解">
-              <span v-if="!job.annotations">——</span>
+              <span v-if="!job.annotations">—</span>
               
               <template v-else v-for="(val, key) in job.annotations">
                 <span :key="key">{{key}}: {{val}}<br/></span>
@@ -179,6 +179,7 @@
           </template>
           <div class="msgClass">
             <el-table
+              v-if="job && job.conditions && job.conditions.length > 0"
               :data="job.conditions"
               class="table-fix"
               tooltip-effect="dark"
@@ -205,7 +206,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.reason ? scope.row.reason : "——" }}
+                    {{ scope.row.reason ? scope.row.reason : "—" }}
                   </span>
                 </template>
               </el-table-column>
@@ -215,7 +216,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.message ? scope.row.message : "——" }}
+                    {{ scope.row.message ? scope.row.message : "—" }}
                   </span>
                 </template>
               </el-table-column>
@@ -230,6 +231,7 @@
                 </template>
               </el-table-column>
             </el-table>
+            <div v-else style="color: #909399; text-align: center">暂无数据</div>
           </div>
         </el-collapse-item>
         <el-collapse-item title="Events" name="events">
@@ -238,6 +240,7 @@
           </template>
           <div class="msgClass">
             <el-table
+              v-if="jobEvents && jobEvents.length > 0"
               :data="jobEvents"
               class="table-fix"
               tooltip-effect="dark"
@@ -270,7 +273,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.reason ? scope.row.reason : "——" }}
+                    {{ scope.row.reason ? scope.row.reason : "—" }}
                   </span>
                 </template>
               </el-table-column>
@@ -281,7 +284,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.message ? scope.row.message : "——" }}
+                    {{ scope.row.message ? scope.row.message : "—" }}
                   </span>
                 </template>
               </el-table-column>
@@ -292,6 +295,7 @@
                 show-overflow-tooltip>
               </el-table-column>
             </el-table>
+            <div v-else style="color: #909399; text-align: center">暂无数据</div>
           </div>
         </el-collapse-item>
       </el-collapse>

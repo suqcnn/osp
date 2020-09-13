@@ -201,7 +201,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.reason ? scope.row.reason : "——" }}
+                    {{ scope.row.reason ? scope.row.reason : "—" }}
                   </span>
                 </template>
               </el-table-column>
@@ -211,7 +211,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.message ? scope.row.message : "——" }}
+                    {{ scope.row.message ? scope.row.message : "—" }}
                   </span>
                 </template>
               </el-table-column>
@@ -266,7 +266,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.reason ? scope.row.reason : "——" }}
+                    {{ scope.row.reason ? scope.row.reason : "—" }}
                   </span>
                 </template>
               </el-table-column>
@@ -277,7 +277,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.message ? scope.row.message : "——" }}
+                    {{ scope.row.message ? scope.row.message : "—" }}
                   </span>
                 </template>
               </el-table-column>

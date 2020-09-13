@@ -211,6 +211,7 @@ export default {
         backend: ingress.spec.backend,
         tls: ingress.spec.tls,
         rules: ingress.spec.rules,
+        resource_version: ingress.metadata.resourceVersion,
         created: ingress.metadata.creationTimestamp
       }
       return p

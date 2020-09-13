@@ -70,7 +70,7 @@
                 {{ c }}
               </span>
             </template>
-            <span v-else>——</span>
+            <span v-else>—</span>
           </template>
         </el-table-column>
         <el-table-column

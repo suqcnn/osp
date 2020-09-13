@@ -147,19 +147,19 @@
               <span>{{ deployment.ready_replicas + "/" + deployment.replicas }}</span>
             </el-form-item>
             <el-form-item label="选择器">
-              <span v-if="!deployment.label_selector">——</span>
+              <span v-if="!deployment.label_selector">—</span>
               <template v-else v-for="(val, key) in deployment.label_selector.matchLabels">
                 <span :key="key">{{key}}: {{val}}<br/></span>
               </template>
             </el-form-item>
             <el-form-item label="标签">
-              <span v-if="!deployment.labels">——</span>
+              <span v-if="!deployment.labels">—</span>
               <template v-else v-for="(val, key) in deployment.labels">
                 <span :key="key">{{key}}: {{val}}<br/></span>
               </template>
             </el-form-item>
             <el-form-item label="注解">
-              <span v-if="!deployment.annotations">——</span>
+              <span v-if="!deployment.annotations">—</span>
               
               <template v-else v-for="(val, key) in deployment.annotations">
                 <span :key="key">{{key}}: {{val}}<br/></span>
@@ -167,13 +167,14 @@
             </el-form-item>
           </el-form>
         <!-- </el-collapse-item> -->
-      <el-collapse class="podCollapse">
+      <el-collapse class="podCollapse" :value="['conditions', 'events']">
         <el-collapse-item title="Conditions" name="conditions">
           <template slot="title">
             <span class="title-class">Conditions</span>
           </template>
           <div class="msgClass">
             <el-table
+              v-if="deployment && deployment.conditions && deployment.conditions.length > 0"
               :data="deployment.conditions"
               class="table-fix"
               tooltip-effect="dark"
@@ -225,6 +226,7 @@
                 </template>
               </el-table-column>
             </el-table>
+            <div v-else style="color: #909399; text-align: center">暂无数据</div>
           </div>
         </el-collapse-item>
         <el-collapse-item title="Events" name="events">
@@ -233,6 +235,7 @@
           </template>
           <div class="msgClass">
             <el-table
+              v-if="deploymentEvents && deploymentEvents.length > 0"
               :data="deploymentEvents"
               class="table-fix"
               tooltip-effect="dark"
@@ -287,6 +290,7 @@
                 show-overflow-tooltip>
               </el-table-column>
             </el-table>
+            <div v-else style="color: #909399; text-align: center">暂无数据</div>
           </div>
         </el-collapse-item>
       </el-collapse>

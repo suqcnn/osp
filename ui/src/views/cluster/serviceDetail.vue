@@ -61,6 +61,7 @@
           </template>
           <div class="msgClass">
             <el-table
+              v-if="serviceEvents && serviceEvents.length > 0"
               :data="serviceEvents"
               class="table-fix"
               tooltip-effect="dark"
@@ -115,6 +116,7 @@
                 show-overflow-tooltip>
               </el-table-column>
             </el-table>
+            <div v-else style="color: #909399; text-align: center">暂无数据</div>
           </div>
         </el-collapse-item>
       </el-collapse>

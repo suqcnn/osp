@@ -143,19 +143,19 @@
               <span>{{ statefulset.ready_replicas + "/" + statefulset.status_replicas }}</span>
             </el-form-item>
             <el-form-item label="选择器">
-              <span v-if="!statefulset.label_selector">——</span>
+              <span v-if="!statefulset.label_selector">—</span>
               <template v-else v-for="(val, key) in statefulset.label_selector.matchLabels">
                 <span :key="key">{{key}}: {{val}}<br/></span>
               </template>
             </el-form-item>
             <el-form-item label="标签">
-              <span v-if="!statefulset.labels">——</span>
+              <span v-if="!statefulset.labels">—</span>
               <template v-else v-for="(val, key) in statefulset.labels">
                 <span :key="key">{{key}}: {{val}}<br/></span>
               </template>
             </el-form-item>
             <el-form-item label="注解">
-              <span v-if="!statefulset.annotations">——</span>
+              <span v-if="!statefulset.annotations">—</span>
               
               <template v-else v-for="(val, key) in statefulset.annotations">
                 <span :key="key">{{key}}: {{val}}<br/></span>
@@ -163,13 +163,14 @@
             </el-form-item>
           </el-form>
         <!-- </el-collapse-item> -->
-      <el-collapse class="podCollapse">
+      <el-collapse class="podCollapse" :value="['conditions', 'events']">
         <el-collapse-item title="Conditions" name="conditions">
           <template slot="title">
             <span class="title-class">Conditions</span>
           </template>
           <div class="msgClass">
             <el-table
+              v-if="statefulset && statefulset.conditions && statefulset.conditions.length > 0"
               :data="statefulset.conditions"
               class="table-fix"
               tooltip-effect="dark"
@@ -196,7 +197,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.reason ? scope.row.reason : "——" }}
+                    {{ scope.row.reason ? scope.row.reason : "—" }}
                   </span>
                 </template>
               </el-table-column>
@@ -206,7 +207,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.message ? scope.row.message : "——" }}
+                    {{ scope.row.message ? scope.row.message : "—" }}
                   </span>
                 </template>
               </el-table-column>
@@ -221,6 +222,7 @@
                 </template>
               </el-table-column>
             </el-table>
+            <div v-else style="color: #909399; text-align: center">暂无数据</div>
           </div>
         </el-collapse-item>
         <el-collapse-item title="Events" name="events">
@@ -229,6 +231,7 @@
           </template>
           <div class="msgClass">
             <el-table
+              v-if="statefulsetEvents && statefulsetEvents.length > 0"
               :data="statefulsetEvents"
               class="table-fix"
               tooltip-effect="dark"
@@ -261,7 +264,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.reason ? scope.row.reason : "——" }}
+                    {{ scope.row.reason ? scope.row.reason : "—" }}
                   </span>
                 </template>
               </el-table-column>
@@ -272,7 +275,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.message ? scope.row.message : "——" }}
+                    {{ scope.row.message ? scope.row.message : "—" }}
                   </span>
                 </template>
               </el-table-column>
@@ -283,6 +286,7 @@
                 show-overflow-tooltip>
               </el-table-column>
             </el-table>
+            <div v-else style="color: #909399; text-align: center">暂无数据</div>
           </div>
         </el-collapse-item>
       </el-collapse>

@@ -136,7 +136,7 @@
                 show-overflow-tooltip>
               </el-table-column>
             </el-table>
-            <div v-else style="font-size: 14px; color: #909399; text-align: center">暂无数据</div>
+            <div v-else style="color: #909399; text-align: center">暂无数据</div>
           </div>
         </el-collapse-item>
       </el-collapse>

@@ -21,3 +21,7 @@ class DeleteResourcesSerializer(ImplementSerializer):
 
 class UpdateResourcesSerializer(ImplementSerializer):
     yaml = serializers.CharField(required=True, allow_blank=False)
+
+
+class GetResourceSerializer(ImplementSerializer):
+    output = serializers.CharField(required=False, allow_blank=True, allow_null=True)

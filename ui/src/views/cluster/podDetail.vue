@@ -58,7 +58,7 @@
         </el-table-column>
         <el-table-column
           prop="name"
-          label="名称"
+          label="容器名称"
           show-overflow-tooltip>
           <template slot-scope="scope">
             <span class="name-class" @click="toogleExpand(scope.row)">
@@ -154,6 +154,7 @@
             </el-form-item>
           </el-form>
         <!-- </el-collapse-item> -->
+      <!-- <el-collapse class="podCollapse" :value="['volumes', 'conditions', 'events']"> -->
       <el-collapse class="podCollapse">
         <el-collapse-item title="Volumes" name="volumes">
           <template slot="title">
@@ -169,7 +170,6 @@
                   </span>
                 </span>
               </template>
-            
           </div>
         </el-collapse-item>
         <el-collapse-item title="Conditions" name="conditions">
@@ -232,6 +232,7 @@
             <span class="title-class">Events</span>
           </template>
           <div class="msgClass">
+            <template v-if="podEvents && podEvents.length > 0">
             <el-table
               :data="podEvents"
               class="table-fix"
@@ -287,6 +288,8 @@
                 show-overflow-tooltip>
               </el-table-column>
             </el-table>
+            </template>
+            <div v-else style="text-align: center; color: #909399;">暂无数据</div>
           </div>
         </el-collapse-item>
       </el-collapse>

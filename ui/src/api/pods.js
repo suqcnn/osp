@@ -99,8 +99,10 @@ export function buildPods(pod) {
     }
   }
   let controlled = ''
+  let controlled_name = ''
   if (pod.metadata.ownerReferences.length > 0) {
     controlled = pod.metadata.ownerReferences[0].kind
+    controlled_name = pod.metadata.ownerReferences[0].name
   }
   let p = {
     uid: pod.metadata.uid,
@@ -109,6 +111,7 @@ export function buildPods(pod) {
     containers: containers,
     init_containers: init_containers,
     controlled: controlled,
+    controlled_name: controlled_name,
     qos: pod.status.qosClass,
     status: pod.status.phase,
     ip: pod.status.podIP,

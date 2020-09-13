@@ -44,6 +44,12 @@ const getters = {
   },
   cronjobsWatch: ( _, getters ) => {
     return getters.resourceWatch("cronjob")
+  },
+  servicesWatch: ( _, getters ) => {
+    return getters.resourceWatch("service")
+  },
+  ingressesWatch: ( _, getters ) => {
+    return getters.resourceWatch("ingress")
   }
 }
 

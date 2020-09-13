@@ -1,6 +1,7 @@
 from api import SlashOptionRouter
 from api.views import user, cluster, pod, namespace, node, event, deployment, config_map, statefulset, \
-     daemonset, job, cronjob, persistent_volume, persistent_volume_claim, storage_class
+     daemonset, job, cronjob, persistent_volume, persistent_volume_claim, storage_class, service, ingress, \
+     endpoints, networkpolicy
 
 router = SlashOptionRouter()
 
@@ -19,5 +20,12 @@ router.register('cronjob/(?P<cluster>[^/.]+)', cronjob.CronJobViewSet, basename=
 router.register('persistent_volume/(?P<cluster>[^/.]+)', persistent_volume.PersistentVolumeViewSet, basename='pv')
 router.register('persistent_volume_claim/(?P<cluster>[^/.]+)', persistent_volume_claim.PersistentVolumeClaimViewSet, basename='pvc')
 router.register('storage_class/(?P<cluster>[^/.]+)', storage_class.StorageClassViewSet, basename='storage class')
+router.register('persistent_volume_claim/(?P<cluster>[^/.]+)',
+                persistent_volume_claim.PersistentVolumeClaimViewSet,
+                basename='pvc')
+router.register('service/(?P<cluster>[^/.]+)', service.ServiceViewSet, basename='service')
+router.register('ingress/(?P<cluster>[^/.]+)', ingress.IngressViewSet, basename='ingress')
+router.register('endpoints/(?P<cluster>[^/.]+)', endpoints.EndpointsViewSet, basename='endpoints')
+router.register('networkpolicy/(?P<cluster>[^/.]+)', networkpolicy.NetworkPolicyViewSet, basename='networkpolicy')
 
 urlpatterns = router.urls

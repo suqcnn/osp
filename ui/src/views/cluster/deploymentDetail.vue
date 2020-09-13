@@ -130,7 +130,7 @@
           <template slot="title">
             <span class="title-class">{{deployment.name}}</span>
           </template> -->
-          <el-form label-position="left" inline class="pod-item">
+          <el-form label-position="left" inline class="pod-item" label-width="90px">
             <el-form-item label="名称">
               <span>{{ deployment.name }}</span>
             </el-form-item>
@@ -684,7 +684,7 @@ export default {
   font-size: 0;
 }
 .pod-item label {
-  width: 90px;
+  /* width: 90px; */
   color: #99a9bf;
   font-weight: 400;
 }

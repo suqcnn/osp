@@ -20,6 +20,8 @@ export function buildEvent(event) {
   if (!eventTime) eventTime = event.metadata.creationTimestamp
   return {
     uid: event.metadata.uid,
+    namespace: event.metadata.namespace,
+    count: event.spec.count,
     reason: event.reason,
     message: event.message,
     type: event.type,

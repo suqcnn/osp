@@ -195,11 +195,7 @@ export default {
       for (let p of this.originServices) {
         if (this.search_ns.length > 0 && this.search_ns.indexOf(p.namespace) < 0) continue
         if (this.search_name && !p.name.includes(this.search_name)) continue
-        if (p.conditions && p.conditions.length > 0) {
-          p.conditions.sort()
-        } else {
-          p.conditions = []
-        }
+        
         dlist.push(p)
       }
       return dlist

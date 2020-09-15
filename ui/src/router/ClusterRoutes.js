@@ -191,31 +191,31 @@ const Routes = [
     name: 'storage',
     meta: { title: '存储', icon: 'storage', group: 'cluster' },
     children: [
-      {
-        path: 'pvc',
-        name: 'pvc',
-        component: () => import('@/views/cluster/persistentVolumeClaim'),
-        meta: { title: '存储声明', group: 'cluster' },
-      },
+      // {
+      //   path: 'pvc',
+      //   name: 'pvc',
+      //   component: () => import('@/views/cluster/persistentVolumeClaim'),
+      //   meta: { title: '存储声明', group: 'cluster' },
+      // },
       {
         path: 'pv',
         name: 'pv',
         component: () => import('@/views/cluster/persistentVolume'),
         meta: { title: '存储卷', group: 'cluster' }
       },
-      {
-        path: 'pv/:persistentVolumeName',
-        name: 'pvDetail',
-        hidden: true,
-        component: () => import('@/views/cluster/persistentVolumeDetail'),
-        meta: { title: '配置项', group: 'cluster', sideName: 'pv' },
-      },
-      {
-        path: 'storageclass',
-        name: 'storageclass',
-        component: () => import('@/views/cluster/storageClass'),
-        meta: { title: '存储类', group: 'cluster' },
-      },
+      // {
+      //   path: 'pv/:persistentVolumeName',
+      //   name: 'pvDetail',
+      //   hidden: true,
+      //   component: () => import('@/views/cluster/persistentVolumeDetail'),
+      //   meta: { title: '配置项', group: 'cluster', sideName: 'pv' },
+      // },
+      // {
+      //   path: 'storageclass',
+      //   name: 'storageclass',
+      //   component: () => import('@/views/cluster/storageClass'),
+      //   meta: { title: '存储类', group: 'cluster' },
+      // },
     ],
   },
 
@@ -224,6 +224,38 @@ const Routes = [
     name: 'namespace',
     component: () => import('@/views/cluster/namespace'),
     meta: { title: '命名空间', icon: 'namespace', group: 'cluster' },
+  },
+  {
+    path: 'event',
+    name: 'event',
+    component: () => import('@/views/cluster/event'),
+    meta: { title: '事件', icon: 'event', group: 'cluster' },
+  },
+  {
+    path: 'rbac',
+    component: Noop,
+    name: 'rbac',
+    meta: { title: '访问控制', icon: 'security', group: 'cluster' },
+    children: [
+      {
+        path: 'serviceaccount',
+        name: 'serviceaccount',
+        component: () => import('@/views/cluster/service'),
+        meta: { title: '服务账户', group: 'cluster' },
+      },
+      {
+        path: 'rolebinding',
+        name: 'rolebinding',
+        component: () => import('@/views/cluster/service'),
+        meta: { title: '角色绑定', group: 'cluster' },
+      },
+      {
+        path: 'role',
+        name: 'role',
+        component: () => import('@/views/cluster/service'),
+        meta: { title: '角色', group: 'cluster' },
+      },
+    ]
   },
 ]
 

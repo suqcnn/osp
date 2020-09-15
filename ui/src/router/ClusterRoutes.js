@@ -191,31 +191,31 @@ const Routes = [
     name: 'storage',
     meta: { title: '存储', icon: 'storage', group: 'cluster' },
     children: [
-      // {
-      //   path: 'pvc',
-      //   name: 'pvc',
-      //   component: () => import('@/views/cluster/persistentVolumeClaim'),
-      //   meta: { title: '存储声明', group: 'cluster' },
-      // },
+      {
+        path: 'pvc',
+        name: 'pvc',
+        component: () => import('@/views/cluster/persistentVolumeClaim'),
+        meta: { title: '存储声明', group: 'cluster' },
+      },
       {
         path: 'pv',
         name: 'pv',
         component: () => import('@/views/cluster/persistentVolume'),
         meta: { title: '存储卷', group: 'cluster' }
       },
-      // {
-      //   path: 'pv/:persistentVolumeName',
-      //   name: 'pvDetail',
-      //   hidden: true,
-      //   component: () => import('@/views/cluster/persistentVolumeDetail'),
-      //   meta: { title: '配置项', group: 'cluster', sideName: 'pv' },
-      // },
-      // {
-      //   path: 'storageclass',
-      //   name: 'storageclass',
-      //   component: () => import('@/views/cluster/storageClass'),
-      //   meta: { title: '存储类', group: 'cluster' },
-      // },
+      {
+        path: 'pv/:persistentVolumeName',
+        name: 'pvDetail',
+        hidden: true,
+        component: () => import('@/views/cluster/persistentVolumeDetail'),
+        meta: { title: '配置项', group: 'cluster', sideName: 'pv' },
+      },
+      {
+        path: 'storageclass',
+        name: 'storageclass',
+        component: () => import('@/views/cluster/storageClass'),
+        meta: { title: '存储类', group: 'cluster' },
+      },
     ],
   },
 

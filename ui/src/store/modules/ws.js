@@ -50,6 +50,12 @@ const getters = {
   },
   ingressesWatch: ( _, getters ) => {
     return getters.resourceWatch("ingress")
+  },
+  rolebindingsWatch: ( _, getters ) => {
+    return getters.resourceWatch("rolebinding")
+  },
+  rolesWatch: ( _, getters ) => {
+    return getters.resourceWatch("role")
   }
 }
 

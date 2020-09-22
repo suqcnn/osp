@@ -240,19 +240,19 @@ const Routes = [
       {
         path: 'serviceaccount',
         name: 'serviceaccount',
-        component: () => import('@/views/cluster/service'),
+        component: () => import('@/views/cluster/serviceaccount'),
         meta: { title: '服务账户', group: 'cluster' },
       },
       {
         path: 'rolebinding',
         name: 'rolebinding',
-        component: () => import('@/views/cluster/service'),
+        component: () => import('@/views/cluster/rolebinding'),
         meta: { title: '角色绑定', group: 'cluster' },
       },
       {
         path: 'role',
         name: 'role',
-        component: () => import('@/views/cluster/service'),
+        component: () => import('@/views/cluster/role'),
         meta: { title: '角色', group: 'cluster' },
       },
     ]

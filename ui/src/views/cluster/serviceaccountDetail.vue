@@ -1,68 +1,53 @@
 <template>
   <div>
-    <clusterbar :titleName="titleName" :delFunc="deleteServices" :editFunc="getServiceYaml"/>
+    <clusterbar :titleName="titleName" :delFunc="deleteServiceAccounts" :editFunc="getServiceAccountYaml"/>
     <div class="dashboard-container" v-loading="loading">
 
       <el-form label-position="left" class="pod-item" label-width="120px">
         <el-form-item label="名称">
-          <span>{{ service.name }}</span>
+          <span>{{ serviceaccount.name }}</span>
         </el-form-item>
         <el-form-item label="创建时间">
-          <span>{{ service.created }}</span>
+          <span>{{ serviceaccount.created }}</span>
         </el-form-item>
         <el-form-item label="命名空间">
-          <span>{{ service.namespace }}</span>
+          <span>{{ serviceaccount.namespace }}</span>
         </el-form-item>
-        <el-form-item label="类型">
-          <span>{{ service.type }}</span>
-        </el-form-item>
-        <el-form-item label="Cluster IP">
-          <span>{{ service.cluster_ip }}</span>
-        </el-form-item>
-        <el-form-item label="端口">
-          <template v-if="service.ports && service.ports.length > 0">
-            <span>{{ getPortsDisplay(service.ports) }}</span>
-          </template>
-        </el-form-item>
-        <el-form-item label="Endpoints">
-          <template v-for="e of endpoints">
-            <span :key="e.name">{{ endpointsAddresses(e.subsets) }}</span>
-          </template>
-        </el-form-item>
-        <el-form-item label="会话亲和">
-          <span>{{ service.session_affinity }}</span>
-        </el-form-item>
-        <el-form-item label="选择器">
-          <template v-if="service.selector">
-            <span v-for="(val, key) in service.selector" :key="key" class="back-class">
-              {{ key + ': ' + val }} <br/>
-            </span>
-          </template>
+        <el-form-item label="Secrets">
+          <span>{{ getSecretsName(serviceaccount.secrets) }}</span>
         </el-form-item>
         <el-form-item label="标签">
-          <span v-if="!service.labels">——</span>
-          <template v-else v-for="(val, key) in service.labels" >
+          <span v-if="!serviceaccount.labels">—</span>
+          <template v-else v-for="(val, key) in serviceaccount.labels" >
             <span :key="key" class="back-class">{{key}}: {{val}} <br/></span>
           </template>
         </el-form-item>
         <!-- <el-form-item label="注解">
-          <span v-if="!service.annotations">——</span>
+          <span v-if="!serviceaccount.annotations">——</span>
           
-          <template v-else v-for="(val, key) in service.annotations">
+          <template v-else v-for="(val, key) in serviceaccount.annotations">
             <span :key="key">{{key}}: {{val}}<br/></span>
           </template>
         </el-form-item> -->
       </el-form>
       
-      <el-collapse class="podCollapse" :value="['events']">
+      <el-collapse class="podCollapse" :value="['secrets', 'events']">
+        <!-- <el-collapse-item title="Secrets" name="secrets">
+          <template slot="title">
+            <span class="title-class">Secrets</span>
+          </template>
+          <div class="msgClass">
+            <span>{{ serviceaccount.secrets }}</span>
+          </div>
+        </el-collapse-item> -->
         <el-collapse-item title="Events" name="events">
           <template slot="title">
             <span class="title-class">Events</span>
           </template>
           <div class="msgClass">
             <el-table
-              v-if="serviceEvents && serviceEvents.length > 0"
-              :data="serviceEvents"
+              v-if="serviceaccountEvents && serviceaccountEvents.length > 0"
+              :data="serviceaccountEvents"
               class="table-fix"
               tooltip-effect="dark"
               style="width: 100%"
@@ -94,7 +79,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.reason ? scope.row.reason : "——" }}
+                    {{ scope.row.reason ? scope.row.reason : "—" }}
                   </span>
                 </template>
               </el-table-column>
@@ -105,7 +90,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                   <span>
-                    {{ scope.row.message ? scope.row.message : "——" }}
+                    {{ scope.row.message ? scope.row.message : "—" }}
                   </span>
                 </template>
               </el-table-column>
@@ -125,7 +110,7 @@
         <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
         <span slot="footer" class="dialog-footer">
           <el-button plain @click="yamlDialog = false" size="small">取 消</el-button>
-          <el-button plain @click="updateService()" size="small">确 定</el-button>
+          <el-button plain @click="updateServiceAccount()" size="small">确 定</el-button>
         </span>
       </el-dialog>
     </div>
@@ -134,14 +119,14 @@
 
 <script>
 import { Clusterbar, Yaml } from '@/views/components'
-import { getService, deleteServices, updateService } from '@/api/service'
+import { getServiceAccount, deleteServiceAccounts, updateServiceAccount } from '@/api/serviceaccount'
 import { listEndpoints } from '@/api/endpoints'
 import { listEvents, buildEvent } from '@/api/event'
 // import { listPods, containerClass, buildPods, podMatch, deletePods } from '@/api/pods'
 import { Message } from 'element-ui'
 
 export default {
-  name: 'ServiceDetail',
+  name: 'ServiceAccountDetail',
   components: {
     Clusterbar,
     Yaml
@@ -153,12 +138,12 @@ export default {
       yamlLoading: true,
       cellStyle: {border: 0},
       loading: true,
-      originService: undefined,
+      originServiceAccount: undefined,
       // pods: [],
       endpoints: [],
       selectContainer: '',
       selectPodName: '',
-      serviceEvents: [],
+      serviceaccountEvents: [],
       eventLoading: true,
     }
   },
@@ -166,63 +151,63 @@ export default {
     this.fetchData()
   },
   watch: {
-    serviceWatch: function (newObj) {
-      if (newObj && this.originService) {
+    serviceaccountWatch: function (newObj) {
+      if (newObj && this.originServiceAccount) {
         let newUid = newObj.resource.metadata.uid
-        if (newUid !== this.service.uid) {
+        if (newUid !== this.serviceaccount.uid) {
           return
         }
         let newRv = newObj.resource.metadata.resourceVersion
-        if (this.service.resource_version < newRv) {
-          this.originService = newObj.resource
+        if (this.serviceaccount.resource_version < newRv) {
+          this.originServiceAccount = newObj.resource
         }
       }
     },
     eventWatch: function (newObj) {
-      if (newObj && this.originService) {
+      if (newObj && this.originServiceAccount) {
         let event = newObj.resource
-        if (event.involvedObject.namespace !== this.service.namespace) return
-        if (event.involvedObject.uid !== this.service.uid) return
+        if (event.involvedObject.namespace !== this.serviceaccount.namespace) return
+        if (event.involvedObject.uid !== this.serviceaccount.uid) return
         let newUid = newObj.resource.metadata.uid
         if (newObj.event === 'add') {
-          this.serviceEvents.push(buildEvent(event))
+          this.serviceaccountEvents.push(buildEvent(event))
         } else if (newObj.event == 'update') {
           let newRv = newObj.resource.metadata.resourceVersion
-          for (let i in this.serviceEvents) {
-            let d = this.serviceEvents[i]
+          for (let i in this.serviceaccountEvents) {
+            let d = this.serviceaccountEvents[i]
             if (d.uid === newUid) {
               if (d.resource_version < newRv){
                 let newEvent = buildEvent(newObj.resource)
-                this.$set(this.serviceEvents, i, newEvent)
+                this.$set(this.serviceaccountEvents, i, newEvent)
               }
               break
             }
           }
         } else if (newObj.event === 'delete') {
-          this.serviceEvents = this.serviceEvents.filter(( { uid } ) => uid !== newUid)
+          this.serviceaccountEvents = this.serviceaccountEvents.filter(( { uid } ) => uid !== newUid)
         }
       }
     },
   },
   computed: {
     titleName: function() {
-      return ['Services', this.serviceName]
+      return ['ServiceAccounts', this.serviceaccountName]
     },
-    serviceName: function() {
-      return this.$route.params ? this.$route.params.serviceName : ''
+    serviceaccountName: function() {
+      return this.$route.params ? this.$route.params.serviceaccountName : ''
     },
     namespace: function() {
       return this.$route.params ? this.$route.params.namespace : ''
     },
-    service: function() {
-      let p = this.buildService(this.originService)
+    serviceaccount: function() {
+      let p = this.buildServiceAccount(this.originServiceAccount)
       return p
     },
     cluster: function() {
       return this.$store.state.cluster
     },
-    serviceWatch: function() {
-      return this.$store.getters["ws/servicesWatch"]
+    serviceaccountWatch: function() {
+      return this.$store.getters["ws/serviceaccountsWatch"]
     },
     eventWatch: function() {
       return this.$store.getters["ws/eventWatch"]
@@ -230,8 +215,8 @@ export default {
   },
   methods: {
     fetchData: function() {
-      this.originService = null
-      this.serviceEvents = []
+      this.originServiceAccount = null
+      this.serviceaccountEvents = []
       this.loading = true
       this.eventLoading = true
       const cluster = this.$store.state.cluster
@@ -247,26 +232,26 @@ export default {
         this.eventLoading = false
         return
       }
-      if (!this.serviceName) {
-        Message.error("获取Service名称参数异常，请刷新重试")
+      if (!this.serviceaccountName) {
+        Message.error("获取ServiceAccount名称参数异常，请刷新重试")
         this.loading = false
         this.eventLoading = false
         return
       }
-      getService(cluster, this.namespace, this.serviceName).then(response => {
+      getServiceAccount(cluster, this.namespace, this.serviceaccountName).then(response => {
         // this.loading = false
-        this.originService = response.data
-        listEndpoints(cluster, this.namespace, this.serviceName).then(response => {
+        this.originServiceAccount = response.data
+        listEndpoints(cluster, this.namespace, this.serviceaccountName).then(response => {
           this.loading = false
           this.endpoints = response.data
         }).catch(() => {
           this.loading = false
         })
 
-        listEvents(cluster, this.originService.metadata.uid).then(response => {
+        listEvents(cluster, this.originServiceAccount.metadata.uid).then(response => {
           this.eventLoading = false
           if (response.data) {
-            this.serviceEvents = response.data.length > 0 ? response.data : []
+            this.serviceaccountEvents = response.data.length > 0 ? response.data : []
           }
         }).catch(() => {
           this.eventLoading = false
@@ -276,22 +261,17 @@ export default {
         this.eventLoading = false
       })
     },
-    buildService: function(service) {
-      if (!service) return {}
+    buildServiceAccount: function(serviceaccount) {
+      if (!serviceaccount) return {}
       let p = {
-        uid: service.metadata.uid,
-        namespace: service.metadata.namespace,
-        name: service.metadata.name,
-        type: service.spec.type,
-        cluster_ip: service.spec.clusterIP,
-        ports: service.spec.ports,
-        external_ip: service.spec.externalIPs,
-        session_affinity: service.spec.sessionAffinity,
-        resource_version: service.metadata.resourceVersion,
-        selector: service.spec.selector,
-        created: service.metadata.creationTimestamp,
-        labels: service.metadata.labels,
-        annotations: service.metadata.annotations,
+        uid: serviceaccount.metadata.uid,
+        namespace: serviceaccount.metadata.namespace,
+        name: serviceaccount.metadata.name,
+        resource_version: serviceaccount.metadata.resourceVersion,
+        secrets: serviceaccount.secrets,
+        created: serviceaccount.metadata.creationTimestamp,
+        labels: serviceaccount.metadata.labels,
+        annotations: serviceaccount.metadata.annotations,
       }
       return p
     },
@@ -299,31 +279,31 @@ export default {
       let $table = this.$refs.table;
       $table.toggleRowExpansion(row)
     },
-    deleteServices: function() {
+    deleteServiceAccounts: function() {
       const cluster = this.$store.state.cluster
       if (!cluster) {
         Message.error("获取集群参数异常，请刷新重试")
         return
       }
-      if ( !this.service ) {
-        Message.error("获取Service参数异常，请刷新重试")
+      if ( !this.serviceaccount ) {
+        Message.error("获取ServiceAccount参数异常，请刷新重试")
       }
-      let services = [{
-        namespace: this.service.namespace,
-        name: this.service.name,
+      let serviceaccounts = [{
+        namespace: this.serviceaccount.namespace,
+        name: this.serviceaccount.name,
       }]
       let params = {
-        resources: services
+        resources: serviceaccounts
       }
-      deleteServices(cluster, params).then(() => {
+      deleteServiceAccounts(cluster, params).then(() => {
         Message.success("删除成功")
       }).catch(() => {
         // console.log(e)
       })
     },
-    getServiceYaml: function() {
-      if (!this.service) {
-        Message.error("获取Service参数异常，请刷新重试")
+    getServiceAccountYaml: function() {
+      if (!this.serviceaccount) {
+        Message.error("获取ServiceAccount参数异常，请刷新重试")
         return
       }
       const cluster = this.$store.state.cluster
@@ -334,16 +314,16 @@ export default {
       this.yamlValue = ""
       this.yamlDialog = true
       this.yamlLoading = true
-      getService(cluster, this.service.namespace, this.service.name, "yaml").then(response => {
+      getServiceAccount(cluster, this.serviceaccount.namespace, this.serviceaccount.name, "yaml").then(response => {
         this.yamlLoading = false
         this.yamlValue = response.data
       }).catch(() => {
         this.yamlLoading = false
       })
     },
-    updateService: function() {
-      if (!this.service) {
-        Message.error("获取Service参数异常，请刷新重试")
+    updateServiceAccount: function() {
+      if (!this.serviceaccount) {
+        Message.error("获取ServiceAccount参数异常，请刷新重试")
         return
       }
       const cluster = this.$store.state.cluster
@@ -352,40 +332,17 @@ export default {
         return
       }
       console.log(this.yamlValue)
-      updateService(cluster, this.service.namespace, this.service.name, this.yamlValue).then(() => {
+      updateServiceAccount(cluster, this.serviceaccount.namespace, this.serviceaccount.name, this.yamlValue).then(() => {
         Message.success("更新成功")
       }).catch(() => {
         // console.log(e) 
       })
     },
-    getPortsDisplay(ports) {
-      if (!ports) return ''
-      var pd = []
-      for (let p of ports) {
-        var pds = p.port
-        if (p.nodePort) {
-          pds += ':' + p.nodePort
-        }
-        pds += '/' + p.protocol
-        pd.push(pds)
-      }
-      return pd.join(',')
-    },
-    endpointsAddresses(subsets) {
-      if (!subsets) return ''
-      let as = []
-      for(let s of subsets) {
-        for(let a of s.addresses) {
-          if(s.ports) {
-            for(let e of s.ports) {
-              as.push(a.ip + ':' + e.port)
-            }
-          } else {
-            as.push(a.ip)
-          }
-        }
-      }
-      return as.join(',')
+    getSecretsName(secrets) {
+      if (!secrets) return ''
+      var n = []
+      for(let s of secrets) n.push(s.name)
+      return n.join(",")
     }
   }
 }

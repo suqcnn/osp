@@ -24,11 +24,11 @@
           label="名称"
           min-width="40"
           show-overflow-tooltip>
-          <!-- <template slot-scope="scope">
+          <template slot-scope="scope">
             <span class="name-class" v-on:click="nameClick(scope.row.namespace, scope.row.name)">
               {{ scope.row.name }}
             </span>
-          </template> -->
+          </template>
         </el-table-column>
         <el-table-column
           prop="namespace"
@@ -235,7 +235,11 @@ export default {
       return p
     },
     nameClick: function(namespace, name) {
-      this.$router.push({name: 'rolebindingDetail', params: {namespace: namespace, rolebindingName: name}})
+      if (namespace) {
+        this.$router.push({name: 'rolebindingDetail', params: {namespace: namespace, rolebindingName: name}})
+      } else {
+        this.$router.push({name: 'clusterrolebindingDetail', params: {rolebindingName: name}})
+      }
     },
     getRoleBindingYaml: function(namespace, name, kind) {
       this.yamlNamespace = ""

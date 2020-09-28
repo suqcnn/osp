@@ -26,7 +26,7 @@
           min-width="25"
           show-overflow-tooltip>
           <template slot-scope="scope">
-            <span>
+            <span class="name-class" v-on:click="nameClick(scope.row.namespace, scope.row.name)">
               {{ scope.row.name }}
             </span>
           </template>

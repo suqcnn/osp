@@ -198,6 +198,13 @@ const Routes = [
         meta: { title: '存储声明', group: 'cluster' },
       },
       {
+        path: 'pvc/:namespace/:persistentVolumeClaimName',
+        name: 'pvcDetail',
+        hidden: true,
+        component: () => import('@/views/cluster/persistentVolumeClaimDetail'),
+        meta: { title: '配置项', group: 'cluster', sideName: 'pvc' },
+      },
+      {
         path: 'pv',
         name: 'pv',
         component: () => import('@/views/cluster/persistentVolume'),

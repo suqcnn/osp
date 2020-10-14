@@ -132,8 +132,15 @@ const Routes = [
       {
         path: 'secrets',
         name: 'secrets',
-        component: () => import('@/views/dashboard/index'),
+        component: () => import('@/views/cluster/secret'),
         meta: { title: '保密字典', group: 'cluster' },
+      },
+      {
+        path: 'secrets/:namespace/:secretName',
+        name: 'secretDetail',
+        hidden: true,
+        component: () => import('@/views/cluster/secretDetail'),
+        meta: { title: '配置项', group: 'cluster', sideName: 'secrets' },
       },
       {
         path: 'hpa',

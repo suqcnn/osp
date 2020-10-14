@@ -2,12 +2,12 @@
 import Layout from '@/layout'
 
 const Routes = [
-  {
-    path: 'overview',
-    name: 'overview',
-    component: () => import('@/views/settings/overview/index'),
-    meta: { title: '总览', icon: 'overview', 'group': 'settings' }
-  },
+  // {
+  //   path: 'overview',
+  //   name: 'overview',
+  //   component: () => import('@/views/settings/overview/index'),
+  //   meta: { title: '总览', icon: 'overview', 'group': 'settings' }
+  // },
   {
     path: 'cluster',
     name: 'settinsCluster',

@@ -156,7 +156,7 @@ export default {
       this.yamlValue = ''
       this.yamlDialog = true
       this.yamlLoading = true
-      getPersistentVolumeClaim(cluster, this.PersistentVolumeClaim.metadata.name, 'yaml')
+      getPersistentVolumeClaim(cluster, this.namespace, this.PersistentVolumeClaimName, 'yaml')
         .then((response) => {
           this.yamlLoading = false
           this.yamlValue = response.data

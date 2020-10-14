@@ -145,7 +145,7 @@ const Routes = [
       {
         path: 'hpa',
         name: 'hpa',
-        component: () => import('@/views/dashboard/index'),
+        component: () => import('@/views/cluster/hpa'),
         meta: { title: '水平扩缩容', group: 'cluster' },
       },
     ],

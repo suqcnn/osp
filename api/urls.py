@@ -1,7 +1,7 @@
 from api import SlashOptionRouter
 from api.views import user, cluster, pod, namespace, node, event, deployment, config_map, statefulset, \
      daemonset, job, cronjob, persistent_volume, persistent_volume_claim, storage_class, service, ingress, \
-     endpoints, networkpolicy, serviceaccount, rolebinding, role, secret
+     endpoints, networkpolicy, serviceaccount, rolebinding, role, secret, horizontal_pod_autoscalers
 
 router = SlashOptionRouter()
 
@@ -30,5 +30,6 @@ router.register('serviceaccount/(?P<cluster>[^/.]+)', serviceaccount.ServiceAcco
 router.register('rolebinding/(?P<cluster>[^/.]+)', rolebinding.RoleBindingViewSet, basename='rolebinding')
 router.register('role/(?P<cluster>[^/.]+)', role.RoleViewSet, basename='role')
 router.register('secret/(?P<cluster>[^/.]+)', secret.SecretViewSet, basename='secret')
+router.register('hpa/(?P<cluster>[^/.]+)', horizontal_pod_autoscalers.HorizontalPodAutoscalersViewSet, basename='hpa')
 
 urlpatterns = router.urls

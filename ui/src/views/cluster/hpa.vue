@@ -8,7 +8,7 @@
     <div class="dashboard-container">
       <el-table
         ref="multipleTable"
-        :data="configMaps"
+        :data="hpas"
         class="table-fix"
         tooltip-effect="dark"
         :max-height="maxHeight"
@@ -26,10 +26,7 @@
           show-overflow-tooltip
         >
           <template slot-scope="scope">
-            <span
-              class="name-class"
-              v-on:click="nameClick(scope.row.namespace, scope.row.name)"
-            >
+            <span class="name-class" v-on:click="nameClick(scope.row.namespace, scope.row.name)">
               {{ scope.row.name }}
             </span>
           </template>
@@ -42,12 +39,12 @@
         >
         </el-table-column>
         <el-table-column
-          prop="keys"
-          label="Keys"
-          min-width="45"
-          show-overflow-tooltip
-        >
-        </el-table-column>
+        prop="type"
+        label="Type"
+        min-width="45"
+        show-overflow-tooltip
+      >
+      </el-table-column>
         <el-table-column
           prop="create_time"
           label="创建时间"
@@ -126,18 +123,18 @@
 <script>
 import { Clusterbar, Yaml } from '@/views/components'
 import { Message } from 'element-ui'
-import { listConfigMaps, getConfigMap } from '@/api/config_map'
+import { listHpas } from '@/api/hpa'
 
 export default {
-  name: 'ConfigMap',
+  name: 'HorizontalPodAutoscalers',
   components: {
     Clusterbar,
     Yaml,
   },
   data() {
     return {
-      titleName: ['ConfigMap'],
-      originConfigMaps: [],
+      titleName: ["HorizontalPodAutoscalers"],
+      originHpas: [],
       search_name: '',
       search_ns: [],
       cellStyle: { border: 0 },
@@ -154,34 +151,23 @@ export default {
     this.fetchData()
   },
   computed: {
-    configMaps: function() {
-      let data = []
-      for (let c of this.originConfigMaps) {
-        if (
-          this.search_ns.length > 0 &&
-          this.search_ns.indexOf(c.namespace) < 0
-        )
-          continue
-        if (this.search_name && !c.name.includes(this.search_name)) continue
-        var str = ''
-        for (let s of c.keys) {
-          str += s + ','
-        }
-        console.log(str)
-        if (str.length > 0) {
-          str = str.substr(0, str.length - 1)
-        }
-        c['keys'] = str
-        data.push(c)
+    hpas: function() {
+      let dlist = []
+      for (let p of this.originHpas) {
+        if (this.search_ns.length > 0 && this.search_ns.indexOf(p.namespace) < 0) continue
+        if (this.search_name && !p.name.includes(this.search_name)) continue
+        
+        dlist.push(p)
       }
-      return data
+      return dlist
     },
   },
   methods: {
     nameClick: function(namespace, name) {
+      console.log(namespace, name);
       this.$router.push({
-        name: 'configMapDetail',
-        params: { namespace: namespace, configMapName: name },
+        name: 'hpaDetail',
+        params: { namespace: namespace, hpaName: name },
       })
     },
     nsSearch: function(vals) {
@@ -195,53 +181,52 @@ export default {
     },
     fetchData: function() {
       this.loading = true
-      this.originConfigMaps = []
+      this.originHpas = []
       const cluster = this.$store.state.cluster
       if (cluster) {
-        listConfigMaps(cluster)
-          .then((response) => {
-            this.loading = false
-            this.originConfigMaps = response.data
-          })
-          .catch(() => {
-            this.loading = false
-          })
+        listHpas(cluster).then(response => {
+          this.loading = false
+          this.originHpas = response.data
+        }).catch(() => {
+          this.loading = false
+        })
       } else {
         this.loading = false
-        Message.error('获取集群异常，请刷新重试.')
+        Message.error("获取集群异常，请刷新重试")
       }
     },
-    getConfigMapYaml: function(namespace, name) {
-      const cluster = this.$store.state.cluster
-      console.log('xxxxxxx', namespace, name)
-      if (!cluster) {
-        Message.error('获取集群参数异常，请刷新重试')
-        return
-      }
-      if (!namespace) {
-        Message.error('获取命名空间参数异常，请刷新重试')
-        return
-      }
-      if (!name) {
-        Message.error('获取Pod名称参数异常，请刷新重试')
-        return
-      }
-      this.yamlLoading = true
-      this.yamlDialog = true
-      getConfigMap(cluster, namespace, name, 'yaml')
-        .then((response) => {
-          this.yamlLoading = false
-          this.yamlValue = response.data
-          this.yamlNamespace = namespace
-          this.yamlName = name
-        })
-        .catch(() => {
-          this.yamlLoading = false
-        })
-    },
-  },
+    // getHpaYaml: function(namespace, name) {
+    //   const cluster = this.$store.state.cluster
+    //   console.log('xxxxxxx', namespace, name)
+    //   if (!cluster) {
+    //     Message.error('获取集群参数异常，请刷新重试')
+    //     return
+    //   }
+    //   if (!namespace) {
+    //     Message.error('获取命名空间参数异常，请刷新重试')
+    //     return
+    //   }
+    //   if (!name) {
+    //     Message.error('获取Hpa名称参数异常，请刷新重试')
+    //     return
+    //   }
+    //   this.yamlLoading = true
+    //   this.yamlDialog = true
+    //   getHpa(cluster, namespace, name, 'yaml')
+    //     .then((response) => {
+    //       this.yamlLoading = false
+    //       this.yamlValue = response.data
+    //       this.yamlNamespace = namespace
+    //       this.yamlName = name
+    //     })
+    //     .catch(() => {
+    //       this.yamlLoading = false
+    //     })
+    // },
+  }
 }
 </script>
+
 <style lang="scss" scoped>
   .dashboard {
     &-container {

@@ -35,7 +35,9 @@
         <el-collapse-item title="Data" name="1" v-if="secret.data">
           <div v-for="(key, val) in secret.data" :key="val" >
             <span >{{val}}</span>
-            <el-input type="textarea"  :autosize='{ minRows: 2, maxRows: 4 }' readonly v-model="secret.data[val]"></el-input>
+            <el-input type="textarea"  :autosize='{ minRows: 2, maxRows: 4 }' readonly v-model="secret.data[val]">
+              <i slot="suffix" class="el-input__icon el-icon-date"></i>
+            </el-input>
           </div>
         </el-collapse-item>
 
@@ -141,7 +143,7 @@ export default {
       this.yamlValue = ''
       this.yamlDialog = true
       this.yamlLoading = true
-      getSecret(cluster, this.secret.metadata.name, 'yaml')
+      getSecret(cluster, this.namespace, this.secretName, 'yaml')
         .then((response) => {
           this.yamlLoading = false
           this.yamlValue = response.data

@@ -148,6 +148,13 @@ const Routes = [
         component: () => import('@/views/cluster/hpa'),
         meta: { title: '水平扩缩容', group: 'cluster' },
       },
+      {
+        path: 'hpa/:namespace/:hpaName',
+        name: 'hpaDetail',
+        hidden: true,
+        component: () => import('@/views/cluster/hpaDetail'),
+        meta: { title: '配置项', group: 'cluster', sideName: 'hpa' },
+      },
     ],
   },
 

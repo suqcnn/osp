@@ -51,7 +51,69 @@
             </el-form-item>
           </el-form>
         </el-collapse-item>
-        <el-collapse-item title="Event" name="2">
+        <el-collapse-item title="Events" name="2">
+          <template slot="title">
+            <span class="title-class">Events</span>
+          </template>
+          <div class="msgClass">
+            <el-table
+              v-if="persistentVolumeClaimEvents && persistentVolumeClaimEvents.length > 0"
+              :data="persistentVolumeClaimEvents"
+              class="table-fix"
+              tooltip-effect="dark"
+              style="width: 100%"
+              v-loading="eventLoading"
+              :cell-style="cellStyle"
+              :default-sort = "{prop: 'event_time', order: 'descending'}"
+              >
+              <el-table-column
+                prop="type"
+                label="类型"
+                min-width="25"
+                show-overflow-tooltip>
+              </el-table-column>
+              <el-table-column
+                prop="object"
+                label="对象"
+                min-width="55"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.row.object.kind }}/{{ scope.row.object.name }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="reason"
+                label="原因"
+                min-width="50"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.row.reason ? scope.row.reason : "——" }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="message"
+                label="信息"
+                min-width="120"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.row.message ? scope.row.message : "——" }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="event_time"
+                label="触发时间"
+                min-width="50"
+                show-overflow-tooltip>
+              </el-table-column>
+            </el-table>
+            <div v-else style="color: #909399; text-align: center">暂无数据</div>
+          </div>
         </el-collapse-item>
       </el-collapse>
 
@@ -60,7 +122,7 @@
         <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
         <span slot="footer" class="dialog-footer">
           <el-button plain @click="yamlDialog = false" size="small">取 消</el-button>
-          <el-button plain size="small">确 定</el-button>
+          <el-button plain @click="updatePersistentVolumeClaim" size="small">确 定</el-button>
         </span>
       </el-dialog>
     </div>
@@ -69,7 +131,8 @@
 
 <script>
 import { Clusterbar, Yaml } from '@/views/components'
-import { getPersistentVolumeClaim } from '@/api/persistent_volume_claim'
+import { getPersistentVolumeClaim, updatePersistentVolumeClaim } from '@/api/persistent_volume_claim'
+import { listEvents } from '@/api/event'
 import { Message } from 'element-ui'
 
 export default {
@@ -88,7 +151,8 @@ export default {
       originPersistentVolumeClaim: {},
       selectContainer: '',
       eventLoading: true,
-      activeNames: ["1"]
+      activeNames: ["1"],
+      persistentVolumeClaimEvents: []
     }
   },
   created() {
@@ -139,6 +203,14 @@ export default {
       getPersistentVolumeClaim(cluster, this.namespace, this.PersistentVolumeClaimName).then(response => {
         this.loading = false
         this.originPersistentVolumeClaim = response.data
+        listEvents(cluster, this.originPersistentVolumeClaim.metadata.uid).then(response => {
+          this.eventLoading = false
+          if (response.data) {
+            this.persistentVolumeClaimEvents = response.data.length > 0 ? response.data : []
+          }
+        }).catch(() => {
+          this.eventLoading = false
+        })
       }).catch(() => {
         this.loading = false
       })
@@ -175,8 +247,11 @@ export default {
         Message.error("获取集群参数异常，请刷新重试")
         return
       }
-      console.log(this.yamlValue)
-      console.log(this.PersistentVolumeClaim)
+      updatePersistentVolumeClaim(cluster, this.namespace, this.PersistentVolumeClaimName, this.yamlValue).then(() => {
+        Message.success("更新成功")
+      }).catch(() => {
+        // console.log(e) 
+      })
     },
   },
 }

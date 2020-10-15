@@ -41,3 +41,16 @@ class PersistentVolumeClaimViewSet(viewsets.GenericViewSet):
         if res.is_success() and not res.data:
             res.data = []
         return res
+
+    @action(methods=['POST'], detail=False, url_path='(?P<namespace>[^/.]+)/(?P<name>[^/.]+)', url_name='update_pvc')
+    @api_decorator('update pvc', serializer_class=serializers.UpdateResourcesSerializer)
+    def do_update_yaml(self, req):
+        params = req.get('params')
+        req_params = {
+            'name': req.get('name'),
+            'namespace': req.get('namespace'),
+            'yaml': params.get('yaml')
+        }
+        pvc_resource = PersistentVolumeClaimResource(req.get('cluster'))
+        res = pvc_resource.update(req_params)
+        return res

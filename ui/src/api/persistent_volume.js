@@ -14,3 +14,11 @@ export function getPersistentVolume(cluster, name, output='') {
     params: { output }
   })
 }
+
+export function updatePersistentVolume(cluster, name, yaml) {
+  return request({
+    url: `persistent_volume/${cluster}/${name}`,
+    method: 'post',
+    data: { yaml }
+  })
+}

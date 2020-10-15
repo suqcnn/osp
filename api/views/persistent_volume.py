@@ -21,7 +21,6 @@ class PersistentVolumeViewSet(viewsets.GenericViewSet):
         params = req.get('params')
         req_params = {
             'name': req.get('name'),
-            'namespace': req.get('namespace'),
             'output': params.get('output')
         }
         pv_resource = PersistentVolumeResource(req.get('cluster'))
@@ -33,11 +32,22 @@ class PersistentVolumeViewSet(viewsets.GenericViewSet):
         params = req.get('params')
         req_params = {
             'name': params.get('name'),
-            'namespace': params.get('namespace'),
         }
         pv_resource = PersistentVolumeResource(req.get('cluster'))
         res = pv_resource.list(req_params)
         logger.info(res.data)
         if res.is_success() and not res.data:
             res.data = []
+        return res
+
+    @action(methods=['POST'], detail=False, url_path='(?P<name>[^/.]+)', url_name='update_pv')
+    @api_decorator('update pv', serializer_class=serializers.UpdateResourcesSerializer)
+    def do_update_yaml(self, req):
+        params = req.get('params')
+        req_params = {
+            'name': req.get('name'),
+            'yaml': params.get('yaml')
+        }
+        pv_resource = PersistentVolumeResource(req.get('cluster'))
+        res = pv_resource.update(req_params)
         return res

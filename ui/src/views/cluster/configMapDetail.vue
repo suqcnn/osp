@@ -47,10 +47,69 @@
             </el-table>
           </div>
         </el-collapse-item>
-        <el-collapse-item title="Event" name="3">
-          <div>简化流程：设计简洁直观的操作流程；</div>
-          <div>清晰明确：语言表达清晰且表意明确，让用户快速理解进而作出决策；</div>
-          <div>帮助用户识别：界面简单直白，让用户快速识别而非回忆，减少用户记忆负担。</div>
+        <el-collapse-item title="Events" name="3">
+          <template slot="title">
+            <span class="title-class">Events</span>
+          </template>
+          <div class="msgClass">
+            <el-table
+              v-if="hpaEvents && hpaEvents.length > 0"
+              :data="hpaEvents"
+              class="table-fix"
+              tooltip-effect="dark"
+              style="width: 100%"
+              v-loading="eventLoading"
+              :cell-style="cellStyle"
+              :default-sort = "{prop: 'event_time', order: 'descending'}"
+              >
+              <el-table-column
+                prop="type"
+                label="类型"
+                min-width="25"
+                show-overflow-tooltip>
+              </el-table-column>
+              <el-table-column
+                prop="object"
+                label="对象"
+                min-width="55"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.row.object.kind }}/{{ scope.row.object.name }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="reason"
+                label="原因"
+                min-width="50"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.row.reason ? scope.row.reason : "——" }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="message"
+                label="信息"
+                min-width="120"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.row.message ? scope.row.message : "——" }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="event_time"
+                label="触发时间"
+                min-width="50"
+                show-overflow-tooltip>
+              </el-table-column>
+            </el-table>
+            <div v-else style="color: #909399; text-align: center">暂无数据</div>
+          </div>
         </el-collapse-item>
       </el-collapse>
 
@@ -69,6 +128,7 @@
 <script>
 import { Clusterbar, Yaml } from '@/views/components'
 import { getConfigMap, updateConfigMap } from '@/api/config_map'
+import { listEvents } from '@/api/event'
 import { Message } from 'element-ui'
 
 export default {
@@ -88,7 +148,8 @@ export default {
       selectContainer: '',
       eventLoading: true,
       activeNames: ["1"],
-      labels: []
+      labels: [],
+      configMapEvents: []
     }
   },
   created() {
@@ -174,8 +235,14 @@ export default {
             })
           })
         }
-        console.log("******", response.data)
-        console.log("******", this.originConfigMap)
+        listEvents(cluster, this.originConfigMap.metadata.uid).then(response => {
+          this.eventLoading = false
+          if (response.data) {
+            this.configMapEvents = response.data.length > 0 ? response.data : []
+          }
+        }).catch(() => {
+          this.eventLoading = false
+        })
       }).catch(() => {
         this.loading = false
       })

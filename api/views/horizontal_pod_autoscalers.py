@@ -11,7 +11,7 @@ from utils import CommonReturn, Code
 from . import serializers
 
 logger = logging.getLogger(__name__)
-# HorizontalPodAutoscalers
+
 
 class HorizontalPodAutoscalersViewSet(viewsets.GenericViewSet):
 
@@ -41,10 +41,9 @@ class HorizontalPodAutoscalersViewSet(viewsets.GenericViewSet):
         res = hpa_resource.get(req_params)
         return res
 
-    @action(methods=['POST'], detail=False, url_path='(?P<namespace>[^/.]+)/(?P<name>[^/.]+)',
-            url_name='update_hpa')
+    @action(methods=['POST'], detail=False, url_path='(?P<namespace>[^/.]+)/(?P<name>[^/.]+)', url_name='update_hpa_yaml')
     @api_decorator('Update hpa', serializer_class=serializers.UpdateResourcesSerializer)
-    def update_yaml(self, req):
+    def do_update_yaml(self, req):
         params = req.get('params')
         req_params = {
             'name': req.get('name'),
@@ -56,7 +55,7 @@ class HorizontalPodAutoscalersViewSet(viewsets.GenericViewSet):
         return res
 
     @action(methods=['POST'], detail=False, url_path='update_hpa', url_name='update_hpa')
-    @api_decorator('Update Secret', serializer_class=secret_serializers.UpdateSecretSerializer)
+    @api_decorator('Update hpa', serializer_class=secret_serializers.UpdateSecretSerializer)
     def update_hpa(self, req):
         params = req.get('params')
         req_params = {

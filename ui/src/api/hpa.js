@@ -17,8 +17,16 @@ export function getHpa(cluster, namespace, name, output='') {
 
 export function updateHpa(cluster, namespace, name, yaml) {
   return request({
-    url: `hpa/${cluster}/update_hpa`,
+    url: `hpa/${cluster}/${namespace}/${name}`,
     method: 'post',
-    data: { yaml, name, namespace }
+    data: { yaml }
+  })
+}
+
+export function deleteHpa(cluster, data) {
+  return request({
+    url: `hpa/${cluster}/delete`,
+    method: 'post',
+    data: data
   })
 }

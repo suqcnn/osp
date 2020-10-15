@@ -41,9 +41,23 @@ class HorizontalPodAutoscalersViewSet(viewsets.GenericViewSet):
         res = hpa_resource.get(req_params)
         return res
 
+    @action(methods=['POST'], detail=False, url_path='(?P<namespace>[^/.]+)/(?P<name>[^/.]+)',
+            url_name='update_hpa')
+    @api_decorator('Update hpa', serializer_class=serializers.UpdateResourcesSerializer)
+    def update_yaml(self, req):
+        params = req.get('params')
+        req_params = {
+            'name': req.get('name'),
+            'namespace': req.get('namespace'),
+            'yaml': params.get('yaml')
+        }
+        dp_resource = HpaResource(req.get('cluster'))
+        res = dp_resource.update(req_params)
+        return res
+
     @action(methods=['POST'], detail=False, url_path='update_hpa', url_name='update_hpa')
     @api_decorator('Update Secret', serializer_class=secret_serializers.UpdateSecretSerializer)
-    def update_yaml(self, req):
+    def update_hpa(self, req):
         params = req.get('params')
         req_params = {
             'name': params.get('name'),
@@ -53,3 +67,16 @@ class HorizontalPodAutoscalersViewSet(viewsets.GenericViewSet):
         hpa_resource = HpaResource(req.get('cluster'))
         res = hpa_resource.update(req_params)
         return res
+
+    @action(methods=['POST'], detail=False, url_path='delete', url_name='delete_hpa')
+    @api_decorator('Delete hpa', serializer_class=serializers.DeleteResourcesSerializer)
+    def delete(self, req):
+        params = req.get('params')
+        req_params = {
+            'resources': params.get('resources')
+        }
+        hpa_resource = HpaResource(req.get('cluster'))
+        res = hpa_resource.delete(req_params)
+        if not res.is_success():
+            return res
+        return CommonReturn(Code.SUCCESS, msg="删除成功")

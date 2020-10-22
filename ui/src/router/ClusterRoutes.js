@@ -23,12 +23,12 @@ const Routes = [
     name: 'workloads',
     meta: { title: '工作负载', icon: 'workloads', group: 'cluster' },
     children: [
-      {
-        path: 'detail',
-        name: 'detail',
-        component: () => import('@/views/dashboard/index'),
-        meta: { title: '概览', group: 'cluster' },
-      },
+      // {
+      //   path: 'detail',
+      //   name: 'detail',
+      //   component: () => import('@/views/dashboard/index'),
+      //   meta: { title: '概览', group: 'cluster' },
+      // },
       {
         path: 'pods',
         name: 'pods',

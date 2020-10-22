@@ -14,3 +14,10 @@ export function createCluster(data) {
     data,
   })
 }
+
+export function clusterDetail(cluster) {
+  return request({
+    url: `/cluster/${cluster}/detail`,
+    method: 'get',
+  })
+}

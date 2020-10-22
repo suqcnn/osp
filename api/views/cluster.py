@@ -2,11 +2,13 @@ import logging
 
 from django.http import HttpResponse
 from rest_framework import viewsets
+from rest_framework.decorators import action
 
 from api.views import api_decorator
 from api.views.serializers import cluster_serializers
 from models import const
 from models.cluster import Cluster
+from service.kuberesource.cluster import ClusterResource
 from utils import CommonReturn, Code
 
 logger = logging.getLogger(__name__)
@@ -38,6 +40,13 @@ class ClusterViewSet(viewsets.GenericViewSet):
                 'update_time': cluster.update_time
             })
         return CommonReturn(Code.SUCCESS, data=data)
+
+    @action(methods=['GET'], detail=False, url_path='(?P<cluster>[^/.]+)/detail', url_name='cluster_detail')
+    @api_decorator('Get cluster detail')
+    def cluster_detail(self, req):
+        cluster_resource = ClusterResource(req.get('cluster'))
+        res = cluster_resource.get({})
+        return res
 
 
 def agent(req):

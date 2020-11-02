@@ -1,17 +1,21 @@
 package views
 
 import (
+	"github.com/openspacee/osp/pkg/model"
 	"github.com/openspacee/osp/pkg/utils"
 	"github.com/openspacee/osp/pkg/utils/code"
 	"net/http"
 )
 
 type User struct {
-	Views []*View
+	Views  []*View
+	models *model.Models
 }
 
-func NewUser() *User {
-	user := &User{}
+func NewUser(models *model.Models) *User {
+	user := &User{
+		models: models,
+	}
 	views := []*View{
 		NewView(http.MethodGet, "/token", user.tokenUser),
 	}

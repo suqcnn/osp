@@ -3,6 +3,7 @@ package router
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/openspacee/osp/pkg/model"
 	"github.com/openspacee/osp/pkg/redis"
 	"github.com/openspacee/osp/pkg/router/views"
 	"github.com/openspacee/osp/pkg/router/views/ws_views"
@@ -21,20 +22,25 @@ type Router struct {
 func NewRouter(redisOptions *redis.Options) *Router {
 	engine := gin.Default()
 
+	engine.Use(LocalMiddleware())
+
 	engine.LoadHTMLFiles("ui/dist/index.html")
 	engine.StaticFS("/static", http.Dir("ui/dist/static"))
 	engine.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", nil)
 	})
-	engine.GET("/ui/login", func(c *gin.Context) {
+	//engine.GET("/ui/login", func(c *gin.Context) {
+	//	c.HTML(http.StatusOK, "index.html", nil)
+	//})
+	engine.GET("/ui/*path", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", nil)
 	})
 
-	engine.Use(LocalMiddleware())
+	models := model.NewModels(redisOptions)
 
 	// 统一认证的api接口
 	apiGroup := engine.Group("/api/v1")
-	viewsets := NewViewSets(redisOptions)
+	viewsets := NewViewSets(redisOptions, models)
 	for group, vs := range *viewsets {
 		g := apiGroup.Group(group)
 		for _, v := range vs {
@@ -43,7 +49,7 @@ func NewRouter(redisOptions *redis.Options) *Router {
 	}
 
 	// 登录登出接口
-	loginView := views.Login{}
+	loginView := views.NewLogin(models)
 	apiGroup.POST("/login", loginView.Login)
 	apiGroup.GET("/has_admin", loginView.HasAdmin)
 	apiGroup.POST("/logout", loginView.Logout)

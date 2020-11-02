@@ -1,17 +1,21 @@
 package views
 
 import (
+	"github.com/openspacee/osp/pkg/model"
 	"github.com/openspacee/osp/pkg/utils"
 	"github.com/openspacee/osp/pkg/utils/code"
 	"net/http"
 )
 
 type Cluster struct {
-	Views []*View
+	Views  []*View
+	models *model.Models
 }
 
-func NewCluster() *Cluster {
-	cluster := &Cluster{}
+func NewCluster(models *model.Models) *Cluster {
+	cluster := &Cluster{
+		models: models,
+	}
 	views := []*View{
 		NewView(http.MethodGet, "", cluster.list),
 	}

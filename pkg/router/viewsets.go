@@ -16,6 +16,9 @@ func NewViewSets(redisOptions *redis.Options) *ViewSets {
 	cluster := views.NewCluster()
 	viewsets["cluster"] = cluster.Views
 
+	user := views.NewUser()
+	viewsets["user"] = user.Views
+
 	pods := kube_views.NewPod(kubeMessage)
 	viewsets["pods"] = pods.Views
 

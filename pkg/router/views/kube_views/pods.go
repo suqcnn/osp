@@ -18,7 +18,7 @@ func NewPod(middleMessage *kube_resource.MiddleMessage) *Pod {
 		PodResource: kube_resource.NewKubeResource(kube_resource.PodType, middleMessage),
 	}
 	vs := []*views.View{
-		views.NewView(http.MethodGet, "/:cluster/list", pod.list),
+		views.NewView(http.MethodPost, "/:cluster/list", pod.list),
 	}
 	pod.Views = vs
 	return pod
@@ -26,7 +26,7 @@ func NewPod(middleMessage *kube_resource.MiddleMessage) *Pod {
 
 func (p *Pod) list(c *views.Context) *utils.Response {
 	var ser ListSerializers
-	if err := c.ShouldBind(ser); err != nil {
+	if err := c.ShouldBind(&ser); err != nil {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
 	}
 	reqParams := map[string]interface{}{

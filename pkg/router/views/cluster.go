@@ -13,7 +13,7 @@ type Cluster struct {
 func NewCluster() *Cluster {
 	cluster := &Cluster{}
 	views := []*View{
-		NewView(http.MethodGet, "/", cluster.list),
+		NewView(http.MethodGet, "", cluster.list),
 	}
 	cluster.Views = views
 	return cluster
@@ -21,6 +21,11 @@ func NewCluster() *Cluster {
 
 func (cluster *Cluster) list(c *Context) *utils.Response {
 	return &utils.Response{Code: code.Success,
-		Data: map[string]interface{}{"Rate": "123", "Domain": "we", "dw": map[string]interface{}{"dlw": "wd"}},
+		Data: []map[string]interface{}{
+			{
+				"name":  "aaa",
+				"token": "we",
+			},
+		},
 	}
 }

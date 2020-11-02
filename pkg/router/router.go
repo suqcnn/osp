@@ -9,6 +9,7 @@ import (
 	"github.com/openspacee/osp/pkg/utils"
 	"github.com/openspacee/osp/pkg/utils/code"
 	"k8s.io/klog"
+	"net/http"
 	"runtime"
 )
 
@@ -19,6 +20,16 @@ type Router struct {
 
 func NewRouter(redisOptions *redis.Options) *Router {
 	engine := gin.Default()
+
+	engine.LoadHTMLFiles("ui/dist/index.html")
+	engine.StaticFS("/static", http.Dir("ui/dist/static"))
+	engine.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
+	})
+	engine.GET("/ui/login", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
+	})
+
 	engine.Use(LocalMiddleware())
 
 	// 统一认证的api接口
@@ -30,6 +41,12 @@ func NewRouter(redisOptions *redis.Options) *Router {
 			g.Handle(v.Method, v.Path, apiWrapper(v.Handler))
 		}
 	}
+
+	// 登录登出接口
+	loginView := views.Login{}
+	apiGroup.POST("/login", loginView.Login)
+	apiGroup.GET("/has_admin", loginView.HasAdmin)
+	apiGroup.POST("/logout", loginView.Logout)
 
 	// 连接k8s agent的websocket接口
 	kubeWs := ws_views.NewKubeWs(redisOptions)

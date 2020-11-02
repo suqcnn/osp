@@ -18,13 +18,13 @@ func (k *KubeResource) List(cluster string, params interface{}) *utils.Response 
 }
 
 func (k *KubeResource) request(cluster, action string, params interface{}) *utils.Response {
-	middleRequest := NewMiddleRequest(cluster, "", k.ResType, action, params, 30)
+	middleRequest := NewMiddleRequest(cluster, k.ResType, action, params, 10)
 	res := k.KubeMessage.SendRequest(middleRequest)
 	return res
 }
 
 const (
-	PodType = "Pod"
+	PodType = "pod"
 )
 
 func NewKubeResource(resType string, message *MiddleMessage) *KubeResource {

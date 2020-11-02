@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/openspacee/osp/pkg/redis"
 	"github.com/openspacee/osp/pkg/router/views"
+	"github.com/openspacee/osp/pkg/router/views/ws_views"
 	"github.com/openspacee/osp/pkg/utils"
 	"github.com/openspacee/osp/pkg/utils/code"
 	"k8s.io/klog"
@@ -20,6 +21,7 @@ func NewRouter(redisOptions *redis.Options) *Router {
 	engine := gin.Default()
 	engine.Use(LocalMiddleware())
 
+	// 统一认证的api接口
 	apiGroup := engine.Group("/api/v1")
 	viewsets := NewViewSets(redisOptions)
 	for group, vs := range *viewsets {
@@ -28,6 +30,10 @@ func NewRouter(redisOptions *redis.Options) *Router {
 			g.Handle(v.Method, v.Path, apiWrapper(v.Handler))
 		}
 	}
+
+	// 连接k8s agent的websocket接口
+	kubeWs := ws_views.NewKubeWs(redisOptions)
+	apiGroup.GET("/kube/connect", kubeWs.Connect)
 
 	return &Router{
 		Engine: engine,
@@ -60,7 +66,7 @@ func LocalMiddleware() gin.HandlerFunc {
 				n := runtime.Stack(buf[:], false)
 				klog.Errorf("==> %s\n", string(buf[:n]))
 				msg := fmt.Sprintf("%s", err)
-				resp := &utils.Response{Code: "UnknownError", Msg: msg}
+				resp := &utils.Response{Code: code.UnknownError, Msg: msg}
 				c.JSON(200, resp)
 			}
 		}()

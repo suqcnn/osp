@@ -3,6 +3,7 @@ package ws_views
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/openspacee/osp/pkg/model"
 	"github.com/openspacee/osp/pkg/redis"
 	kubewebsocket "github.com/openspacee/osp/pkg/websockets"
 	"k8s.io/klog"
@@ -10,11 +11,13 @@ import (
 
 type KubeWs struct {
 	redisOptions *redis.Options
+	models       *model.Models
 }
 
-func NewKubeWs(op *redis.Options) *KubeWs {
+func NewKubeWs(op *redis.Options, models *model.Models) *KubeWs {
 	return &KubeWs{
 		redisOptions: op,
+		models:       models,
 	}
 }
 

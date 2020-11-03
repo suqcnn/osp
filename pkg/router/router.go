@@ -55,7 +55,7 @@ func NewRouter(redisOptions *redis.Options) *Router {
 	apiGroup.POST("/logout", loginView.Logout)
 
 	// 连接k8s agent的websocket接口
-	kubeWs := ws_views.NewKubeWs(redisOptions)
+	kubeWs := ws_views.NewKubeWs(redisOptions, models)
 	apiGroup.GET("/kube/connect", kubeWs.Connect)
 
 	return &Router{

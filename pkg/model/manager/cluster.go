@@ -6,12 +6,14 @@ import (
 )
 
 type ClusterManager struct {
-	client *redis.Client
+	client   *redis.Client
+	modelKey string
 }
 
 func NewClusterManager(redisClient *redis.Client) *ClusterManager {
 	return &ClusterManager{
-		client: redisClient,
+		client:   redisClient,
+		modelKey: "osp:cluster:",
 	}
 }
 

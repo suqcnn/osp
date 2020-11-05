@@ -35,7 +35,7 @@ export function deletePods(cluster, data) {
 
 export function updatePod(cluster, namespace, name, yaml) {
   return request({
-    url: `pods/${cluster}/${namespace}/${name}`,
+    url: `pods/${cluster}/update/${namespace}/${name}`,
     method: 'post',
     data: { yaml }
   })

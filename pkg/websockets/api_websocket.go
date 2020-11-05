@@ -11,12 +11,14 @@ import (
 type ApiWebsocket struct {
 	redisOptions *redis.Options
 	wsConn       *websocket.Conn
+	*kube_resource.KubeResources
 }
 
-func NewApiWebsocket(ws *websocket.Conn, redisOp *redis.Options) *ApiWebsocket {
+func NewApiWebsocket(ws *websocket.Conn, redisOp *redis.Options, kr *kube_resource.KubeResources) *ApiWebsocket {
 	return &ApiWebsocket{
-		redisOptions: redisOp,
-		wsConn:       ws,
+		redisOptions:  redisOp,
+		wsConn:        ws,
+		KubeResources: kr,
 	}
 }
 
@@ -54,25 +56,32 @@ func (a *ApiWebsocket) WsReceiveMsg() {
 			continue
 		}
 		if apiMsg.Action == "watchCluster" {
-			clusterMsg := apiMsg.Params.(map[string]interface{})
-			cluster := clusterMsg["cluster"].(string)
 			stopWatch = true
 			if startWatch {
 				middleMessage.Close()
 				<-stopChan
 				middleMessage = kube_resource.NewMiddleMessage(a.redisOptions)
 			}
+			clusterMsg := apiMsg.Params.(map[string]interface{})
+			cluster := clusterMsg["cluster"].(string)
 			klog.Info(cluster)
 			if cluster != "" {
 				startWatch = true
 				go func() {
 					stopWatch = false
+					resp := a.Watch.OpenWatch(cluster)
+					if !resp.IsSuccess() {
+						startWatch = false
+						klog.Errorf("open watch error: %s", err.Error())
+						return
+					}
 					for !stopWatch {
 						klog.Info("start receive watch data")
 						middleMessage.ReceiveWatch(cluster, func(data string) {
 							a.wsConn.WriteMessage(websocket.TextMessage, []byte(data))
 						})
 					}
+					a.Watch.CloseWatch(cluster)
 					klog.Info("end receive")
 					stopChan <- struct{}{}
 					klog.Info("end receive watch data")
@@ -88,8 +97,4 @@ func (a *ApiWebsocket) WsReceiveMsg() {
 type ApiMsg struct {
 	Action string      `json:"action"`
 	Params interface{} `json:"params"`
-}
-
-type ApiWatchClusterMsg struct {
-	cluster string
 }

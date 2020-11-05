@@ -62,7 +62,7 @@ func NewRouter(redisOptions *redis.Options) *Router {
 	apiGroup.GET("/kube/connect", kubeWs.Connect)
 
 	// 连接api websocket接口
-	apiWs := ws_views.NewApiWs(redisOptions, models)
+	apiWs := ws_views.NewApiWs(redisOptions, models, kubeResources)
 	apiGroup.GET("/web/connect", apiWs.Connect)
 
 	// 连接exec websocket接口

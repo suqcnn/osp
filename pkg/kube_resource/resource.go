@@ -5,7 +5,12 @@ import (
 )
 
 const (
-	ListAction = "list"
+	ListAction     = "list"
+	ExecAction     = "exec"
+	GetAction      = "get"
+	StdinAction    = "stdin"
+	OpenLogAction  = "openLog"
+	CloseLogAction = "closeLog"
 )
 
 type KubeResource struct {
@@ -13,8 +18,28 @@ type KubeResource struct {
 	KubeMessage *MiddleMessage
 }
 
+func (k *KubeResource) Get(cluster string, params interface{}) *utils.Response {
+	return k.request(cluster, GetAction, params)
+}
+
 func (k *KubeResource) List(cluster string, params interface{}) *utils.Response {
 	return k.request(cluster, ListAction, params)
+}
+
+func (k *KubeResource) Exec(cluster string, params interface{}) *utils.Response {
+	return k.request(cluster, ExecAction, params)
+}
+
+func (k *KubeResource) Stdin(cluster string, params interface{}) *utils.Response {
+	return k.request(cluster, StdinAction, params)
+}
+
+func (k *KubeResource) OpenLog(cluster string, params interface{}) *utils.Response {
+	return k.request(cluster, OpenLogAction, params)
+}
+
+func (k *KubeResource) CloseLog(cluster string, params interface{}) *utils.Response {
+	return k.request(cluster, CloseLogAction, params)
 }
 
 func (k *KubeResource) request(cluster, action string, params interface{}) *utils.Response {
@@ -27,9 +52,12 @@ const (
 	PodType = "pod"
 )
 
-func NewKubeResource(resType string, message *MiddleMessage) *KubeResource {
-	return &KubeResource{
-		ResType:     resType,
-		KubeMessage: message,
+type KubeResources struct {
+	Pod *KubeResource
+}
+
+func NewKubeResources(message *MiddleMessage) *KubeResources {
+	return &KubeResources{
+		Pod: &KubeResource{ResType: PodType, KubeMessage: message},
 	}
 }

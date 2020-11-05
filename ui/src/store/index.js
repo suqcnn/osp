@@ -73,11 +73,15 @@ var wsOnClose = function(e) {
 }
 
 function connect() {
-  wsConn = new WebSocket(`ws://${window.location.host}/osp/api/connect`)
-  wsConn.onopen = wsOnOpen
-  wsConn.onerror = wsOnError
-  wsConn.onmessage = wsOnMessage
-  wsConn.onclose = wsOnClose
+  try{
+    wsConn = new WebSocket(`ws://${window.location.host}/api/v1/web/connect`)
+    wsConn.onopen = wsOnOpen
+    wsConn.onerror = wsOnError
+    wsConn.onmessage = wsOnMessage
+    wsConn.onclose = wsOnClose
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 // function reConnect(num) {
@@ -90,7 +94,11 @@ function connect() {
 const hasToken = getToken()
 
 if (hasToken) {
-  // connect()
+  try{
+    connect()
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 export default store

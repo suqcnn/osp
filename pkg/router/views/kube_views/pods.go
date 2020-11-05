@@ -9,16 +9,17 @@ import (
 )
 
 type Pod struct {
-	Views       []*views.View
-	PodResource *kube_resource.KubeResource
+	Views []*views.View
+	*kube_resource.KubeResources
 }
 
-func NewPod(middleMessage *kube_resource.MiddleMessage) *Pod {
+func NewPod(kr *kube_resource.KubeResources) *Pod {
 	pod := &Pod{
-		PodResource: kube_resource.NewKubeResource(kube_resource.PodType, middleMessage),
+		KubeResources: kr,
 	}
 	vs := []*views.View{
 		views.NewView(http.MethodPost, "/:cluster/list", pod.list),
+		views.NewView(http.MethodGet, "/:cluster/:namespace/:name", pod.get),
 	}
 	pod.Views = vs
 	return pod
@@ -34,5 +35,18 @@ func (p *Pod) list(c *views.Context) *utils.Response {
 		"namespace":      ser.Namespace,
 		"label_selector": ser.LabelSelector,
 	}
-	return p.PodResource.List(c.Param("cluster"), reqParams)
+	return p.Pod.List(c.Param("cluster"), reqParams)
+}
+
+func (p *Pod) get(c *views.Context) *utils.Response {
+	var ser GetSerializers
+	if err := c.ShouldBind(&ser); err != nil {
+		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
+	}
+	reqParams := map[string]interface{}{
+		"name":      c.Param("name"),
+		"namespace": c.Param("namespace"),
+		"output":    ser.Output,
+	}
+	return p.Pod.Get(c.Param("cluster"), reqParams)
 }

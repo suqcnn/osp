@@ -3,6 +3,7 @@ package router
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/openspacee/osp/pkg/kube_resource"
 	"github.com/openspacee/osp/pkg/model"
 	"github.com/openspacee/osp/pkg/redis"
 	"github.com/openspacee/osp/pkg/router/views"
@@ -36,11 +37,13 @@ func NewRouter(redisOptions *redis.Options) *Router {
 		c.HTML(http.StatusOK, "index.html", nil)
 	})
 
+	kubeMessage := kube_resource.NewMiddleMessage(redisOptions)
 	models := model.NewModels(redisOptions)
+	kubeResources := kube_resource.NewKubeResources(kubeMessage)
 
 	// 统一认证的api接口
 	apiGroup := engine.Group("/api/v1")
-	viewsets := NewViewSets(redisOptions, models)
+	viewsets := NewViewSets(kubeResources, models)
 	for group, vs := range *viewsets {
 		g := apiGroup.Group(group)
 		for _, v := range vs {
@@ -57,6 +60,18 @@ func NewRouter(redisOptions *redis.Options) *Router {
 	// 连接k8s agent的websocket接口
 	kubeWs := ws_views.NewKubeWs(redisOptions, models)
 	apiGroup.GET("/kube/connect", kubeWs.Connect)
+
+	// 连接api websocket接口
+	apiWs := ws_views.NewApiWs(redisOptions, models)
+	apiGroup.GET("/web/connect", apiWs.Connect)
+
+	// 连接exec websocket接口
+	execWs := ws_views.NewExecWs(redisOptions, models, kubeResources)
+	apiGroup.GET("/exec/:cluster/:namespace/:pod", execWs.Connect)
+
+	// 连接log websocket接口
+	logWs := ws_views.NewLogWs(redisOptions, models, kubeResources)
+	apiGroup.GET("/log/:cluster/:namespace/:pod", logWs.Connect)
 
 	return &Router{
 		Engine: engine,

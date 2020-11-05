@@ -12,8 +12,7 @@ type KubeWebsocket struct {
 	middleMessage *kube_resource.MiddleMessage
 	cluster       string
 	wsConn        *websocket.Conn
-	wsReceiveChan chan []byte
-	wsCloseChan   chan struct{}
+	stopped       bool
 }
 
 func NewKubeWebsocket(cluster string, ws *websocket.Conn, redisOp *redis.Options) *KubeWebsocket {
@@ -23,8 +22,7 @@ func NewKubeWebsocket(cluster string, ws *websocket.Conn, redisOp *redis.Options
 		redisOptions:  redisOp,
 		middleMessage: middleMsg,
 		wsConn:        ws,
-		wsReceiveChan: make(chan []byte),
-		wsCloseChan:   make(chan struct{}),
+		stopped:       false,
 	}
 }
 
@@ -32,39 +30,17 @@ func (k *KubeWebsocket) Consume() {
 	klog.Info("start consume cluster ", k.cluster)
 	go k.WsReceiveMsg()
 	go k.MiddleRequestHandle()
-
-	go func() {
-		for {
-			select {
-			case data := <-k.wsReceiveChan:
-				klog.Info(string(data))
-				midResp, err := kube_resource.UnserialzerMiddleResponse(string(data))
-				if err != nil {
-					klog.Errorf("unserializer data error: %s", err.Error())
-					continue
-				}
-				k.middleMessage.SendResponse(midResp)
-			case <-k.wsCloseChan:
-				klog.Info("websocket closed")
-				break
-			}
-		}
-	}()
 }
 
 func (k *KubeWebsocket) MiddleRequestHandle() {
-	middleReqChan := make(chan *kube_resource.MiddleRequest)
-	go k.middleMessage.ReceiveRequest(k.cluster, middleReqChan)
-	for {
-		select {
-		case midReq := <-middleReqChan:
-			klog.Info(midReq)
-			//midResponse := kube_resource.NewMiddleResponse(midReq.RequestId, "request", "test")
-			//k.middleMessage.SendResponse(midResponse)
-			serReq, _ := midReq.Serializer()
+	for !k.stopped {
+		klog.Info("start receive request from cluster ", k.cluster)
+		k.middleMessage.ReceiveRequest(k.cluster, func(mr *kube_resource.MiddleRequest) {
+			serReq, _ := mr.Serializer()
 			k.wsConn.WriteMessage(websocket.TextMessage, serReq)
-		}
+		})
 	}
+	klog.Info("middle request handle end")
 }
 
 func (k *KubeWebsocket) WsReceiveMsg() {
@@ -76,13 +52,27 @@ func (k *KubeWebsocket) WsReceiveMsg() {
 			break
 		}
 		klog.Infof("read data: %s", string(data))
-		k.wsReceiveChan <- data
+		midResp, err := kube_resource.UnserialzerMiddleResponse(string(data))
+		if err != nil {
+			klog.Errorf("unserializer data error: %s", err.Error())
+			continue
+		}
+		if midResp.IsRequest() {
+			k.middleMessage.SendResponse(midResp)
+		} else if midResp.IsTerm() {
+			k.middleMessage.SendTerm(midResp)
+		} else if midResp.IsWatch() {
+			k.middleMessage.SendWatch(k.cluster, midResp)
+		} else if midResp.IsLog() {
+			k.middleMessage.SendLog(midResp)
+		}
 	}
 }
 
 func (k *KubeWebsocket) Clean() {
 	klog.Infof("start clean cluster %s websocket", k.cluster)
-	k.wsConn.Close()
 	k.middleMessage.Close()
-	k.wsCloseChan <- struct{}{}
+	k.stopped = true
+	k.wsConn.Close()
+	klog.Info("end clean cluster websocket")
 }

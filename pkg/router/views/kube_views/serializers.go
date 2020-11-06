@@ -28,6 +28,10 @@ type UpdateSerializers struct {
 	Kind string `json:"kind"`
 }
 
+type UpdateWorkloadSerializers struct {
+	Replicas int `json:"replicas" form:"replicas"`
+}
+
 type EventListSerializers struct {
 	UID       string `json:"uid" form:"uid"`
 	Kind      string `json:"kind" form:"kind"`

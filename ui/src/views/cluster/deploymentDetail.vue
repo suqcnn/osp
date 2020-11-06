@@ -158,13 +158,13 @@
                 <span :key="key">{{key}}: {{val}}<br/></span>
               </template>
             </el-form-item>
-            <el-form-item label="注解">
+            <!-- <el-form-item label="注解">
               <span v-if="!deployment.annotations">—</span>
               
               <template v-else v-for="(val, key) in deployment.annotations">
                 <span :key="key">{{key}}: {{val}}<br/></span>
               </template>
-            </el-form-item>
+            </el-form-item> -->
           </el-form>
         <!-- </el-collapse-item> -->
       <el-collapse class="podCollapse" :value="['conditions', 'events']">

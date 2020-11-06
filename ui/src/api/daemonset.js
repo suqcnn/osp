@@ -25,7 +25,7 @@ export function deleteDaemonSets(cluster, data) {
 
 export function updateDaemonSet(cluster, namespace, name, yaml) {
   return request({
-    url: `daemonset/${cluster}/${namespace}/${name}`,
+    url: `daemonset/${cluster}/update/${namespace}/${name}`,
     method: 'post',
     data: { yaml }
   })

@@ -197,7 +197,7 @@ export default {
       if (cluster) {
         listCronJobs(cluster).then(response => {
           this.loading = false
-          this.originCronJobs = response.data
+          this.originCronJobs = response.data ? response.data : []
         }).catch(() => {
           this.loading = false
         })

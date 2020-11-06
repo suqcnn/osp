@@ -25,7 +25,7 @@ export function deleteStatefulSets(cluster, data) {
 
 export function updateStatefulSet(cluster, namespace, name, yaml) {
   return request({
-    url: `statefulset/${cluster}/${namespace}/${name}`,
+    url: `statefulset/${cluster}/update/${namespace}/${name}`,
     method: 'post',
     data: { yaml }
   })
@@ -33,7 +33,7 @@ export function updateStatefulSet(cluster, namespace, name, yaml) {
 
 export function updateStatefulSetObj(cluster, namespace, name, data) {
   return request({
-    url: `statefulset/${cluster}/${namespace}/${name}/update_obj`,
+    url: `statefulset/${cluster}/update_obj/${namespace}/${name}`,
     method: 'post',
     data: data
   })

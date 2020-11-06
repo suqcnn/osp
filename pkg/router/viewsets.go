@@ -10,22 +10,31 @@ import (
 type ViewSets map[string][]*views.View
 
 func NewViewSets(kr *kube_resource.KubeResources, models *model.Models) *ViewSets {
-	viewsets := make(ViewSets)
-
 	cluster := views.NewCluster(models, kr)
-	viewsets["cluster"] = cluster.Views
-
 	user := views.NewUser(models)
-	viewsets["user"] = user.Views
-
 	pods := kube_views.NewPod(kr)
-	viewsets["pods"] = pods.Views
-
 	event := kube_views.NewEvent(kr)
-	viewsets["event"] = event.Views
-
 	namespace := kube_views.NewNamespace(kr)
-	viewsets["namespace"] = namespace.Views
+	deployment := kube_views.NewDeployment(kr)
+	node := kube_views.NewNode(kr)
+	statefulset := kube_views.NewStatefulset(kr)
+	daemonset := kube_views.NewDaemonset(kr)
+	cronjob := kube_views.NewCronjob(kr)
+	job := kube_views.NewJob(kr)
 
-	return &viewsets
+	viewsets := &ViewSets{
+		"cluster":     cluster.Views,
+		"user":        user.Views,
+		"pods":        pods.Views,
+		"event":       event.Views,
+		"namespace":   namespace.Views,
+		"deployment":  deployment.Views,
+		"nodes":       node.Views,
+		"statefulset": statefulset.Views,
+		"daemonset":   daemonset.Views,
+		"cronjob":     cronjob.Views,
+		"job":         job.Views,
+	}
+
+	return viewsets
 }

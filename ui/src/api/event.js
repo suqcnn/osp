@@ -21,7 +21,7 @@ export function buildEvent(event) {
   return {
     uid: event.metadata.uid,
     namespace: event.metadata.namespace,
-    count: event.spec.count,
+    count: event.spec ? event.spec.count : 1,
     reason: event.reason,
     message: event.message,
     type: event.type,

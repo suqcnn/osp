@@ -25,7 +25,7 @@ export function deleteNetworkPolicies(cluster, data) {
 
 export function updateNetworkPolicy(cluster, namespace, name, yaml) {
   return request({
-    url: `networkpolicy/${cluster}/${namespace}/${name}`,
+    url: `networkpolicy/${cluster}/update/${namespace}/${name}`,
     method: 'post',
     data: { yaml }
   })
@@ -33,7 +33,7 @@ export function updateNetworkPolicy(cluster, namespace, name, yaml) {
 
 export function updateNetworkPolicyObj(cluster, namespace, name, data) {
   return request({
-    url: `networkpolicy/${cluster}/${namespace}/${name}/update_obj`,
+    url: `networkpolicy/${cluster}/update_obj/${namespace}/${name}`,
     method: 'post',
     data: data
   })

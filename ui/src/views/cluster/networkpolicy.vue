@@ -179,7 +179,7 @@ export default {
       if (cluster) {
         listNetworkPolicies(cluster).then(response => {
           this.loading = false
-          this.originNetworkPolicies = response.data
+          this.originNetworkPolicies = response.data ? response.data : []
         }).catch(() => {
           this.loading = false
         })

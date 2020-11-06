@@ -8,13 +8,13 @@ import (
 	"net/http"
 )
 
-type Cronjob struct {
+type Role struct {
 	Views []*views.View
 	*kube_resource.KubeResources
 }
 
-func NewCronjob(kr *kube_resource.KubeResources) *Cronjob {
-	d := &Cronjob{
+func NewRole(kr *kube_resource.KubeResources) *Role {
+	d := &Role{
 		KubeResources: kr,
 	}
 	vs := []*views.View{
@@ -27,7 +27,7 @@ func NewCronjob(kr *kube_resource.KubeResources) *Cronjob {
 	return d
 }
 
-func (d *Cronjob) list(c *views.Context) *utils.Response {
+func (d *Role) list(c *views.Context) *utils.Response {
 	var ser ListSerializers
 	if err := c.ShouldBindQuery(&ser); err != nil {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
@@ -36,10 +36,10 @@ func (d *Cronjob) list(c *views.Context) *utils.Response {
 		"name":      ser.Name,
 		"namespace": ser.Namespace,
 	}
-	return d.Cronjob.List(c.Param("cluster"), reqParams)
+	return d.Role.List(c.Param("cluster"), reqParams)
 }
 
-func (d *Cronjob) get(c *views.Context) *utils.Response {
+func (d *Role) get(c *views.Context) *utils.Response {
 	var ser GetSerializers
 	if err := c.ShouldBindQuery(&ser); err != nil {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
@@ -48,27 +48,33 @@ func (d *Cronjob) get(c *views.Context) *utils.Response {
 		"name":      c.Param("name"),
 		"namespace": c.Param("namespace"),
 		"output":    ser.Output,
+		"kind":      ser.Kind,
 	}
-	return d.Cronjob.Get(c.Param("cluster"), reqParams)
+	return d.Role.Get(c.Param("cluster"), reqParams)
 }
 
-func (d *Cronjob) delete(c *views.Context) *utils.Response {
+func (d *Role) delete(c *views.Context) *utils.Response {
 	var ser DeleteSerializers
 	if err := c.ShouldBind(&ser); err != nil {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
 	}
-	return d.Cronjob.Delete(c.Param("cluster"), ser)
+	return d.Role.Delete(c.Param("cluster"), ser)
 }
 
-func (d *Cronjob) updateYaml(c *views.Context) *utils.Response {
+func (d *Role) updateYaml(c *views.Context) *utils.Response {
 	var ser UpdateSerializers
 	if err := c.ShouldBind(&ser); err != nil {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
 	}
+	namespace := c.Param("namespace")
+	if ser.Kind == "ClusterRole" {
+		namespace = ""
+	}
 	reqParams := map[string]interface{}{
 		"name":      c.Param("name"),
-		"namespace": c.Param("namespace"),
+		"namespace": namespace,
 		"yaml":      ser.Yaml,
+		"kind":      ser.Kind,
 	}
-	return d.Cronjob.UpdateYaml(c.Param("cluster"), reqParams)
+	return d.Role.UpdateYaml(c.Param("cluster"), reqParams)
 }

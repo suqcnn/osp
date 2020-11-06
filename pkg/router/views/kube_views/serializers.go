@@ -12,6 +12,7 @@ type GetSerializers struct {
 	Name      string `json:"name" form:"name"`
 	Namespace string `json:"namespace" form:"namespace"`
 	Output    string `json:"output" form:"output"`
+	Kind      string `json:"kind" form:"kind"`
 }
 
 type DeleteResource struct {

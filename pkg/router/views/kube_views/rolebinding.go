@@ -8,13 +8,13 @@ import (
 	"net/http"
 )
 
-type Cronjob struct {
+type Rolebinding struct {
 	Views []*views.View
 	*kube_resource.KubeResources
 }
 
-func NewCronjob(kr *kube_resource.KubeResources) *Cronjob {
-	d := &Cronjob{
+func NewRolebinding(kr *kube_resource.KubeResources) *Rolebinding {
+	d := &Rolebinding{
 		KubeResources: kr,
 	}
 	vs := []*views.View{
@@ -27,7 +27,7 @@ func NewCronjob(kr *kube_resource.KubeResources) *Cronjob {
 	return d
 }
 
-func (d *Cronjob) list(c *views.Context) *utils.Response {
+func (d *Rolebinding) list(c *views.Context) *utils.Response {
 	var ser ListSerializers
 	if err := c.ShouldBindQuery(&ser); err != nil {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
@@ -36,10 +36,10 @@ func (d *Cronjob) list(c *views.Context) *utils.Response {
 		"name":      ser.Name,
 		"namespace": ser.Namespace,
 	}
-	return d.Cronjob.List(c.Param("cluster"), reqParams)
+	return d.Rolebinding.List(c.Param("cluster"), reqParams)
 }
 
-func (d *Cronjob) get(c *views.Context) *utils.Response {
+func (d *Rolebinding) get(c *views.Context) *utils.Response {
 	var ser GetSerializers
 	if err := c.ShouldBindQuery(&ser); err != nil {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
@@ -48,27 +48,33 @@ func (d *Cronjob) get(c *views.Context) *utils.Response {
 		"name":      c.Param("name"),
 		"namespace": c.Param("namespace"),
 		"output":    ser.Output,
+		"kind":      ser.Kind,
 	}
-	return d.Cronjob.Get(c.Param("cluster"), reqParams)
+	return d.Rolebinding.Get(c.Param("cluster"), reqParams)
 }
 
-func (d *Cronjob) delete(c *views.Context) *utils.Response {
+func (d *Rolebinding) delete(c *views.Context) *utils.Response {
 	var ser DeleteSerializers
 	if err := c.ShouldBind(&ser); err != nil {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
 	}
-	return d.Cronjob.Delete(c.Param("cluster"), ser)
+	return d.Rolebinding.Delete(c.Param("cluster"), ser)
 }
 
-func (d *Cronjob) updateYaml(c *views.Context) *utils.Response {
+func (d *Rolebinding) updateYaml(c *views.Context) *utils.Response {
 	var ser UpdateSerializers
 	if err := c.ShouldBind(&ser); err != nil {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
 	}
+	namespace := c.Param("namespace")
+	if ser.Kind == "ClusterRoleBinding" {
+		namespace = ""
+	}
 	reqParams := map[string]interface{}{
 		"name":      c.Param("name"),
-		"namespace": c.Param("namespace"),
+		"namespace": namespace,
 		"yaml":      ser.Yaml,
+		"kind":      ser.Kind,
 	}
-	return d.Cronjob.UpdateYaml(c.Param("cluster"), reqParams)
+	return d.Rolebinding.UpdateYaml(c.Param("cluster"), reqParams)
 }

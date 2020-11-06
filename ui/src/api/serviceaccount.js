@@ -25,7 +25,7 @@ export function deleteServiceAccounts(cluster, data) {
 
 export function updateServiceAccount(cluster, namespace, name, yaml) {
   return request({
-    url: `serviceaccount/${cluster}/${namespace}/${name}`,
+    url: `serviceaccount/${cluster}/update/${namespace}/${name}`,
     method: 'post',
     data: { yaml }
   })
@@ -33,7 +33,7 @@ export function updateServiceAccount(cluster, namespace, name, yaml) {
 
 export function updateServiceAccountObj(cluster, namespace, name, data) {
   return request({
-    url: `serviceaccount/${cluster}/${namespace}/${name}/update_obj`,
+    url: `serviceaccount/${cluster}/update_obj/${namespace}/${name}`,
     method: 'post',
     data: data
   })

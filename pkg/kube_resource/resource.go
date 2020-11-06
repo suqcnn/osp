@@ -81,45 +81,66 @@ func (w *WatchResource) CloseWatch(cluster string) *utils.Response {
 }
 
 const (
-	WatchResType    = "watch"
-	PodType         = "pod"
-	ClusterType     = "cluster"
-	EventType       = "event"
-	NodeType        = "node"
-	DeploymentType  = "deployment"
-	StatefulsetType = "statefulset"
-	DaemonsetType   = "daemonset"
-	CronjobType     = "cronjob"
-	JobType         = "job"
-	NamespaceType   = "namespace"
+	WatchResType       = "watch"
+	PodType            = "pod"
+	ClusterType        = "cluster"
+	EventType          = "event"
+	NodeType           = "node"
+	DeploymentType     = "deployment"
+	StatefulsetType    = "statefulset"
+	DaemonsetType      = "daemonset"
+	CronjobType        = "cronjob"
+	JobType            = "job"
+	NamespaceType      = "namespace"
+	ServiceType        = "service"
+	IngressType        = "ingress"
+	NetworkPolicyType  = "networkpolicy"
+	EndpointType       = "endpoints"
+	ServiceAccountType = "serviceaccount"
+	RolebindingType    = "rolebinding"
+	RoleType           = "role"
 )
 
 type KubeResources struct {
-	Watch       *WatchResource
-	Pod         *KubeResource
-	Cluster     *KubeResource
-	Event       *KubeResource
-	Node        *KubeResource
-	Deployment  *KubeResource
-	Statefulset *KubeResource
-	Daemonset   *KubeResource
-	Cronjob     *KubeResource
-	Job         *KubeResource
-	Namespace   *KubeResource
+	Watch          *WatchResource
+	Pod            *KubeResource
+	Cluster        *KubeResource
+	Event          *KubeResource
+	Node           *KubeResource
+	Deployment     *KubeResource
+	Statefulset    *KubeResource
+	Daemonset      *KubeResource
+	Cronjob        *KubeResource
+	Job            *KubeResource
+	Namespace      *KubeResource
+	Service        *KubeResource
+	Ingress        *KubeResource
+	NetworkPolicy  *KubeResource
+	Endpoint       *KubeResource
+	ServiceAccount *KubeResource
+	Rolebinding    *KubeResource
+	Role           *KubeResource
 }
 
 func NewKubeResources(message *MiddleMessage) *KubeResources {
 	return &KubeResources{
-		Watch:       &WatchResource{&KubeResource{ResType: WatchResType, KubeMessage: message}},
-		Pod:         &KubeResource{ResType: PodType, KubeMessage: message},
-		Cluster:     &KubeResource{ResType: ClusterType, KubeMessage: message},
-		Event:       &KubeResource{ResType: EventType, KubeMessage: message},
-		Node:        &KubeResource{ResType: NodeType, KubeMessage: message},
-		Deployment:  &KubeResource{ResType: DeploymentType, KubeMessage: message},
-		Statefulset: &KubeResource{ResType: StatefulsetType, KubeMessage: message},
-		Daemonset:   &KubeResource{ResType: DaemonsetType, KubeMessage: message},
-		Cronjob:     &KubeResource{ResType: CronjobType, KubeMessage: message},
-		Job:         &KubeResource{ResType: JobType, KubeMessage: message},
-		Namespace:   &KubeResource{ResType: NamespaceType, KubeMessage: message},
+		Watch:          &WatchResource{&KubeResource{ResType: WatchResType, KubeMessage: message}},
+		Pod:            &KubeResource{ResType: PodType, KubeMessage: message},
+		Cluster:        &KubeResource{ResType: ClusterType, KubeMessage: message},
+		Event:          &KubeResource{ResType: EventType, KubeMessage: message},
+		Node:           &KubeResource{ResType: NodeType, KubeMessage: message},
+		Deployment:     &KubeResource{ResType: DeploymentType, KubeMessage: message},
+		Statefulset:    &KubeResource{ResType: StatefulsetType, KubeMessage: message},
+		Daemonset:      &KubeResource{ResType: DaemonsetType, KubeMessage: message},
+		Cronjob:        &KubeResource{ResType: CronjobType, KubeMessage: message},
+		Job:            &KubeResource{ResType: JobType, KubeMessage: message},
+		Namespace:      &KubeResource{ResType: NamespaceType, KubeMessage: message},
+		Service:        &KubeResource{ResType: ServiceType, KubeMessage: message},
+		Ingress:        &KubeResource{ResType: IngressType, KubeMessage: message},
+		NetworkPolicy:  &KubeResource{ResType: NetworkPolicyType, KubeMessage: message},
+		Endpoint:       &KubeResource{ResType: EndpointType, KubeMessage: message},
+		ServiceAccount: &KubeResource{ResType: ServiceAccountType, KubeMessage: message},
+		Rolebinding:    &KubeResource{ResType: RolebindingType, KubeMessage: message},
+		Role:           &KubeResource{ResType: RoleType, KubeMessage: message},
 	}
 }

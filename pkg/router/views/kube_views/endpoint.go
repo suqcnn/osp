@@ -8,13 +8,13 @@ import (
 	"net/http"
 )
 
-type Cronjob struct {
+type Endpoint struct {
 	Views []*views.View
 	*kube_resource.KubeResources
 }
 
-func NewCronjob(kr *kube_resource.KubeResources) *Cronjob {
-	d := &Cronjob{
+func NewEndpoint(kr *kube_resource.KubeResources) *Endpoint {
+	d := &Endpoint{
 		KubeResources: kr,
 	}
 	vs := []*views.View{
@@ -27,7 +27,7 @@ func NewCronjob(kr *kube_resource.KubeResources) *Cronjob {
 	return d
 }
 
-func (d *Cronjob) list(c *views.Context) *utils.Response {
+func (d *Endpoint) list(c *views.Context) *utils.Response {
 	var ser ListSerializers
 	if err := c.ShouldBindQuery(&ser); err != nil {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
@@ -36,10 +36,10 @@ func (d *Cronjob) list(c *views.Context) *utils.Response {
 		"name":      ser.Name,
 		"namespace": ser.Namespace,
 	}
-	return d.Cronjob.List(c.Param("cluster"), reqParams)
+	return d.Endpoint.List(c.Param("cluster"), reqParams)
 }
 
-func (d *Cronjob) get(c *views.Context) *utils.Response {
+func (d *Endpoint) get(c *views.Context) *utils.Response {
 	var ser GetSerializers
 	if err := c.ShouldBindQuery(&ser); err != nil {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
@@ -49,18 +49,18 @@ func (d *Cronjob) get(c *views.Context) *utils.Response {
 		"namespace": c.Param("namespace"),
 		"output":    ser.Output,
 	}
-	return d.Cronjob.Get(c.Param("cluster"), reqParams)
+	return d.Endpoint.Get(c.Param("cluster"), reqParams)
 }
 
-func (d *Cronjob) delete(c *views.Context) *utils.Response {
+func (d *Endpoint) delete(c *views.Context) *utils.Response {
 	var ser DeleteSerializers
 	if err := c.ShouldBind(&ser); err != nil {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
 	}
-	return d.Cronjob.Delete(c.Param("cluster"), ser)
+	return d.Endpoint.Delete(c.Param("cluster"), ser)
 }
 
-func (d *Cronjob) updateYaml(c *views.Context) *utils.Response {
+func (d *Endpoint) updateYaml(c *views.Context) *utils.Response {
 	var ser UpdateSerializers
 	if err := c.ShouldBind(&ser); err != nil {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
@@ -70,5 +70,5 @@ func (d *Cronjob) updateYaml(c *views.Context) *utils.Response {
 		"namespace": c.Param("namespace"),
 		"yaml":      ser.Yaml,
 	}
-	return d.Cronjob.UpdateYaml(c.Param("cluster"), reqParams)
+	return d.Endpoint.UpdateYaml(c.Param("cluster"), reqParams)
 }

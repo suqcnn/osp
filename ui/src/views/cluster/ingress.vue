@@ -184,7 +184,7 @@ export default {
       if (cluster) {
         listIngresses(cluster).then(response => {
           this.loading = false
-          this.originIngresses = response.data
+          this.originIngresses = response.data ? response.data : []
         }).catch(() => {
           this.loading = false
         })

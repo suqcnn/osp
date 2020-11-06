@@ -161,13 +161,13 @@ export default {
         let newUid = newObj.resource.metadata.uid
         let newRv = newObj.resource.metadata.resourceVersion
         if (newObj.event === 'add') {
-          this.originEvents.push(buildEvents(newObj.resource))
+          this.originEvents.push(buildEvent(newObj.resource))
         } else if (newObj.event === 'update') {
           for (let i in this.originEvents) {
             let d = this.originEvents[i]
             if (d.uid === newUid) {
               if (d.resource_version < newRv){
-                let newDp = buildEvents(newObj.resource)
+                let newDp = buildEvent(newObj.resource)
                 this.$set(this.originEvents, i, newDp)
               }
               break
@@ -202,7 +202,7 @@ export default {
       if (cluster) {
         listEvents(cluster).then(response => {
           this.loading = false
-          this.originEvents = response.data
+          this.originEvents = response.data ? response.data : []
         }).catch(() => {
           this.loading = false
         })

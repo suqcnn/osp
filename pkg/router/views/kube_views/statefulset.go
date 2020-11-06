@@ -34,9 +34,8 @@ func (d *Statefulset) list(c *views.Context) *utils.Response {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
 	}
 	reqParams := map[string]interface{}{
-		"name":           ser.Name,
-		"namespace":      ser.Namespace,
-		"label_selector": ser.LabelSelector,
+		"name":      ser.Name,
+		"namespace": ser.Namespace,
 	}
 	return d.Statefulset.List(c.Param("cluster"), reqParams)
 }

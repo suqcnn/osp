@@ -25,7 +25,7 @@ export function deleteServices(cluster, data) {
 
 export function updateService(cluster, namespace, name, yaml) {
   return request({
-    url: `service/${cluster}/${namespace}/${name}`,
+    url: `service/${cluster}/update/${namespace}/${name}`,
     method: 'post',
     data: { yaml }
   })
@@ -33,7 +33,7 @@ export function updateService(cluster, namespace, name, yaml) {
 
 export function updateServiceObj(cluster, namespace, name, data) {
   return request({
-    url: `service/${cluster}/${namespace}/${name}/update_obj`,
+    url: `service/${cluster}/update_obj/${namespace}/${name}`,
     method: 'post',
     data: data
   })

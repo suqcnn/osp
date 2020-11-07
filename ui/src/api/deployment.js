@@ -25,7 +25,7 @@ export function deleteDeployments(cluster, data) {
 
 export function updateDeployment(cluster, namespace, name, yaml) {
   return request({
-    url: `deployment/${cluster}/${namespace}/${name}`,
+    url: `deployment/${cluster}/update/${namespace}/${name}`,
     method: 'post',
     data: { yaml }
   })
@@ -33,7 +33,7 @@ export function updateDeployment(cluster, namespace, name, yaml) {
 
 export function updateDeploymentObj(cluster, namespace, name, data) {
   return request({
-    url: `deployment/${cluster}/${namespace}/${name}/update_obj`,
+    url: `deployment/${cluster}/update_obj/${namespace}/${name}`,
     method: 'post',
     data: data
   })

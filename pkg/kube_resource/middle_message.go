@@ -107,6 +107,20 @@ func (m *MiddleMessage) ClusterWatchQueueKey(cluster string) string {
 	return "osp:cluster_watch:" + cluster
 }
 
+func (m *MiddleMessage) HasWatchReceive(cluster string) bool {
+	watchKey := m.ClusterWatchQueueKey(cluster)
+	subNums, err := m.client.PubSubNumSub(m.Context, watchKey).Result()
+	if err != nil {
+		klog.Errorf("get pubsub %s error: %s", watchKey, err.Error())
+		return false
+	}
+	if num, ok := subNums[watchKey]; !ok || num <= 0 {
+		klog.Errorf("watch cluster %s is not in subscribe", cluster)
+		return false
+	}
+	return true
+}
+
 func (m *MiddleMessage) ReceiveWatch(cluster string, reqHandle func(string)) error {
 	reqSubKey := m.ClusterWatchQueueKey(cluster)
 	pubsub := m.client.Subscribe(m.Context, reqSubKey)

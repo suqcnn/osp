@@ -10,16 +10,46 @@ import (
 type ViewSets map[string][]*views.View
 
 func NewViewSets(kr *kube_resource.KubeResources, models *model.Models) *ViewSets {
-	viewsets := make(ViewSets)
-
-	cluster := views.NewCluster(models)
-	viewsets["cluster"] = cluster.Views
-
+	cluster := views.NewCluster(models, kr)
 	user := views.NewUser(models)
-	viewsets["user"] = user.Views
 
 	pods := kube_views.NewPod(kr)
-	viewsets["pods"] = pods.Views
+	event := kube_views.NewEvent(kr)
+	namespace := kube_views.NewNamespace(kr)
+	deployment := kube_views.NewDeployment(kr)
+	node := kube_views.NewNode(kr)
+	statefulset := kube_views.NewStatefulset(kr)
+	daemonset := kube_views.NewDaemonset(kr)
+	cronjob := kube_views.NewCronjob(kr)
+	job := kube_views.NewJob(kr)
+	service := kube_views.NewService(kr)
+	endpoints := kube_views.NewEndpoint(kr)
+	ingress := kube_views.NewIngress(kr)
+	networkpolicy := kube_views.NewNetworkPolicy(kr)
+	serviceaccount := kube_views.NewServiceAccount(kr)
+	rolebinding := kube_views.NewRolebinding(kr)
+	role := kube_views.NewRole(kr)
 
-	return &viewsets
+	viewsets := &ViewSets{
+		"cluster":        cluster.Views,
+		"user":           user.Views,
+		"pods":           pods.Views,
+		"event":          event.Views,
+		"namespace":      namespace.Views,
+		"deployment":     deployment.Views,
+		"nodes":          node.Views,
+		"statefulset":    statefulset.Views,
+		"daemonset":      daemonset.Views,
+		"cronjob":        cronjob.Views,
+		"job":            job.Views,
+		"service":        service.Views,
+		"endpoints":      endpoints.Views,
+		"ingress":        ingress.Views,
+		"networkpolicy":  networkpolicy.Views,
+		"serviceaccount": serviceaccount.Views,
+		"rolebinding":    rolebinding.Views,
+		"role":           role.Views,
+	}
+
+	return viewsets
 }

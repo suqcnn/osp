@@ -26,7 +26,7 @@ export function deleteJobs(cluster, data) {
 
 export function updateJob(cluster, namespace, name, yaml) {
   return request({
-    url: `job/${cluster}/${namespace}/${name}`,
+    url: `job/${cluster}/update/${namespace}/${name}`,
     method: 'post',
     data: { yaml }
   })

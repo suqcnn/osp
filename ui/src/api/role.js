@@ -25,7 +25,7 @@ export function deleteRoles(cluster, data) {
 
 export function updateRole(cluster, namespace, name, yaml) {
   return request({
-    url: `role/${cluster}/${namespace}/${name}`,
+    url: `role/${cluster}/update/${namespace}/${name}`,
     method: 'post',
     data: { yaml }
   })
@@ -33,7 +33,7 @@ export function updateRole(cluster, namespace, name, yaml) {
 
 export function updateRoleObj(cluster, namespace, name, data) {
   return request({
-    url: `role/${cluster}/${namespace}/${name}/update_obj`,
+    url: `role/${cluster}/update_obj/${namespace}/${name}`,
     method: 'post',
     data: data
   })

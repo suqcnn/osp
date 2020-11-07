@@ -210,7 +210,7 @@ export default {
       if (cluster) {
         listJobs(cluster).then(response => {
           this.loading = false
-          this.originJobs = response.data
+          this.originJobs = response.data ? response.data : []
         }).catch(() => {
           this.loading = false
         })

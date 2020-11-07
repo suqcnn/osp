@@ -25,7 +25,7 @@ export function deleteCronJobs(cluster, data) {
 
 export function updateCronJob(cluster, namespace, name, yaml) {
   return request({
-    url: `cronjob/${cluster}/${namespace}/${name}`,
+    url: `cronjob/${cluster}/update/${namespace}/${name}`,
     method: 'post',
     data: { yaml }
   })

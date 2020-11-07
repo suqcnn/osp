@@ -25,7 +25,7 @@ export function deleteRoleBindings(cluster, data) {
 
 export function updateRoleBinding(cluster, namespace, name, kind, yaml) {
   return request({
-    url: `rolebinding/${cluster}/${namespace}/${name}`,
+    url: `rolebinding/${cluster}/update/${namespace}/${name}`,
     method: 'post',
     data: { yaml, kind }
   })
@@ -33,7 +33,7 @@ export function updateRoleBinding(cluster, namespace, name, kind, yaml) {
 
 export function updateRoleBindingObj(cluster, namespace, name, data) {
   return request({
-    url: `rolebinding/${cluster}/${namespace}/${name}/update_obj`,
+    url: `rolebinding/${cluster}/update_obj/${namespace}/${name}`,
     method: 'post',
     data: data
   })

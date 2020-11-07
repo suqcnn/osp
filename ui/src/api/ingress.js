@@ -25,7 +25,7 @@ export function deleteIngresses(cluster, data) {
 
 export function updateIngress(cluster, namespace, name, yaml) {
   return request({
-    url: `ingress/${cluster}/${namespace}/${name}`,
+    url: `ingress/${cluster}/update/${namespace}/${name}`,
     method: 'post',
     data: { yaml }
   })
@@ -33,7 +33,7 @@ export function updateIngress(cluster, namespace, name, yaml) {
 
 export function updateIngressObj(cluster, namespace, name, data) {
   return request({
-    url: `ingress/${cluster}/${namespace}/${name}/update_obj`,
+    url: `ingress/${cluster}/update_obj/${namespace}/${name}`,
     method: 'post',
     data: data
   })

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/openspacee/osp/pkg/kube_resource"
 	"github.com/openspacee/osp/pkg/model"
+	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/redis"
 	"github.com/openspacee/osp/pkg/router/views"
 	"github.com/openspacee/osp/pkg/router/views/ws_views"
@@ -13,6 +14,7 @@ import (
 	"k8s.io/klog"
 	"net/http"
 	"runtime"
+	"strings"
 )
 
 type Router struct {
@@ -47,7 +49,7 @@ func NewRouter(redisOptions *redis.Options) *Router {
 	for group, vs := range *viewsets {
 		g := apiGroup.Group(group)
 		for _, v := range vs {
-			g.Handle(v.Method, v.Path, apiWrapper(v.Handler))
+			g.Handle(v.Method, v.Path, apiWrapper(models, v.Handler))
 		}
 	}
 
@@ -78,21 +80,42 @@ func NewRouter(redisOptions *redis.Options) *Router {
 	}
 }
 
-func apiWrapper(handler views.ViewHandler) gin.HandlerFunc {
+func apiWrapper(m *model.Models, handler views.ViewHandler) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authRes := auth(c)
+		authRes := auth(m, c)
 		if !authRes.IsSuccess() {
 			c.JSON(200, authRes)
 		} else {
-			context := &views.Context{Context: c}
+			context := &views.Context{Context: c, User: authRes.Data.(*types.User)}
 			res := handler(context)
 			c.JSON(200, res)
 		}
 	}
 }
 
-func auth(c *gin.Context) *utils.Response {
-	return &utils.Response{Code: code.Success}
+func auth(m *model.Models, c *gin.Context) *utils.Response {
+	token := c.DefaultQuery("token", "")
+	if token == "" {
+		token = c.Request.Header.Get("Authorization")
+		if s := strings.Split(token, " "); len(s) == 2 {
+			token = s[1]
+		}
+	}
+	if token == "" {
+		return &utils.Response{Code: code.RequestError, Msg: "not found token"}
+	}
+
+	tkObj := types.Token{}
+	if err := m.TokenManager.Get(token, &tkObj); err != nil {
+		return &utils.Response{Code: code.RequestError, Msg: err.Error()}
+	}
+
+	userObj := types.User{}
+	if err := m.UserManager.Get(tkObj.UserName, &userObj); err != nil {
+		return &utils.Response{Code: code.RequestError, Msg: err.Error()}
+	}
+
+	return &utils.Response{Code: code.Success, Data: &userObj}
 }
 
 func LocalMiddleware() gin.HandlerFunc {

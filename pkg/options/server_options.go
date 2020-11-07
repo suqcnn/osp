@@ -1,5 +1,6 @@
 package options
 
 type ServerOptions struct {
-	Port int
+	Port         int
+	RedisAddress string
 }

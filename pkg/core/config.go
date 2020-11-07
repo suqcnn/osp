@@ -12,7 +12,7 @@ type ServerConfig struct {
 
 func NewServerConfig(op *options.ServerOptions) (*ServerConfig, error) {
 	redisOp := &redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     op.RedisAddress,
 		Password: "",
 		DB:       0,
 	}

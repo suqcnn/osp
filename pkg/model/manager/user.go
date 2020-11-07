@@ -1,20 +1,20 @@
 package manager
 
 import (
+	"context"
 	"github.com/go-redis/redis/v8"
-	"github.com/openspacee/osp/pkg/model/types"
 )
 
 type UserManager struct {
-	client *redis.Client
+	CommonManager
 }
 
 func NewUserManager(redisClient *redis.Client) *UserManager {
 	return &UserManager{
-		client: redisClient,
+		CommonManager{
+			client: redisClient,
+			modelKey: "osp:user",
+			Context: context.Background(),
+		},
 	}
-}
-
-func (um *UserManager) List() ([]*types.User, error) {
-	return nil, nil
 }

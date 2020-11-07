@@ -1,6 +1,8 @@
 package types
 
 type Cluster struct {
-	Name  string
-	Token string
+	Common
+
+	Name  string `json:"name"`
+	Token string `json:"token"`
 }

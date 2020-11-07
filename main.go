@@ -9,11 +9,13 @@ import (
 
 var (
 	port = flag.Int("port", 80, "Server port to listen.")
+	redisAddress = flag.String("redis-address", "localhost:6379", "redis address used")
 )
 
 func createServerOptions() *options.ServerOptions {
 	return &options.ServerOptions{
 		Port: *port,
+		RedisAddress: *redisAddress,
 	}
 }
 

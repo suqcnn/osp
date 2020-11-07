@@ -1,20 +1,20 @@
 package manager
 
 import (
+	"context"
 	"github.com/go-redis/redis/v8"
-	"github.com/openspacee/osp/pkg/model/types"
 )
 
 type TokenManager struct {
-	client *redis.Client
+	CommonManager
 }
 
 func NewTokenManager(redisClient *redis.Client) *TokenManager {
 	return &TokenManager{
-		client: redisClient,
+		CommonManager{
+			modelKey: "osp:token",
+			Context: context.Background(),
+			client: redisClient,
+		},
 	}
-}
-
-func (tm *TokenManager) List() ([]*types.Token, error) {
-	return nil, nil
 }

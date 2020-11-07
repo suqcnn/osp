@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"github.com/openspacee/osp/pkg/router"
 	"net/http"
 )
@@ -20,7 +21,7 @@ func NewServer(config *ServerConfig) *Server {
 
 func (s *Server) Run() {
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    fmt.Sprintf(":%d", s.config.Port),
 		Handler: s.router,
 	}
 	server.ListenAndServe()

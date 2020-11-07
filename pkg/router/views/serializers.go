@@ -13,3 +13,6 @@ type UserSerializers struct {
 	Status    string `json:"status"`
 }
 
+type ClusterCreateSerializers struct {
+	Name      string `json:"name"`
+}

@@ -21,6 +21,7 @@ func NewUser(models *model.Models) *User {
 	views := []*View{
 		NewView(http.MethodGet, "", user.list),
 		NewView(http.MethodPost, "", user.create),
+		//NewView(http.MethodPost, "/admin", user.create),
 		NewView(http.MethodPut, "/:username", user.update),
 
 		NewView(http.MethodGet, "/token", user.tokenUser),
@@ -60,6 +61,11 @@ func (u *User) update(c *Context) *utils.Response {
 	}
 
 	if user.Email != "" {
+		if ok := utils.VerifyEmailFormat(user.Email); !ok {
+			resp.Code = code.ParamsError
+			resp.Msg = fmt.Sprintf("email:%s format error for user:%s", user.Email, userName)
+			return &resp
+		}
 		userObj.Email = user.Email
 	}
 
@@ -97,9 +103,23 @@ func (u *User) list(c *Context) *utils.Response {
 
 func (u *User) create(c *Context) *utils.Response {
 	var ser UserCreateSerializers
+	resp := utils.Response{Code: code.Success}
+
 	if err := c.ShouldBind(&ser); err != nil {
-		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
+		resp.Code = code.ParamsError
+		resp.Msg = err.Error()
+		return &resp
 	}
+	if ser.Name == "" {
+		ser.Name = "admin"
+	} else {
+		if ok := utils.VerifyEmailFormat(ser.Email); !ok {
+			resp.Code = code.ParamsError
+			resp.Msg = fmt.Sprintf("email:%s format error for user:%s", ser.Email, ser.Name)
+			return &resp
+		}
+	}
+
 	user := &types.User{
 		Name: ser.Name,
 		Email: ser.Email,
@@ -111,11 +131,15 @@ func (u *User) create(c *Context) *utils.Response {
 	user.UpdateTime = utils.StringNow()
 
 	if err := u.models.UserManager.Save(user.Name, user, -1, true); err != nil {
-		return &utils.Response{Code: code.CreateError, Msg: err.Error()}
+		resp.Code = code.CreateError
+		resp.Msg = err.Error()
+		return &resp
 	}
-	return &utils.Response{Code: code.Success, Data: map[string]interface{}{
+
+	resp.Data = map[string]interface{}{
 		"name": user.Name,
 		"email": user.Email,
 		"status": user.Status,
-	}}
+	}
+	return &resp
 }

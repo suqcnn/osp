@@ -25,7 +25,7 @@ export function logout() {
 
 export function adminSet(data) {
   return request({
-    url: '/user/admin',
+    url: '/admin',
     method: 'post',
     data
   })

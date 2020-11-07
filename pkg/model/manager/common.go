@@ -3,6 +3,7 @@ package manager
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"time"
@@ -22,6 +23,9 @@ func (cm *CommonManager) Get(key string, keyObj interface{}) error {
 		return err
 	}
 
+	if len(data) == 0 {
+		return errors.New(fmt.Sprintf("not found key:%s", key))
+	}
 	jsonBody, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -117,7 +121,11 @@ func (cm *CommonManager) SetsKey() string {
 }
 
 func (cm *CommonManager) AddSets(name string) error {
-	err := cm.client.SAdd(cm.Context, cm.SetsKey(), name).Err()
+	setKey := cm.SetsKey()
+	if ok, _ := cm.client.SIsMember(cm.Context, setKey, name).Result(); ok {
+		return errors.New(fmt.Sprintf("have added %s to sets：%s", name, setKey))
+	}
+	err := cm.client.SAdd(cm.Context, setKey, name).Err()
 	if err != nil {
 		return err
 	}

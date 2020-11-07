@@ -87,9 +87,40 @@ func (l Login) HasAdmin(c *gin.Context) {
 	userObj := types.User{}
 	if err := l.models.UserManager.Get("admin", &userObj); err != nil {
 		data["has"] = 0
-		c.JSON(http.StatusOK, &utils.Response{Code: code.Success, Data: data})
 	}
 	c.JSON(http.StatusOK, &utils.Response{Code: code.Success, Data: data})
+}
+
+
+func (l Login) CreateAdmin(c *gin.Context) {
+	var ser UserCreateSerializers
+	if err := c.ShouldBind(&ser); err != nil {
+		c.JSON(http.StatusOK, &utils.Response{Code: code.ParamsError, Msg: err.Error()})
+		return
+	}
+	user := &types.User{
+		Name: "admin",
+		Email: ser.Email,
+		Password: utils.Encrypt(ser.Password),
+		Status: "normal",
+		LastLogin: utils.StringNow(),
+	}
+	user.CreateTime = utils.StringNow()
+	user.UpdateTime = utils.StringNow()
+
+	if err := l.models.UserManager.Save(user.Name, user, -1, true); err != nil {
+		c.JSON(http.StatusOK, &utils.Response{Code: code.ParamsError, Msg: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, &utils.Response{
+		Code: code.Success,
+		Data: map[string]interface{}{
+			"name": user.Name,
+			"email": user.Email,
+			"status": user.Status,
+		},
+	})
 }
 
 func (l Login) Logout(c *gin.Context) {

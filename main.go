@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	port = flag.Int("port", 80, "Server port to listen.")
+	port = flag.Int("port", 8088, "Server port to listen.")
 	redisAddress = flag.String("redis-address", "localhost:6379", "redis address used")
 )
 

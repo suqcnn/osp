@@ -57,6 +57,7 @@ func NewRouter(redisOptions *redis.Options) *Router {
 	loginView := views.NewLogin(models)
 	apiGroup.POST("/login", loginView.Login)
 	apiGroup.GET("/has_admin", loginView.HasAdmin)
+	apiGroup.POST("/admin", loginView.CreateAdmin)
 	apiGroup.POST("/logout", loginView.Logout)
 
 	// 连接k8s agent的websocket接口

@@ -1,22 +1,20 @@
 package manager
 
 import (
+	"context"
 	"github.com/go-redis/redis/v8"
-	"github.com/openspacee/osp/pkg/model/types"
 )
 
 type ClusterManager struct {
-	client   *redis.Client
-	modelKey string
+	CommonManager
 }
 
 func NewClusterManager(redisClient *redis.Client) *ClusterManager {
 	return &ClusterManager{
-		client:   redisClient,
-		modelKey: "osp:cluster:",
+		CommonManager{
+			client:   redisClient,
+			modelKey: "osp:cluster",
+			Context: context.Background(),
+		},
 	}
-}
-
-func (cm *ClusterManager) List() ([]*types.Cluster, error) {
-	return nil, nil
 }

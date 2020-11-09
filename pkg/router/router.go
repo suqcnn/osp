@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/openspacee/osp/pkg/kube_resource"
 	"github.com/openspacee/osp/pkg/model"
-	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/redis"
 	"github.com/openspacee/osp/pkg/router/views"
 	"github.com/openspacee/osp/pkg/router/views/ws_views"
@@ -87,7 +86,7 @@ func apiWrapper(m *model.Models, handler views.ViewHandler) gin.HandlerFunc {
 		if !authRes.IsSuccess() {
 			c.JSON(200, authRes)
 		} else {
-			context := &views.Context{Context: c, User: authRes.Data.(*types.User)}
+			context := &views.Context{Context: c, UserName: authRes.Data.(map[string]interface{})["name"].(string)}
 			res := handler(context)
 			c.JSON(200, res)
 		}
@@ -95,6 +94,7 @@ func apiWrapper(m *model.Models, handler views.ViewHandler) gin.HandlerFunc {
 }
 
 func auth(m *model.Models, c *gin.Context) *utils.Response {
+	resp := utils.Response{Code: code.Success}
 	token := c.DefaultQuery("token", "")
 	if token == "" {
 		token = c.Request.Header.Get("Authorization")
@@ -103,20 +103,23 @@ func auth(m *model.Models, c *gin.Context) *utils.Response {
 		}
 	}
 	if token == "" {
-		return &utils.Response{Code: code.RequestError, Msg: "not found token"}
+		resp.Code = code.ParamsError
+		resp.Msg = "not found token"
+		return &resp
 	}
 
-	tkObj := types.Token{}
-	if err := m.TokenManager.Get(token, &tkObj); err != nil {
-		return &utils.Response{Code: code.RequestError, Msg: err.Error()}
+	tk := m.TokenManager.Get(token)
+	if !tk.IsSuccess() {
+		return tk
 	}
 
-	userObj := types.User{}
-	if err := m.UserManager.Get(tkObj.UserName, &userObj); err != nil {
-		return &utils.Response{Code: code.RequestError, Msg: err.Error()}
+	u := m.UserManager.Get(tk.Data.(map[string]interface{})["username"].(string))
+	if !u.IsSuccess() {
+		return u
 	}
 
-	return &utils.Response{Code: code.Success, Data: &userObj}
+	resp.Data = u.Data
+	return &resp
 }
 
 func LocalMiddleware() gin.HandlerFunc {

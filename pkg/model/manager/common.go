@@ -81,7 +81,7 @@ func (cm *CommonManager) Delete(key string) error {
 	return nil
 }
 
-func (cm *CommonManager) List(filters map[string]string) ([]map[string]string, error) {
+func (cm *CommonManager) List(filters map[string]interface{}) ([]map[string]string, error) {
 	pipeline := cm.client.Pipeline()
 	es, _ := cm.client.SMembers(cm.Context, cm.SetsKey()).Result()
 	for _, pk := range es {

@@ -3,7 +3,6 @@ package views
 import (
 	"fmt"
 	"github.com/openspacee/osp/pkg/model"
-	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/utils"
 	"github.com/openspacee/osp/pkg/utils/code"
 	"net/http"
@@ -34,7 +33,7 @@ func NewUser(models *model.Models) *User {
 func (u *User) tokenUser(c *Context) *utils.Response {
 	return &utils.Response{Code: code.Success,
 		Data: map[string]interface{}{
-			"name": c.User.Name,
+			"name": c.UserName,
 		},
 	}
 }
@@ -49,15 +48,10 @@ func (u *User) update(c *Context) *utils.Response {
 		return &resp
 	}
 
-	userObj := types.User{}
-	if err := u.models.UserManager.Get(userName, &userObj); err != nil {
-		resp.Code = code.GetError
-		resp.Msg = fmt.Sprintf("not found user:%s", userName)
-		return &resp
-	}
+	params := map[string]interface{}{}
 
 	if user.Status != "" {
-		userObj.Status = user.Status
+		params["status"] = user.Status
 	}
 
 	if user.Email != "" {
@@ -66,20 +60,15 @@ func (u *User) update(c *Context) *utils.Response {
 			resp.Msg = fmt.Sprintf("email:%s format error for user:%s", user.Email, userName)
 			return &resp
 		}
-		userObj.Email = user.Email
+		params["email"] = user.Email
 	}
 
-	if err := u.models.UserManager.Save(userObj.Name, &userObj, -1, false); err != nil {
-		resp.Code = code.CreateError
-		resp.Msg = err.Error()
-		return &resp
-	}
-	return &resp
+	return u.models.UserManager.Update(userName, params)
 }
 
 func (u *User) list(c *Context) *utils.Response {
 	resp := utils.Response{Code: code.Success}
-	var filters map[string]string
+	var filters map[string]interface{}
 
 	dList, err := u.models.UserManager.List(filters)
 	if err != nil {
@@ -119,27 +108,16 @@ func (u *User) create(c *Context) *utils.Response {
 			return &resp
 		}
 	}
-
-	user := &types.User{
-		Name: ser.Name,
-		Email: ser.Email,
-		Password: utils.Encrypt(ser.Password),
-		Status: "normal",
-		LastLogin: utils.StringNow(),
-	}
-	user.CreateTime = utils.StringNow()
-	user.UpdateTime = utils.StringNow()
-
-	if err := u.models.UserManager.Save(user.Name, user, -1, true); err != nil {
-		resp.Code = code.CreateError
-		resp.Msg = err.Error()
-		return &resp
+	params := map[string]interface{}{
+		"name": ser.Name,
+		"email": ser.Email,
+		"password": ser.Password,
 	}
 
-	resp.Data = map[string]interface{}{
-		"name": user.Name,
-		"email": user.Email,
-		"status": user.Status,
+	uc := u.models.UserManager.Create(params)
+	if !uc.IsSuccess() {
+		return uc
 	}
+	resp.Data = uc.Data
 	return &resp
 }

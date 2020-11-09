@@ -3,9 +3,7 @@ package views
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/openspacee/osp/pkg/model"
-	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/utils"
 	"github.com/openspacee/osp/pkg/utils/code"
 	"net/http"
@@ -38,44 +36,39 @@ func (l Login) Login(c *gin.Context) {
 		return
 	}
 	password := utils.Encrypt(user.Password)
-	userObj := types.User{}
-	if err := l.models.UserManager.Get(user.UserName, &userObj); err != nil {
-		resp.Code = code.DataNotExists
-		resp.Msg = fmt.Sprintf("not found user by:%s", user.UserName)
-		c.JSON(http.StatusOK, resp)
+
+	up := l.models.UserManager.Get(user.UserName)
+	if !up.IsSuccess() {
+		c.JSON(http.StatusOK, up)
 		return
 	}
 
-	if password != userObj.Password {
+	userObjPassword := up.Data.(map[string]interface{})["password"].(string)
+	if password != userObjPassword {
 		resp.Code = code.AuthError
 		resp.Msg = fmt.Sprintf("password error for user by:%s", user.UserName)
 		c.JSON(http.StatusOK, resp)
 		return
 	}
 
-	tk := uuid.New()
-	tkObj := &types.Token{
-		UserName: user.UserName,
-		Token: tk,
-	}
-	tkObj.CreateTime = utils.StringNow()
-	tkObj.UpdateTime = utils.StringNow()
-
-	if err := l.models.TokenManager.Save(tkObj.Token.String(), tkObj, 43200, false); err != nil {
+	tk := l.models.TokenManager.Create(user.UserName)
+	if !tk.IsSuccess() {
 		resp.Code = code.CreateError
-		resp.Msg = fmt.Sprintf("create token for user:%s error:%s", tkObj.UserName, err.Error())
+		resp.Msg = fmt.Sprintf("create token for user:%s error:%s", user.UserName, tk.Msg)
 		c.JSON(http.StatusOK, resp)
 		return
 	}
-	userObj.LastLogin = utils.StringNow()
-	if err := l.models.UserManager.Save(userObj.Name, userObj, 0, false); err != nil {
-		resp.Code = code.CreateError
-		resp.Msg = fmt.Sprintf("create token for user:%s error:%s", tkObj.UserName, err.Error())
-		c.JSON(http.StatusOK, resp)
+
+	params := map[string]interface{}{
+		"last_login": utils.StringNow(),
+	}
+	up = l.models.UserManager.Update(user.UserName, params)
+	if !up.IsSuccess() {
+		c.JSON(http.StatusOK, up)
 		return
 	}
 	resp.Data = map[string]interface{}{
-		"token": tkObj.Token,
+		"token": tk.Data.(map[string]interface{})["token"].(string),
 	}
 	c.JSON(http.StatusOK, resp)
 }
@@ -84,8 +77,8 @@ func (l Login) HasAdmin(c *gin.Context) {
 	data := map[string]interface{}{
 		"has": 1,
 	}
-	userObj := types.User{}
-	if err := l.models.UserManager.Get("admin", &userObj); err != nil {
+	up := l.models.UserManager.Get("admin")
+	if !up.IsSuccess() {
 		data["has"] = 0
 	}
 	c.JSON(http.StatusOK, &utils.Response{Code: code.Success, Data: data})
@@ -98,28 +91,22 @@ func (l Login) CreateAdmin(c *gin.Context) {
 		c.JSON(http.StatusOK, &utils.Response{Code: code.ParamsError, Msg: err.Error()})
 		return
 	}
-	user := &types.User{
-		Name: "admin",
-		Email: ser.Email,
-		Password: utils.Encrypt(ser.Password),
-		Status: "normal",
-		LastLogin: utils.StringNow(),
-	}
-	user.CreateTime = utils.StringNow()
-	user.UpdateTime = utils.StringNow()
 
-	if err := l.models.UserManager.Save(user.Name, user, -1, true); err != nil {
-		c.JSON(http.StatusOK, &utils.Response{Code: code.ParamsError, Msg: err.Error()})
+	params := map[string]interface{}{
+		"name": "admin",
+		"email": ser.Email,
+		"password": ser.Password,
+	}
+
+	uc := l.models.UserManager.Create(params)
+	if !uc.IsSuccess() {
+		c.JSON(http.StatusOK, uc)
 		return
 	}
 
 	c.JSON(http.StatusOK, &utils.Response{
 		Code: code.Success,
-		Data: map[string]interface{}{
-			"name": user.Name,
-			"email": user.Email,
-			"status": user.Status,
-		},
+		Data: uc.Data,
 	})
 }
 

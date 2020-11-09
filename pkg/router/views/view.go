@@ -2,7 +2,6 @@ package views
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/utils"
 )
 
@@ -24,5 +23,5 @@ type ViewHandler func(*Context) *utils.Response
 
 type Context struct {
 	*gin.Context
-	User *types.User
+	UserName string
 }

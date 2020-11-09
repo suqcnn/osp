@@ -2,10 +2,8 @@ package views
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/openspacee/osp/pkg/kube_resource"
 	"github.com/openspacee/osp/pkg/model"
-	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/utils"
 	"github.com/openspacee/osp/pkg/utils/code"
 	"net/http"
@@ -32,28 +30,9 @@ func NewCluster(models *model.Models, kr *kube_resource.KubeResources) *Cluster 
 }
 
 func (clu *Cluster) list(c *Context) *utils.Response {
-	resp := utils.Response{Code: code.Success}
-	var filters map[string]string
+	var filters map[string]interface{}
 
-	dList, err := clu.models.ClusterManager.List(filters)
-	if err != nil {
-		resp.Code = code.GetError
-		resp.Msg = err.Error()
-		return &resp
-	}
-	var data []map[string]interface{}
-
-	for _, du := range dList {
-		data = append(data, map[string]interface{}{
-			"name": du["name"],
-			"token": du["token"],
-			"status": du["status"],
-			"create_time": du["create_time"],
-			"update_time": du["update_time"],
-		})
-	}
-	resp.Data = data
-	return &resp
+	return clu.models.ClusterManager.List(filters)
 }
 
 func (clu *Cluster) create(c *Context) *utils.Response {
@@ -71,21 +50,10 @@ func (clu *Cluster) create(c *Context) *utils.Response {
 		return &resp
 	}
 
-	cluster := &types.Cluster{
-		Name: ser.Name,
-		Token: uuid.New(),
-		Status: "normal",
+	params := map[string]interface{}{
+		"name": ser.Name,
 	}
-	cluster.CreateTime = utils.StringNow()
-	cluster.UpdateTime = utils.StringNow()
-
-	if err := clu.models.ClusterManager.Save(cluster.Name, cluster, -1, true); err != nil {
-		resp.Code = code.CreateError
-		resp.Msg = err.Error()
-		return &resp
-	}
-
-	return &resp
+	return clu.models.ClusterManager.Create(params)
 }
 
 func (clu *Cluster) detail(c *Context) *utils.Response {

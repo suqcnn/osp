@@ -2,11 +2,9 @@ package manager
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/go-redis/redis/v8"
-	"github.com/google/uuid"
 	"github.com/openspacee/osp/pkg/model/types"
-	"github.com/openspacee/osp/pkg/utils"
-	"github.com/openspacee/osp/pkg/utils/code"
 )
 
 type ClusterManager struct {
@@ -23,46 +21,27 @@ func NewClusterManager(redisClient *redis.Client) *ClusterManager {
 	}
 }
 
-func (clu *ClusterManager) Create(params map[string]interface{}) *utils.Response {
-	resp := utils.Response{Code: code.Success}
-	cluster := &types.Cluster{
-		Name: params["name"].(string),
-		Token: uuid.New(),
-		Status: "normal",
-	}
-	cluster.CreateTime = utils.StringNow()
-	cluster.UpdateTime = utils.StringNow()
-
+func (clu *ClusterManager) Create(cluster *types.Cluster) error {
 	if err := clu.CommonManager.Save(cluster.Name, cluster, -1, true); err != nil {
-		resp.Code = code.CreateError
-		resp.Msg = err.Error()
-		return &resp
+		return err
 	}
 
-	return &resp
+	return nil
 }
 
-func (clu *ClusterManager) List(filters map[string]interface{}) *utils.Response {
-	resp := utils.Response{Code: code.Success}
-
+func (clu *ClusterManager) List(filters map[string]interface{}) ([]*types.Cluster, error) {
 	dList, err := clu.CommonManager.List(filters)
 	if err != nil {
-		resp.Code = code.GetError
-		resp.Msg = err.Error()
-		return &resp
+		return nil, err
 	}
-
-	var data []map[string]interface{}
-
-	for _, du := range dList {
-		data = append(data, map[string]interface{}{
-			"name": du["name"],
-			"token": du["token"],
-			"status": du["status"],
-			"create_time": du["create_time"],
-			"update_time": du["update_time"],
-		})
+	jsonBody, err := json.Marshal(dList)
+	if err != nil {
+		return nil, err
 	}
-	resp.Data = data
-	return &resp
+	var clus []*types.Cluster
+
+	if err := json.Unmarshal(jsonBody, &clus); err != nil {
+		return nil, err
+	}
+	return clus, nil
 }

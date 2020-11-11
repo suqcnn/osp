@@ -3,6 +3,7 @@ package views
 import (
 	"fmt"
 	"github.com/openspacee/osp/pkg/model"
+	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/utils"
 	"github.com/openspacee/osp/pkg/utils/code"
 	"net/http"
@@ -31,50 +32,65 @@ func NewUser(models *model.Models) *User {
 }
 
 func (u *User) tokenUser(c *Context) *utils.Response {
+	userName := ""
+	if user, ok := c.Get("user"); ok {
+		userName = user.(*types.User).Name
+	}
 	return &utils.Response{Code: code.Success,
 		Data: map[string]interface{}{
-			"name": c.UserName,
-		},
-	}
+			"name": userName,
+		}}
 }
 
 func (u *User) update(c *Context) *utils.Response {
 	userName := c.Param("username")
 	var user UserSerializers
-	resp := utils.Response{Code: code.Success}
+
+	resp := &utils.Response{Code: code.Success}
+
 	if err := c.ShouldBindJSON(&user); err != nil {
 		resp.Code = code.ParamsError
 		resp.Msg = err.Error()
-		return &resp
+		return resp
 	}
 
-	params := map[string]interface{}{}
+	userObj, err := u.models.UserManager.Get(userName)
+	if err != nil {
+		resp.Code = code.GetError
+		resp.Msg = err.Error()
+		return resp
+	}
 
 	if user.Status != "" {
-		params["status"] = user.Status
+		userObj.Status = user.Status
 	}
 
 	if user.Email != "" {
 		if ok := utils.VerifyEmailFormat(user.Email); !ok {
 			resp.Code = code.ParamsError
 			resp.Msg = fmt.Sprintf("email:%s format error for user:%s", user.Email, userName)
-			return &resp
+			return resp
 		}
-		params["email"] = user.Email
+		userObj.Email = user.Email
 	}
 
-	return u.models.UserManager.Update(userName, params)
+	 if err := u.models.UserManager.Update(userObj); err != nil {
+		 resp.Code = code.UpdateError
+		 resp.Msg = err.Error()
+		 return resp
+	 }
+	 return resp
 }
 
 func (u *User) list(c *Context) *utils.Response {
-	resp := utils.Response{Code: code.Success}
+	resp := &utils.Response{Code: code.Success}
 	var filters map[string]interface{}
 
 	dList, err := u.models.UserManager.List(filters)
 	if err != nil {
 		resp.Code = code.GetError
 		resp.Msg = err.Error()
-		return &resp
+		return resp
 	}
 	var data []map[string]interface{}
 
@@ -87,17 +103,17 @@ func (u *User) list(c *Context) *utils.Response {
 		})
 	}
 	resp.Data = data
-	return &resp
+	return resp
 }
 
 func (u *User) create(c *Context) *utils.Response {
 	var ser UserCreateSerializers
-	resp := utils.Response{Code: code.Success}
+	resp := &utils.Response{Code: code.Success}
 
 	if err := c.ShouldBind(&ser); err != nil {
 		resp.Code = code.ParamsError
 		resp.Msg = err.Error()
-		return &resp
+		return resp
 	}
 	if ser.Name == "" {
 		ser.Name = "admin"
@@ -105,19 +121,29 @@ func (u *User) create(c *Context) *utils.Response {
 		if ok := utils.VerifyEmailFormat(ser.Email); !ok {
 			resp.Code = code.ParamsError
 			resp.Msg = fmt.Sprintf("email:%s format error for user:%s", ser.Email, ser.Name)
-			return &resp
+			return resp
 		}
 	}
-	params := map[string]interface{}{
-		"name": ser.Name,
-		"email": ser.Email,
-		"password": ser.Password,
+
+	userObj := types.User{
+		Name: ser.Name,
+		Password: utils.Encrypt(ser.Password),
+		Email: ser.Email,
+		Status: "normal",
+	}
+	userObj.CreateTime = utils.StringNow()
+	userObj.UpdateTime = utils.StringNow()
+
+	if err := u.models.UserManager.Create(&userObj); err != nil {
+		resp.Code = code.CreateError
+		resp.Msg = err.Error()
+		return resp
 	}
 
-	uc := u.models.UserManager.Create(params)
-	if !uc.IsSuccess() {
-		return uc
+	resp.Data = map[string]interface{}{
+		"name": userObj.Name,
+		"password": userObj.Password,
+		"status":userObj.Status,
 	}
-	resp.Data = uc.Data
-	return &resp
+	return resp
 }

@@ -3,7 +3,9 @@ package views
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/openspacee/osp/pkg/model"
+	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/utils"
 	"github.com/openspacee/osp/pkg/utils/code"
 	"net/http"
@@ -37,39 +39,43 @@ func (l Login) Login(c *gin.Context) {
 	}
 	password := utils.Encrypt(user.Password)
 
-	up := l.models.UserManager.Get(user.UserName)
-	if !up.IsSuccess() {
-		c.JSON(http.StatusOK, up)
+	userObj, err := l.models.UserManager.Get(user.UserName)
+	if err != nil {
+		resp.Code = code.GetError
+		resp.Msg = fmt.Sprintf("not found user by name:%s", user.UserName)
+		c.JSON(http.StatusOK, resp)
 		return
 	}
 
-	userObjPassword := up.Data.(map[string]interface{})["password"].(string)
-	if password != userObjPassword {
+	if password != userObj.Password {
 		resp.Code = code.AuthError
 		resp.Msg = fmt.Sprintf("password error for user by:%s", user.UserName)
 		c.JSON(http.StatusOK, resp)
 		return
 	}
 
-	tk := l.models.TokenManager.Create(user.UserName)
-	if !tk.IsSuccess() {
+	tkObj := types.Token{
+		UserName: user.UserName,
+		Token: uuid.New(),
+	}
+	if err := l.models.TokenManager.Create(&tkObj); err != nil  {
 		resp.Code = code.CreateError
-		resp.Msg = fmt.Sprintf("create token for user:%s error:%s", user.UserName, tk.Msg)
+		resp.Msg = fmt.Sprintf("create token for user:%s error:%s", user.UserName, err.Error())
 		c.JSON(http.StatusOK, resp)
 		return
 	}
 
-	params := map[string]interface{}{
-		"last_login": utils.StringNow(),
-	}
-	up = l.models.UserManager.Update(user.UserName, params)
-	if !up.IsSuccess() {
-		c.JSON(http.StatusOK, up)
+	userObj.LastLogin = utils.StringNow()
+	if err := l.models.UserManager.Update(userObj); err != nil {
+		resp.Code = code.UpdateError
+		resp.Msg = err.Error()
+		c.JSON(http.StatusOK, resp)
 		return
 	}
 	resp.Data = map[string]interface{}{
-		"token": tk.Data.(map[string]interface{})["token"].(string),
+		"token": tkObj.Token.String(),
 	}
+	c.Set("user", user)
 	c.JSON(http.StatusOK, resp)
 }
 
@@ -77,8 +83,7 @@ func (l Login) HasAdmin(c *gin.Context) {
 	data := map[string]interface{}{
 		"has": 1,
 	}
-	up := l.models.UserManager.Get("admin")
-	if !up.IsSuccess() {
+	if _, err := l.models.UserManager.Get("admin"); err != nil {
 		data["has"] = 0
 	}
 	c.JSON(http.StatusOK, &utils.Response{Code: code.Success, Data: data})
@@ -87,27 +92,35 @@ func (l Login) HasAdmin(c *gin.Context) {
 
 func (l Login) CreateAdmin(c *gin.Context) {
 	var ser UserCreateSerializers
+	resp := &utils.Response{Code: code.Success}
 	if err := c.ShouldBind(&ser); err != nil {
-		c.JSON(http.StatusOK, &utils.Response{Code: code.ParamsError, Msg: err.Error()})
+		resp.Code = code.ParamsError
+		resp.Msg = err.Error()
+		c.JSON(http.StatusOK, resp)
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": "admin",
-		"email": ser.Email,
-		"password": ser.Password,
+	user := types.User{
+		Name: "admin",
+		Email: ser.Email,
+		Password: utils.Encrypt(ser.Password),
+		Status: "normal",
 	}
+	user.CreateTime = utils.StringNow()
+	user.UpdateTime = utils.StringNow()
 
-	uc := l.models.UserManager.Create(params)
-	if !uc.IsSuccess() {
-		c.JSON(http.StatusOK, uc)
+	if err := l.models.UserManager.Create(&user); err != nil {
+		resp.Code = code.CreateError
+		resp.Msg = err.Error()
+		c.JSON(http.StatusOK, resp)
 		return
 	}
 
-	c.JSON(http.StatusOK, &utils.Response{
-		Code: code.Success,
-		Data: uc.Data,
-	})
+	resp.Data = map[string]interface{}{
+		"name": user.Name,
+		"password": user.Password,
+	}
+	c.JSON(http.StatusOK, resp)
 }
 
 func (l Login) Logout(c *gin.Context) {

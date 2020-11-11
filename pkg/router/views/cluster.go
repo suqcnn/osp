@@ -2,8 +2,10 @@ package views
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/openspacee/osp/pkg/kube_resource"
 	"github.com/openspacee/osp/pkg/model"
+	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/utils"
 	"github.com/openspacee/osp/pkg/utils/code"
 	"net/http"
@@ -30,30 +32,56 @@ func NewCluster(models *model.Models, kr *kube_resource.KubeResources) *Cluster 
 }
 
 func (clu *Cluster) list(c *Context) *utils.Response {
+	resp := &utils.Response{Code: code.Success}
 	var filters map[string]interface{}
+	clus, err := clu.models.ClusterManager.List(filters)
+	if err != nil {
+		resp.Code = code.GetError
+		resp.Msg = err.Error()
+		return resp
+	}
+	var data []map[string]interface{}
 
-	return clu.models.ClusterManager.List(filters)
+	for _, du := range clus {
+		data = append(data, map[string]interface{}{
+			"name": du.Name,
+			"token": du.Token.String(),
+			"status": du.Status,
+			"create_time": du.CreateTime,
+			"update_time": du.UpdateTime,
+		})
+	}
+	resp.Data = data
+	return resp
 }
 
 func (clu *Cluster) create(c *Context) *utils.Response {
 	var ser ClusterCreateSerializers
-	resp := utils.Response{Code: code.Success}
+	resp := &utils.Response{Code: code.Success}
 
 	if err := c.ShouldBind(&ser); err != nil {
 		resp.Code = code.ParamsError
 		resp.Msg = err.Error()
-		return &resp
+		return resp
 	}
 	if ser.Name == "" {
 		resp.Code = code.ParamsError
 		resp.Msg = fmt.Sprintf("params cluster name:%s blank", ser.Name)
-		return &resp
+		return resp
 	}
-
-	params := map[string]interface{}{
-		"name": ser.Name,
+	cluster := &types.Cluster{
+		Name: ser.Name,
+		Token: uuid.New(),
+		Status: "normal",
 	}
-	return clu.models.ClusterManager.Create(params)
+	cluster.CreateTime = utils.StringNow()
+	cluster.UpdateTime = utils.StringNow()
+	if err := clu.models.ClusterManager.Create(cluster); err != nil {
+		resp.Code = code.CreateError
+		resp.Msg = err.Error()
+		return resp
+	}
+	return resp
 }
 
 func (clu *Cluster) detail(c *Context) *utils.Response {

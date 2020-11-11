@@ -108,17 +108,23 @@ func auth(m *model.Models, c *gin.Context) *utils.Response {
 		return &resp
 	}
 
-	tk := m.TokenManager.Get(token)
-	if !tk.IsSuccess() {
-		return tk
+	tk, err := m.TokenManager.Get(token)
+	if err != nil {
+		resp.Code = code.GetError
+		resp.Msg = err.Error()
+		return &resp
 	}
 
-	u := m.UserManager.Get(tk.Data.(map[string]interface{})["username"].(string))
-	if !u.IsSuccess() {
-		return u
+	u, err := m.UserManager.Get(tk.UserName)
+	if err != nil {
+		resp.Code = code.GetError
+		resp.Msg = err.Error()
+		return &resp
 	}
-
-	resp.Data = u.Data
+	resp.Data = map[string]interface{}{
+		"name": u.Name,
+		"password": u.Password,
+	}
 	return &resp
 }
 

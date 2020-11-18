@@ -22,17 +22,28 @@ func NewKubeWs(op *redis.Options, models *model.Models) *KubeWs {
 }
 
 func (k *KubeWs) Connect(c *gin.Context) {
-	cluster := "aaa"
+
+	token := c.GetHeader("token")
+	klog.Info(token)
+
+	cluster, err := k.models.ClusterManager.GetByToken(token)
+	if err != nil {
+		klog.Errorf("get cluster error")
+		return
+	}
+	if cluster == nil {
+		klog.Errorf("cant get cluster")
+		return
+	}
+
 	upGrader := &websocket.Upgrader{}
 	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		klog.Errorf("upgrader agent conn error: %s", err)
 		return
 	}
-	token := c.GetHeader("token")
-	klog.Info(token)
-
-	kubeWebsocket := kubewebsocket.NewKubeWebsocket(cluster, ws, k.redisOptions)
+	klog.Info(cluster.Name)
+	kubeWebsocket := kubewebsocket.NewKubeWebsocket(cluster.Name, ws, k.redisOptions)
 	kubeWebsocket.Consume()
-	klog.Infof("cluster %s kube connect finish", cluster)
+	klog.Infof("cluster %s kube connect finish", cluster.Name)
 }

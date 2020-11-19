@@ -57,16 +57,26 @@ func (m *MiddleMessage) ReceiveRequest(cluster string, reqHandle func(*MiddleReq
 	}
 }
 
-func (m *MiddleMessage) SendRequest(request *MiddleRequest) *utils.Response {
-	reqPubKey := m.ClusterRequestQueueKey(request.Cluster)
+func (m *MiddleMessage) ClusterConnected(cluster string) bool {
+	reqPubKey := m.ClusterRequestQueueKey(cluster)
 	subNums, err := m.client.PubSubNumSub(m.Context, reqPubKey).Result()
 	if err != nil {
-		return &utils.Response{Code: code.RedisError, Msg: err.Error()}
+		klog.Errorf("get cluster %s pubsub error: %s", cluster, err.Error())
+		return false
 	}
 	if num, ok := subNums[reqPubKey]; !ok || num <= 0 {
-		klog.Infof("cluster %s is not in subscribe", request.Cluster)
+		klog.Infof("cluster %s is not in subscribe", cluster)
+		return false
+	}
+	return true
+}
+
+func (m *MiddleMessage) SendRequest(request *MiddleRequest) *utils.Response {
+	clusterConnect := m.ClusterConnected(request.Cluster)
+	if !clusterConnect {
 		return &utils.Response{Code: code.RequestError, Msg: "connect kubernetes agent error"}
 	}
+	reqPubKey := m.ClusterRequestQueueKey(request.Cluster)
 	reqData, err := request.Serializer()
 	if err != nil {
 		klog.Errorf("middle request error: %s", err.Error())

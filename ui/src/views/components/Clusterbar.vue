@@ -12,7 +12,7 @@
 
     <div class="right">
       <!-- <el-button v-if="typeof delFunc !== 'undefined'"  size="small" plain @click="delFunc()">删 除</el-button> -->
-
+      <el-button v-if="typeof createFunc !== 'undefined'" size="small" plain @click="createFunc()">{{ createDisplay }}</el-button>
       <el-select v-if="typeof nsFunc !== 'undefined'" v-model="nsInput" @change="nsChange" multiple placeholder="命名空间" size="small">
         <el-option
           v-for="item in namespaces"
@@ -62,6 +62,16 @@ export default {
       default: undefined,
     },
     editFunc: {
+      type: Function,
+      required: false,
+      default: undefined,
+    },
+    createDisplay: {
+      type: String,
+      required: false,
+      default: "创建"
+    },
+    createFunc: {
       type: Function,
       required: false,
       default: undefined,
@@ -176,7 +186,7 @@ export default {
 }
 </style>
 <style >
-.right .el-button.is-plain {
+/* .right .el-button.is-plain {
   border-color: #f78989;
   color: #f78989;
 }
@@ -187,5 +197,5 @@ export default {
 .right .el-button.is-plain:focus {
   border-color: #f56c6c;
   color: #f56c6c;
-}
+} */
 </style>

@@ -43,10 +43,15 @@ func (clu *Cluster) list(c *Context) *utils.Response {
 	var data []map[string]interface{}
 
 	for _, du := range clus {
+		status := types.ClusterPending
+		clusterConnect := clu.Watch.KubeMessage.ClusterConnected(du.Name)
+		if clusterConnect {
+			status = types.ClusterConnect
+		}
 		data = append(data, map[string]interface{}{
-			"name": du.Name,
-			"token": du.Token.String(),
-			"status": du.Status,
+			"name":        du.Name,
+			"token":       du.Token.String(),
+			"status":      status,
 			"create_time": du.CreateTime,
 			"update_time": du.UpdateTime,
 		})
@@ -70,9 +75,9 @@ func (clu *Cluster) create(c *Context) *utils.Response {
 		return resp
 	}
 	cluster := &types.Cluster{
-		Name: ser.Name,
-		Token: uuid.New(),
-		Status: "normal",
+		Name:   ser.Name,
+		Token:  uuid.New(),
+		Status: types.ClusterPending,
 	}
 	cluster.CreateTime = utils.StringNow()
 	cluster.UpdateTime = utils.StringNow()

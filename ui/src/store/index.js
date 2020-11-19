@@ -55,11 +55,12 @@ const store = new Vuex.Store({
 
 var wsOnOpen = function() {
   console.log("ws connect success")
-  // ws.send(JSON.stringify({action: "watchCluster", params: {cluster: "test"}}))
+  wsConn.send(JSON.stringify({action: "watchCluster", params: {cluster: state.cluster}}))
 }
 
 var wsOnError = function(e) {
   console.log("ws connect error", e)
+  reConnect()
 }
 
 var wsOnMessage = function(e) {
@@ -70,6 +71,7 @@ var wsOnMessage = function(e) {
 
 var wsOnClose = function(e) {
   console.log("ws closed", e)
+  reConnect()
 }
 
 function connect() {
@@ -79,17 +81,20 @@ function connect() {
     wsConn.onerror = wsOnError
     wsConn.onmessage = wsOnMessage
     wsConn.onclose = wsOnClose
-  } catch (e) {
+  } catch(e) {
     console.log(e)
+    reConnect()
   }
 }
 
-// function reConnect(num) {
-//   if (num <= 0) return
-//   setTimeout(() => {
-//     connect()
-//   }, 3000)
-// }
+function reConnect() {
+  if(reConnect.lock) return;
+  reConnect.lock = true;
+  setTimeout(() => {
+    reConnect.lock = false;
+    connect()
+  }, 5000)
+}
 
 const hasToken = getToken()
 

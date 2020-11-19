@@ -25,20 +25,19 @@ func NewUser(models *model.Models) *User {
 		NewView(http.MethodPut, "/:username", user.update),
 
 		NewView(http.MethodGet, "/token", user.tokenUser),
-
 	}
 	user.Views = views
 	return user
 }
 
 func (u *User) tokenUser(c *Context) *utils.Response {
-	userName := ""
-	if user, ok := c.Get("user"); ok {
-		userName = user.(*types.User).Name
-	}
+	//userName := ""
+	//if user, ok := c.Get("user"); ok {
+	//	userName = user.(*types.User).Name
+	//}
 	return &utils.Response{Code: code.Success,
 		Data: map[string]interface{}{
-			"name": userName,
+			"name": c.UserName,
 		}}
 }
 
@@ -74,12 +73,12 @@ func (u *User) update(c *Context) *utils.Response {
 		userObj.Email = user.Email
 	}
 
-	 if err := u.models.UserManager.Update(userObj); err != nil {
-		 resp.Code = code.UpdateError
-		 resp.Msg = err.Error()
-		 return resp
-	 }
-	 return resp
+	if err := u.models.UserManager.Update(userObj); err != nil {
+		resp.Code = code.UpdateError
+		resp.Msg = err.Error()
+		return resp
+	}
+	return resp
 }
 
 func (u *User) list(c *Context) *utils.Response {
@@ -96,9 +95,9 @@ func (u *User) list(c *Context) *utils.Response {
 
 	for _, du := range dList {
 		data = append(data, map[string]interface{}{
-			"name": du["name"],
-			"email": du["email"],
-			"status": du["status"],
+			"name":       du["name"],
+			"email":      du["email"],
+			"status":     du["status"],
 			"last_login": du["last_login"],
 		})
 	}
@@ -126,10 +125,10 @@ func (u *User) create(c *Context) *utils.Response {
 	}
 
 	userObj := types.User{
-		Name: ser.Name,
+		Name:     ser.Name,
 		Password: utils.Encrypt(ser.Password),
-		Email: ser.Email,
-		Status: "normal",
+		Email:    ser.Email,
+		Status:   "normal",
 	}
 	userObj.CreateTime = utils.StringNow()
 	userObj.UpdateTime = utils.StringNow()
@@ -141,9 +140,9 @@ func (u *User) create(c *Context) *utils.Response {
 	}
 
 	resp.Data = map[string]interface{}{
-		"name": userObj.Name,
+		"name":     userObj.Name,
 		"password": userObj.Password,
-		"status":userObj.Status,
+		"status":   userObj.Status,
 	}
 	return resp
 }

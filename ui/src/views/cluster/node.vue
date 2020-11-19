@@ -1,6 +1,6 @@
 <template>
   <div>
-    <clusterbar :titleName="titleName" :nsFunc="nsSearch" :nameFunc="nameSearch" :delFunc="delFunc"/>
+    <clusterbar :titleName="titleName" :nameFunc="nameSearch" :delFunc="delFunc"/>
     <div class="dashboard-container">
       <!-- <div class="dashboard-text"></div> -->
       <el-table

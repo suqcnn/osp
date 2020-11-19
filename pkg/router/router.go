@@ -10,6 +10,8 @@ import (
 	"github.com/openspacee/osp/pkg/router/views/ws_views"
 	"github.com/openspacee/osp/pkg/utils"
 	"github.com/openspacee/osp/pkg/utils/code"
+	"html/template"
+	"io/ioutil"
 	"k8s.io/klog"
 	"net/http"
 	"runtime"
@@ -26,16 +28,23 @@ func NewRouter(redisOptions *redis.Options) *Router {
 
 	engine.Use(LocalMiddleware())
 
-	engine.LoadHTMLFiles("ui/dist/index.html")
-	engine.StaticFS("/static", http.Dir("ui/dist/static"))
+	indexHtml, _ := ioutil.ReadAll(Assets.Files["/index.html"])
+	t, _ := template.New("").New("/index.html").Parse(string(indexHtml))
+	//engine.LoadHTMLFiles("ui/dist/index.html")
+	engine.SetHTMLTemplate(t)
+	//engine.StaticFS("/static", http.Dir("ui/dist/static"))
+	engine.StaticFS("/static", Assets)
+	//a := Assets.Dirs["/ui/dist/static"]
+	//fullName := filepath.Join("ui/dist/static", filepath.FromSlash(path.Clean("/"+"css/index.html")))
+	//klog.Info(fullName)
 	engine.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", nil)
+		c.HTML(http.StatusOK, "/index.html", nil)
 	})
 	//engine.GET("/ui/login", func(c *gin.Context) {
 	//	c.HTML(http.StatusOK, "index.html", nil)
 	//})
 	engine.GET("/ui/*path", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", nil)
+		c.HTML(http.StatusOK, "/index.html", nil)
 	})
 
 	kubeMessage := kube_resource.NewMiddleMessage(redisOptions)
@@ -122,7 +131,7 @@ func auth(m *model.Models, c *gin.Context) *utils.Response {
 		return &resp
 	}
 	resp.Data = map[string]interface{}{
-		"name": u.Name,
+		"name":     u.Name,
 		"password": u.Password,
 	}
 	return &resp

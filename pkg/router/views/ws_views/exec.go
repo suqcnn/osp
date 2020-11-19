@@ -33,8 +33,21 @@ func (e *ExecWs) Connect(c *gin.Context) {
 		klog.Errorf("upgrader agent conn error: %s", err)
 		return
 	}
-	token := c.GetHeader("token")
+	token, err := c.Cookie("osp-token")
+	if err != nil {
+		klog.Errorf("auth token error: %s", err.Error())
+		ws.WriteMessage(websocket.TextMessage, []byte("auth token error"))
+		ws.Close()
+		return
+	}
 	klog.Info(token)
+	_, err = e.models.TokenManager.Get(token)
+	if err != nil {
+		klog.Errorf("auth token error: %s", err.Error())
+		ws.WriteMessage(websocket.TextMessage, []byte("auth token error"))
+		ws.Close()
+		return
+	}
 
 	container := c.Query("container")
 	rows := c.Query("rows")

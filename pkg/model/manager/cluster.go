@@ -16,7 +16,7 @@ func NewClusterManager(redisClient *redis.Client) *ClusterManager {
 		CommonManager{
 			client:   redisClient,
 			modelKey: "osp:cluster",
-			Context: context.Background(),
+			Context:  context.Background(),
 		},
 	}
 }
@@ -44,4 +44,20 @@ func (clu *ClusterManager) List(filters map[string]interface{}) ([]*types.Cluste
 		return nil, err
 	}
 	return clus, nil
+}
+
+func (clu *ClusterManager) GetByToken(token string) (*types.Cluster, error) {
+
+	clusterList, err := clu.List(map[string]interface{}{
+		"token": token,
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, clu := range clusterList {
+		if clu.Token.String() == token {
+			return clu, nil
+		}
+	}
+	return nil, nil
 }

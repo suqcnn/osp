@@ -1,34 +1,18 @@
 <template>
   <div>
-    <div class="member-bar">
-      <el-breadcrumb class="app-breadcrumb" separator="/">
-        <transition-group name="breadcrumb">
-          <el-breadcrumb-item key="pods">
-            <span class="no-redirect">Cluster</span>
-          </el-breadcrumb-item>
-        </transition-group>
-      </el-breadcrumb>
-      <div class="right">
-        <el-button size="mini" @click="createClusterFormVisible = true"
-          >创建集群</el-button
-        >
-        <el-input size="small" placeholder="搜索" suffix-icon="el-icon-search">
-        </el-input>
-      </div>
-    </div>
+    <clusterbar :titleName="titleName" :nameFunc="nameSearch" :createFunc="createClusterDialog" createDisplay="创建集群"/>
     <div class="dashboard-container" ref="tableCot">
       <el-table
-        v-loading="loading"
         :data="clusters"
         class="table-fix"
-        :max-height="maxHeight"
         tooltip-effect="dark"
+        :max-height="maxHeight"
         style="width: 100%"
-        fit
+        v-loading="loading"
+        :cell-style="cellStyle"
+        :default-sort = "{prop: 'name'}"
+        row-key="name"
       >
-        <!-- <div slot="empty">
-          <el-link >添加集群</el-link>
-        </div> -->
         <el-table-column prop="name" label="名称" show-overflow-tooltip>
         </el-table-column>
         <el-table-column
@@ -46,21 +30,33 @@
         </el-table-column>
 
         <el-table-column label="" width="80">
-          <template>
+          <template slot-scope="scope">
             <!-- <el-button
               @click.native.prevent="deleteRow(scope.$index, tableData)"
               type="text"
               size="small">
               删除
             </el-button> -->
-            <el-link :underline="false" style="font-size: 13px">删除</el-link>
+            <!-- <el-link :underline="false" style="font-size: 13px">删除</el-link> -->
+            <el-dropdown size="medium" >
+              <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item @click.native.prevent="nameClick(scope.row.namespace, scope.row.name)" v-if="scope.row.status === 'Pending'">
+                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="link" />
+                  <span style="margin-left: 5px;">连接</span>
+                </el-dropdown-item>
+                <el-dropdown-item @click.native.prevent="deleteClusters([{namespace: scope.row.namespace, name: scope.row.name}])">
+                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="delete" />
+                  <span style="margin-left: 5px;">删除</span>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
-      <!-- {{ clustersWatch }} -->
     </div>
     <div>
-      <el-dialog title="创建集群" :visible.sync="createClusterFormVisible">
+      <el-dialog title="创建集群" :visible.sync="createClusterFormVisible" :close-on-click-modal="false">
         <el-form :model="form">
           <el-form-item label="集群名称">
             <el-input v-model="form.name" autocomplete="off"></el-input>
@@ -68,9 +64,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="createClusterFormVisible = false">取 消</el-button>
-          <el-button type="primary" @click="handleCreateCluster"
-            >确 定</el-button
-          >
+          <el-button type="primary" @click="handleCreateCluster">确 定</el-button>
         </div>
       </el-dialog>
     </div>
@@ -78,28 +72,18 @@
 </template>
 
 <script>
-// import { Clusterbar } from '@/views/components'
+import { Clusterbar } from '@/views/components'
 import { listCluster, createCluster } from '@/api/cluster'
 import { Message } from 'element-ui'
 
 export default {
   name: 'SettingsCluster',
   components: {
-    // Clusterbar
+    Clusterbar
   },
   created() {
     this.fetchData()
   },
-  // computed: {
-  //   clustersWatch: function() {
-  //     return this.$store.getters['ws/podWatch']
-  //   },
-  // },
-  // watch: {
-  //   clustersWatch: function(newObj) {
-  //     console.log('watch obj', newObj)
-  //   },
-  // },
   mounted() {
     const that = this
     // let heightStyle = that.$refs.tableCot.offsetHeight
@@ -114,6 +98,9 @@ export default {
   },
   data() {
     return {
+      titleName: ["Cluster"],
+      search_name: '',
+      cellStyle: {border: 0},
       maxHeight: window.innerHeight - 150,
       loading: true,
       clusters: [],
@@ -135,6 +122,12 @@ export default {
           this.loading = false
         })
     },
+    nameSearch: function(val) {
+      this.search_name = val
+    },
+    createClusterDialog() {
+      this.createClusterFormVisible = true;
+    },
     handleCreateCluster() {
       console.log(this.form.name)
       if (!this.form.name) {
@@ -150,6 +143,9 @@ export default {
         })
       this.createClusterFormVisible = false
     },
+    deleteClusters(delClusters) {
+
+    }
   },
 }
 </script>

@@ -2,6 +2,11 @@ package types
 
 import "github.com/google/uuid"
 
+const (
+	ClusterPending = "Pending"
+	ClusterConnect = "Connect"
+)
+
 type Cluster struct {
 	Common
 

@@ -2,14 +2,14 @@ import request from '@/utils/request'
 
 export function listPersistentVolume(cluster) {
   return request({
-    url: `persistent_volume/${cluster}`,
+    url: `pv/${cluster}`,
     method: 'get',
   })
 }
 
 export function getPersistentVolume(cluster, name, output='') {
   return request({
-    url: `persistent_volume/${cluster}/${name}`,
+    url: `pv/${cluster}/${name}`,
     method: 'get',
     params: { output }
   })
@@ -17,7 +17,7 @@ export function getPersistentVolume(cluster, name, output='') {
 
 export function updatePersistentVolume(cluster, name, yaml) {
   return request({
-    url: `persistent_volume/${cluster}/${name}`,
+    url: `pv/${cluster}/${name}`,
     method: 'post',
     data: { yaml }
   })

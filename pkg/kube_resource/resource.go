@@ -99,6 +99,12 @@ const (
 	ServiceAccountType = "serviceaccount"
 	RolebindingType    = "rolebinding"
 	RoleType           = "role"
+	ConfigMapType      = "configMap"
+	SecretType         = "secret"
+	HpaType            = "horizontalPodAutoscaler"
+	PvcType            = "persistentVolumeClaim"
+	PVType             = "persistentVolume"
+	StorageClassType   = "storageClass"
 )
 
 type KubeResources struct {
@@ -120,6 +126,12 @@ type KubeResources struct {
 	ServiceAccount *KubeResource
 	Rolebinding    *KubeResource
 	Role           *KubeResource
+	ConfigMap      *KubeResource
+	Secret         *KubeResource
+	Hpa            *KubeResource
+	Pvc            *KubeResource
+	PV             *KubeResource
+	StorageClass   *KubeResource
 }
 
 func NewKubeResources(message *MiddleMessage) *KubeResources {
@@ -142,5 +154,11 @@ func NewKubeResources(message *MiddleMessage) *KubeResources {
 		ServiceAccount: &KubeResource{ResType: ServiceAccountType, KubeMessage: message},
 		Rolebinding:    &KubeResource{ResType: RolebindingType, KubeMessage: message},
 		Role:           &KubeResource{ResType: RoleType, KubeMessage: message},
+		ConfigMap:      &KubeResource{ResType: ConfigMapType, KubeMessage: message},
+		Secret:         &KubeResource{ResType: SecretType, KubeMessage: message},
+		Hpa:            &KubeResource{ResType: HpaType, KubeMessage: message},
+		Pvc:            &KubeResource{ResType: PvcType, KubeMessage: message},
+		PV:             &KubeResource{ResType: PVType, KubeMessage: message},
+		StorageClass:   &KubeResource{ResType: StorageClassType, KubeMessage: message},
 	}
 }

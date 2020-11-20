@@ -29,6 +29,12 @@ func NewViewSets(kr *kube_resource.KubeResources, models *model.Models) *ViewSet
 	serviceaccount := kube_views.NewServiceAccount(kr)
 	rolebinding := kube_views.NewRolebinding(kr)
 	role := kube_views.NewRole(kr)
+	configmap := kube_views.NewConfigMap(kr)
+	secret := kube_views.NewSecret(kr)
+	hpa := kube_views.NewHpa(kr)
+	pvc := kube_views.NewPvc(kr)
+	pv := kube_views.NewPV(kr)
+	storageclass := kube_views.NewStorageClass(kr)
 
 	viewsets := &ViewSets{
 		"cluster":        cluster.Views,
@@ -49,6 +55,12 @@ func NewViewSets(kr *kube_resource.KubeResources, models *model.Models) *ViewSet
 		"serviceaccount": serviceaccount.Views,
 		"rolebinding":    rolebinding.Views,
 		"role":           role.Views,
+		"configmap":      configmap.Views,
+		"secret":         secret.Views,
+		"hpa":            hpa.Views,
+		"pvc":            pvc.Views,
+		"pv":             pv.Views,
+		"storageclass":   storageclass.Views,
 	}
 
 	return viewsets

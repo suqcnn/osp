@@ -13,16 +13,16 @@
           <span>{{ hpa.metadata.namespace }}</span>
         </el-form-item>
         <el-form-item label="Min Pods">
-          <span>{{ hpa.spec.minReplicas }}</span>
+          <span v-if="hpa.spec">{{ hpa.spec.minReplicas }}</span>
         </el-form-item>
         <el-form-item label="Max Pods">
-          <span>{{ hpa.spec.maxReplicas }}</span>
+          <span v-if="hpa.spec">{{ hpa.spec.maxReplicas }}</span>
         </el-form-item>
         <el-form-item label="Replicas">
-          <span>{{ hpa.status.currentReplicas }}</span>
+          <span v-if="hpa.status">{{ hpa.status.currentReplicas }}</span>
         </el-form-item>
         <el-form-item label="Reference">
-          <span>{{ hpa.spec.scaleTargetRef.kind }}/{{hpa.spec.scaleTargetRef.name}}</span>
+          <span v-if="hpa.spec">{{ hpa.spec.scaleTargetRef.kind }}/{{hpa.spec.scaleTargetRef.name}}</span>
         </el-form-item>
       </el-form>
 

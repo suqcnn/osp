@@ -2,7 +2,7 @@
 
 OpenSpace是一个用来管理多Kubernetes集群的开源项目。OpenSpace可以兼容不同云厂商的Kubernetes集群，极大的方便了集群的管理工作。
 
-#### 快速开始
+### 快速开始
 
 ```
 sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --name openspace openspacee/osp
@@ -10,15 +10,15 @@ sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --name openspace
 
 启动之后，在浏览器打开：https://${ip}，请将ip替换为启动服务所在服务器ip地址。
 
-#### 使用说明
+### 使用说明
 
-##### 1. 首次登录
+#### 1. 首次登录
 
 在OpenSpace第一次登录时，会要求输入admin超级管理员的密码，然后以admin帐号登录。
 
 ![](docs/images/first_login.png)
 
-##### 2. 添加集群
+#### 2. 添加集群
 
 首次登录之后，需要添加集群，输入集群名称，该名称在OpenSpace系统中只是作显示之用。
 
@@ -28,7 +28,7 @@ sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --name openspace
 
 ![image-20201121205832524](docs/images/connect_cluster.png)
 
-#####3. 导入集群
+#### 3. 导入集群
 
 在Kubernetes集群中使用上述的kubectl命令部署ospagent服务，将集群连接导入到OpenSpace系统。
 
@@ -42,21 +42,21 @@ sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --name openspace
 
 可以看到ospagent服务的pod已经是Running状态。
 
-##### 4. 集群管理
+#### 4. 集群管理
 
 将Kubernetes集群成功连接导入到OpenSpace系统之后，就可以统一管理集群中的资源了。
 
 ![image-20201121211314376](docs/images/cluster_manage.png)
 
-#### 软件架构
+### 软件架构
 
 ![image-20201122110225534](docs/images/architecture.png)
 
-#### 部署方式
+### 部署方式
 
-##### 1. K8s集群内部署
+#### 1. K8s集群内部署
 
-####后续功能
+### 后续功能
 
 - [ ] 1.界面持续优化迭代，整体操作更简单易用；
 - [ ] 2.增加用户权限管理；
@@ -65,7 +65,7 @@ sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --name openspace
 - [ ] 5.增加支持Helm包管理工具；
 - [ ] 6.增加支持添加监控功能。
 
-#### 交流讨论
+### 交流讨论
 
 如果您在使用过程中，有任何问题、建议或功能需求，可以随时在[issues](https://github.com/openspacee/osp/issues)中提交请求，我们会及时跟进。
 

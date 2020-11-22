@@ -75,7 +75,7 @@ sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --name openspace
 
 最后，不要忘了点个star，支持一下😊！
 
-#### License
+### License
 Copyright 2020 OpenSpace.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at

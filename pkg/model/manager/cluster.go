@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/go-redis/redis/v8"
 	"github.com/openspacee/osp/pkg/model/types"
+	"k8s.io/klog"
 )
 
 type ClusterManager struct {
@@ -54,8 +55,11 @@ func (clu *ClusterManager) GetByToken(token string) (*types.Cluster, error) {
 	if err != nil {
 		return nil, err
 	}
+	klog.Info(clusterList)
 	for _, clu := range clusterList {
-		if clu.Token.String() == token {
+		klog.Info(clu.Token)
+		klog.Info(token)
+		if clu.Token == token {
 			return clu, nil
 		}
 	}

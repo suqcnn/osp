@@ -21,3 +21,11 @@ export function clusterDetail(cluster) {
     method: 'get',
   })
 }
+
+export function deleteCluster(clusters) {
+  return request({
+    url: `/cluster/delete`,
+    method: 'post',
+    data: clusters,
+  })
+}

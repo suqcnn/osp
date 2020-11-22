@@ -13,6 +13,9 @@ import '@/permissions'
 
 import '@/styles/index.scss' // global css
 import '@/icons' // icon
+import VueClipboard from 'vue-clipboard2';
+
+Vue.use(VueClipboard)
 
 Vue.use(ElementUI)
 

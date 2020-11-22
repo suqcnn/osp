@@ -32,7 +32,7 @@ func (k *KubeWs) Connect(c *gin.Context) {
 		return
 	}
 	if cluster == nil {
-		klog.Errorf("cant get cluster")
+		klog.Errorf("can not get cluster")
 		return
 	}
 

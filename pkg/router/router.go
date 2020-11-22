@@ -61,6 +61,9 @@ func NewRouter(redisOptions *redis.Options) *Router {
 		}
 	}
 
+	clusterAgent := views.NewClusterAgent(models)
+	engine.GET("/v1/import/:token", clusterAgent.AgentYaml)
+
 	// 登录登出接口
 	loginView := views.NewLogin(models)
 	apiGroup.POST("/login", loginView.Login)

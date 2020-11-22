@@ -41,11 +41,11 @@
             <el-dropdown size="medium" >
               <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item @click.native.prevent="nameClick(scope.row.namespace, scope.row.name)" v-if="scope.row.status === 'Pending'">
+                <el-dropdown-item @click.native.prevent="clusterConnectToken=scope.row.token; clusterConnectDialog = true" v-if="scope.row.status === 'Pending'">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="link" />
                   <span style="margin-left: 5px;">连接</span>
                 </el-dropdown-item>
-                <el-dropdown-item @click.native.prevent="deleteClusters([{namespace: scope.row.namespace, name: scope.row.name}])">
+                <el-dropdown-item @click.native.prevent="deleteClusters([{name: scope.row.name}])">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="delete" />
                   <span style="margin-left: 5px;">删除</span>
                 </el-dropdown-item>
@@ -68,12 +68,43 @@
         </div>
       </el-dialog>
     </div>
+    <div>
+      <el-dialog title="集群导入" :visible.sync="clusterConnectDialog" :close-on-click-modal="false">
+        <div style="font-size: 15px;">请在现有Kubernetes集群上运行下面的kubeclt命令，以连接OpenSpace平台：</div>
+        <!-- <div style="margin-top: 25px; font-size: 15px;">
+          <span style="padding: 10px;background-color:#606266; color: rgb(217, 236, 255); ">
+            kubectl apply -f http://localhost:8080/v1/import/{{ clusterConnectToken }}
+          </span>
+          <span style="padding: 10px; border: 1px solid #606266; border-radius: 0px 3px 3px 0px;" class="copy-btn" v-clipboard:copy="f" v-clipboard:success="onCopy" v-clipboard:error="onError">
+            <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="copy" />
+            复制
+          </span>
+        </div> -->
+        <div style="margin-top: 15px;">
+          <el-tag type="info" style="font-size: 14px; border-radius: 4px 0px 0px 4px; border-right-width: 0px;">
+            {{ copyCluster }}
+          </el-tag>
+          <!-- <el-tag type="" style="font-size: 14px; border-radius: 0px 4px 4px 0px;">复制</el-tag> -->
+          <el-button plain size="small" slot="append" 
+              style="height: 32px; border-radius: 0px 4px 4px 0px; padding: 10px 15px;"
+              v-clipboard:copy="copyCluster" v-clipboard:success="onCopy" v-clipboard:error="onError">
+              复制
+          </el-button>
+        </div>
+        <div style="font-size: 13px; margin-top: 8px; color: #e6a23c;">
+          *注意：请将上述访问地址{{this.locationAddr}}换为Kubernetes集群可以访问的地址。
+        </div>
+        <div slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="clusterConnectDialog = false">确 定</el-button>
+        </div>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
 <script>
 import { Clusterbar } from '@/views/components'
-import { listCluster, createCluster } from '@/api/cluster'
+import { listCluster, createCluster, deleteCluster } from '@/api/cluster'
 import { Message } from 'element-ui'
 
 export default {
@@ -105,9 +136,17 @@ export default {
       loading: true,
       clusters: [],
       createClusterFormVisible: false,
+      clusterConnectDialog: false,
+      clusterConnectToken: '',
       form: {
         name: '',
       },
+      locationAddr: window.location.origin,
+    }
+  },
+  computed: {
+    copyCluster() {
+      return `kubectl apply -f ${ this.locationAddr }/v1/import/${ this.clusterConnectToken }`;
     }
   },
   methods: {
@@ -132,18 +171,37 @@ export default {
       console.log(this.form.name)
       if (!this.form.name) {
         Message.error('集群名称不能为空！')
+        return
       }
       createCluster(this.form)
-        .then(() => {
+        .then((response) => {
+          Message.success("集群添加成功")
+          this.createClusterFormVisible = false
           this.loading = false
           this.fetchData()
+          this.clusterConnectToken = response.data.token
+          this.clusterConnectDialog = true;
         })
         .catch(() => {
+          // this.createClusterFormVisible = false
           this.loading = false
         })
-      this.createClusterFormVisible = false
     },
     deleteClusters(delClusters) {
+      if(delClusters.length <= 0) {
+        Message.error('请选择要删除的集群')
+        return
+      }
+      deleteCluster(delClusters).then((response) => {
+          this.fetchData()
+      }).catch((e) => {
+        console.log(e)
+      })
+    },
+    onCopy(e) {
+      Message.success("复制成功")
+    },
+    onError(e) {
 
     }
   },

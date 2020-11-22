@@ -1,7 +1,5 @@
 package types
 
-import "github.com/google/uuid"
-
 const (
 	ClusterPending = "Pending"
 	ClusterConnect = "Connect"
@@ -10,7 +8,7 @@ const (
 type Cluster struct {
 	Common
 
-	Name   string    `json:"name"`
-	Token  uuid.UUID `json:"token"`
-	Status string    `json:"status"`
+	Name   string `json:"name"`
+	Token  string `json:"token"`
+	Status string `json:"status"`
 }

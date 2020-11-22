@@ -2,12 +2,12 @@ package views
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/openspacee/osp/pkg/kube_resource"
 	"github.com/openspacee/osp/pkg/model"
 	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/utils"
 	"github.com/openspacee/osp/pkg/utils/code"
+	"k8s.io/klog"
 	"net/http"
 )
 
@@ -26,6 +26,7 @@ func NewCluster(models *model.Models, kr *kube_resource.KubeResources) *Cluster 
 		NewView(http.MethodGet, "", cluster.list),
 		NewView(http.MethodPost, "", cluster.create),
 		NewView(http.MethodGet, "/:cluster/detail", cluster.detail),
+		NewView(http.MethodPost, "/delete", cluster.delete),
 	}
 	cluster.Views = views
 	return cluster
@@ -50,7 +51,7 @@ func (clu *Cluster) list(c *Context) *utils.Response {
 		}
 		data = append(data, map[string]interface{}{
 			"name":        du.Name,
-			"token":       du.Token.String(),
+			"token":       du.Token,
 			"status":      status,
 			"create_time": du.CreateTime,
 			"update_time": du.UpdateTime,
@@ -76,7 +77,7 @@ func (clu *Cluster) create(c *Context) *utils.Response {
 	}
 	cluster := &types.Cluster{
 		Name:   ser.Name,
-		Token:  uuid.New(),
+		Token:  utils.CreateUUID(),
 		Status: types.ClusterPending,
 	}
 	cluster.CreateTime = utils.StringNow()
@@ -86,9 +87,35 @@ func (clu *Cluster) create(c *Context) *utils.Response {
 		resp.Msg = err.Error()
 		return resp
 	}
+	d := map[string]interface{}{
+		"name":        cluster.Name,
+		"token":       cluster.Token,
+		"status":      cluster.Status,
+		"create_time": cluster.CreateTime,
+		"update_time": cluster.UpdateTime,
+	}
+	resp.Data = d
 	return resp
 }
 
 func (clu *Cluster) detail(c *Context) *utils.Response {
 	return clu.Cluster.Get(c.Param("cluster"), map[string]interface{}{})
+}
+
+func (clu *Cluster) delete(c *Context) *utils.Response {
+	var ser []DeleteClusterSerializers
+	//klog.Info(c.Request.Body)
+	if err := c.ShouldBind(&ser); err != nil {
+		klog.Errorf("bind params error: %s", err.Error())
+		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
+	}
+	klog.Info(ser)
+	for _, c := range ser {
+		err := clu.models.ClusterManager.Delete(c.Name)
+		if err != nil {
+			klog.Errorf("delete cluster %s error: %s", c, err.Error())
+			return &utils.Response{Code: code.DeleteError, Msg: err.Error()}
+		}
+	}
+	return &utils.Response{Code: code.Success}
 }

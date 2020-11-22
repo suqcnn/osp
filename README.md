@@ -2,7 +2,7 @@
 
 OpenSpace是一个用来管理多Kubernetes集群的开源项目。OpenSpace可以兼容不同云厂商的Kubernetes集群，极大的方便了集群的管理工作。
 
-#### 快速开始
+### 快速开始
 
 ```
 sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --name openspace openspacee/osp
@@ -28,7 +28,7 @@ sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --name openspace
 
 ![image-20201121205832524](docs/images/connect_cluster.png)
 
-#####3. 导入集群
+##### 3. 导入集群
 
 在Kubernetes集群中使用上述的kubectl命令部署ospagent服务，将集群连接导入到OpenSpace系统。
 

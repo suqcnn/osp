@@ -17,9 +17,9 @@ build-in-docker: clean docker-builder
 	docker run -v `pwd`:/gopath/src/github.com/openspacee/osp/ ospserver-builder:latest bash -c 'cd /gopath/src/github.com/openspacee/osp && make build-binary'
 
 make-image:
-	docker build -t ${REGISTRY}/ospserver:${TAG} .
+	docker build -t ${REGISTRY}/osp:${TAG} .
 
 push-image:
-	docker push ${REGISTRY}/ospserver:${TAG}
+	docker push ${REGISTRY}/osp:${TAG}
 
 execute-release: make-image push-image

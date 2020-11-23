@@ -24,5 +24,6 @@ func (s *Server) Run() {
 		Addr:    fmt.Sprintf(":%d", s.config.Port),
 		Handler: s.router,
 	}
-	server.ListenAndServe()
+	//server.ListenAndServe()
+	server.ListenAndServeTLS(s.config.CertFilePath, s.config.KeyFilePath)
 }

@@ -77,7 +77,9 @@ export default {
         Message.error("获取POD参数异常，请刷新重试")
         return
       }
-      let wsUrl = `ws://${window.location.host}/api/v1/log/${this.cluster}/${this.namespace}/${this.pod}`
+
+      var protocal = window.location.protocol == 'http:' ? 'ws':'wss'
+      let wsUrl = `${protocal}://${window.location.host}/ws/log/${this.cluster}/${this.namespace}/${this.pod}`
       this.socket = new WebSocket(wsUrl + `?container=${this.container}&token=${token}`);
       this.socketOnClose();
       this.socketOnOpen();

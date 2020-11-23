@@ -37,9 +37,16 @@ module.exports = {
     },
     // before: require('./mock/mock-server.js')
     proxy: {
-      '/api/v1': {
-        target: 'http://127.0.0.1:8080',
+      '/ws': {
+        target: 'wss://127.0.0.1:8080',
         ws: true,
+        secure: false,
+        changeOrigin: true,
+      },
+      '/api/v1': {
+        target: 'https://127.0.0.1:8080',
+        ws: true,
+        secure: false,
         changeOrigin: true,
       }
     }

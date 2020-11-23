@@ -77,15 +77,15 @@ func NewRouter(redisOptions *redis.Options) *Router {
 
 	// 连接api websocket接口
 	apiWs := ws_views.NewApiWs(redisOptions, models, kubeResources)
-	apiGroup.GET("/web/connect", apiWs.Connect)
+	engine.GET("/ws/web/connect", apiWs.Connect)
 
 	// 连接exec websocket接口
 	execWs := ws_views.NewExecWs(redisOptions, models, kubeResources)
-	apiGroup.GET("/exec/:cluster/:namespace/:pod", execWs.Connect)
+	engine.GET("/ws/exec/:cluster/:namespace/:pod", execWs.Connect)
 
 	// 连接log websocket接口
 	logWs := ws_views.NewLogWs(redisOptions, models, kubeResources)
-	apiGroup.GET("/log/:cluster/:namespace/:pod", logWs.Connect)
+	engine.GET("/ws/log/:cluster/:namespace/:pod", logWs.Connect)
 
 	return &Router{
 		Engine: engine,

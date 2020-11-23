@@ -76,7 +76,8 @@ var wsOnClose = function(e) {
 
 function connect() {
   try{
-    wsConn = new WebSocket(`ws://${window.location.host}/api/v1/web/connect`)
+    var protocal = window.location.protocol == 'http:' ? 'ws':'wss'
+    wsConn = new WebSocket(`${protocal}://${window.location.host}/ws/web/connect`)
     wsConn.onopen = wsOnOpen
     wsConn.onerror = wsOnError
     wsConn.onmessage = wsOnMessage

@@ -65,7 +65,7 @@ export default {
       this.loading = true
       listCluster().then(response => {
         this.loading = false
-        this.origin_clusters = response.data
+        this.origin_clusters = response.data ? response.data : []
         if (!this.origin_clusters) {
           this.noCluster = true
         }

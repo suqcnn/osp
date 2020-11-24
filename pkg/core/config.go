@@ -23,12 +23,18 @@ func NewServerConfig(op *options.ServerOptions) (*ServerConfig, error) {
 	certFilePath := op.CertFilePath
 	keyFilePath := op.KeyFilePath
 	if op.CertFilePath == "" || op.KeyFilePath == "" {
-		err := utils.GenerateCert("localhost,127.0.0.1,*", time.Hour*24*365*10, true, "P256")
-		if err != nil {
-			return nil, err
-		}
 		certFilePath = "cert.pem"
 		keyFilePath = "key.pem"
+		if !utils.PathExist(certFilePath) || !utils.PathExist(keyFilePath) {
+			err := utils.GenerateCert(
+				"localhost,127.0.0.1,*",
+				time.Hour*24*365*10,
+				false,
+				"P256")
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 	return &ServerConfig{
 		Port:         op.Port,

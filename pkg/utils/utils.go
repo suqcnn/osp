@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"github.com/google/uuid"
+	"os"
 	"regexp"
 	"time"
 )
@@ -20,8 +21,6 @@ func Contains(strList []string, str string) bool {
 	}
 	return false
 }
-
-func int32Ptr(i int32) *int32 { return &i }
 
 func CreateUUID() string {
 	return uuid.New().String()
@@ -51,4 +50,12 @@ func VerifyMobileFormat(mobileNum string) bool {
 
 	reg := regexp.MustCompile(regular)
 	return reg.MatchString(mobileNum)
+}
+
+func PathExist(path string) bool {
+	_, err := os.Stat(path)
+	if err != nil && os.IsNotExist(err) {
+		return false
+	}
+	return true
 }

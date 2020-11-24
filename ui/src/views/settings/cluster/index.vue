@@ -146,7 +146,7 @@ export default {
   },
   computed: {
     copyCluster() {
-      return `kubectl apply -f ${ this.locationAddr }/v1/import/${ this.clusterConnectToken }`;
+      return `curl -k ${ this.locationAddr }/v1/import/${ this.clusterConnectToken } | kubectl apply -f -`;
     }
   },
   methods: {

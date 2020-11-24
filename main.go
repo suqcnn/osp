@@ -12,6 +12,8 @@ var (
 	redisAddress  = flag.String("redis-address", "localhost:6379", "redis address used.")
 	redisDB       = flag.Int("redis-db", 0, "redis db used.")
 	redisPassword = flag.String("redis-password", "", "redis password used.")
+	certFile      = flag.String("cert-file", "", "cert file path for tls used.")
+	keyFile       = flag.String("cert-key-file", "", "cert key file path for tls used.")
 )
 
 func createServerOptions() *options.ServerOptions {
@@ -20,6 +22,8 @@ func createServerOptions() *options.ServerOptions {
 		RedisAddress:  *redisAddress,
 		RedisDB:       *redisDB,
 		RedisPassword: *redisPassword,
+		CertFilePath:  *certFile,
+		KeyFilePath:   *keyFile,
 	}
 }
 

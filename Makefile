@@ -16,7 +16,10 @@ docker-builder:
 build-in-docker: clean docker-builder
 	docker run -v `pwd`:/gopath/src/github.com/openspacee/osp/ ospserver-builder:latest bash -c 'cd /gopath/src/github.com/openspacee/osp && make build-binary'
 
-make-image:
+make-base-image:
+	docker build -t openspacee/ospserver-base ./base-image
+
+make-image: build-in-docker make-base-image
 	docker build -t ${REGISTRY}/osp:${TAG} .
 
 push-image:

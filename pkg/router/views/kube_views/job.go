@@ -33,8 +33,9 @@ func (d *Job) list(c *views.Context) *utils.Response {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
 	}
 	reqParams := map[string]interface{}{
-		"name":      ser.Name,
-		"namespace": ser.Namespace,
+		"name":        ser.Name,
+		"namespace":   ser.Namespace,
+		"cronjob_uid": ser.CronjobUID,
 	}
 	return d.Job.List(c.Param("cluster"), reqParams)
 }

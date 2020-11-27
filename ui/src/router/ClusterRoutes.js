@@ -39,7 +39,7 @@ const Routes = [
         path: 'pods/:namespace/:podName',
         name: 'podsDetail',
         hidden: true,
-        component: () => import('@/views/cluster/podDetail'),
+        component: () => import('@/views/cluster/podDetail1'),
         meta: { title: '容器组', group: 'cluster', sideName: 'pods' },
       },
       {
@@ -52,7 +52,7 @@ const Routes = [
         path: 'deployments/:namespace/:deploymentName',
         name: 'deploymentDetail',
         hidden: true,
-        component: () => import('@/views/cluster/deploymentDetail'),
+        component: () => import('@/views/cluster/deploymentDetail1'),
         meta: { title: '无状态', group: 'cluster', sideName: 'deployments' },
       },
       {
@@ -65,7 +65,7 @@ const Routes = [
         path: 'statefulsets/:namespace/:statefulsetName',
         name: 'statefulsetDetail',
         hidden: true,
-        component: () => import('@/views/cluster/statefulsetDetail'),
+        component: () => import('@/views/cluster/statefulsetDetail1'),
         meta: { title: '有状态', group: 'cluster', sideName: "statefulsets" }
       },
       {
@@ -78,7 +78,7 @@ const Routes = [
         path: 'daemonsets/:namespace/:daemonsetName',
         name: 'daemonsetDetail',
         hidden: true,
-        component: () => import('@/views/cluster/daemonsetDetail'),
+        component: () => import('@/views/cluster/daemonsetDetail1'),
         meta: { title: '守护进程集', group: 'cluster', sideName: "daemonsets" }
       },
       {
@@ -91,7 +91,7 @@ const Routes = [
         path: 'job/:namespace/:jobName',
         name: 'jobDetail',
         hidden: true,
-        component: () => import('@/views/cluster/jobDetail'),
+        component: () => import('@/views/cluster/jobDetail1'),
         meta: { title: '任务', group: 'cluster', sideName: "job" }
       },
       {
@@ -104,7 +104,7 @@ const Routes = [
         path: 'cronjob/:namespace/:cronjobName',
         name: 'cronjobDetail',
         hidden: true,
-        component: () => import('@/views/cluster/cronjobDetail'),
+        component: () => import('@/views/cluster/cronjobDetail1'),
         meta: { title: '定时任务', group: 'cluster', sideName: "cronjob" }
       },
     ]

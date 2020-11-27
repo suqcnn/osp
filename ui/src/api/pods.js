@@ -47,9 +47,9 @@ export function containerClass(status) {
   if (status === 'waiting') return 'waiting-class'
 }
 
-function buildContainer(container, statuses) {
+export function buildContainer(container, statuses) {
   if (!container) return {}
-  if (!statuses) return {}
+  // if (!statuses) return {}
   let c = {
     name: container.name,
     status: 'unknown',
@@ -63,23 +63,27 @@ function buildContainer(container, statuses) {
     image_pull_policy: container.imagePullPolicy ? container.imagePullPolicy : '',
     resources: container.resources ? container.resources : {},
     start_time: '',
+    liveness_probe: container.livenessProbe,
+    readiness_probe: container.readinessProbe,
   }
-  for (let s of statuses) {
-    if (s.name == container.name) {
-      c.restarts = s.restartCount
-      if (s.state.running) {
-        c.status = 'running'
-        c.start_time = s.state.running.startedAt
+  if(statuses) {
+    for (let s of statuses) {
+      if (s.name == container.name) {
+        c.restarts = s.restartCount
+        if (s.state.running) {
+          c.status = 'running'
+          c.start_time = s.state.running.startedAt
+        }
+        else if (s.state.terminated) {
+          c.status = 'terminated'
+          c.start_time = s.state.terminated.startedAt
+        }
+        else if (s.state.waiting) {
+          c.status = 'waiting'
+        }
+        c.ready = s.ready
+        break
       }
-      else if (s.state.terminated) {
-        c.status = 'terminated'
-        c.start_time = s.state.terminated.startedAt
-      }
-      else if (s.state.waiting) {
-        c.status = 'waiting'
-      }
-      c.ready = s.ready
-      break
     }
   }
   return c
@@ -136,4 +140,27 @@ export function buildPods(pod) {
     }
   }
   return p
+}
+
+export function resourceFor(r, r_type, f_type) {
+  if (r_type in r && f_type in r[r_type]) return r[r_type][f_type]
+  return '-'
+}
+
+export function envStr(env) {
+  let s = env.name + ': '
+  if (env.value) {
+    s += env.value
+  } else if (env.valueFrom) {
+    if (env.valueFrom.configMapKeyRef) {
+      s += `configmap(${env.valueFrom.configMapKeyRef.key}:${env.valueFrom.configMapKeyRef.name})`
+    } else if (env.valueFrom.fieldRef) {
+      s += `fieldRef(${env.valueFrom.fieldRef.apiVersion}:${env.valueFrom.fieldRef.fieldPath})`
+    } else if (env.valueFrom.secretKeyRef) {
+      s += `secret(${env.valueFrom.secretKeyRef.key}:${env.valueFrom.secretKeyRef.name})`
+    } else {
+      s += String(env.valueFrom)
+    }
+  }
+  return s
 }

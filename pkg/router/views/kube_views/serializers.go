@@ -5,6 +5,7 @@ type ListSerializers struct {
 	Name          string      `json:"name" form:"name"`
 	Namespace     string      `json:"namespace" form:"namespace"`
 	LabelSelector interface{} `json:"label_selector" form:"label_selector"`
+	CronjobUID    string      `json:"cronjob_uid" form:"cronjob_uid"`
 }
 
 type GetSerializers struct {

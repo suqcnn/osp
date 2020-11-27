@@ -30,28 +30,26 @@
           </template>
         </el-form-item>
       </el-form>
-      
-      <el-collapse class="podCollapse" :value="['rules', 'events']">
-        <el-collapse-item title="Rules" name="rules">
-          <template slot="title">
-            <span class="title-class">Rules</span>
-          </template>
-          <div class="msgClass">
-            <div v-for="r of ingress.rules" :key="r.host">
-              <div><span style="color: #606266"><b>访问域名： {{ r.host }}</b></span></div>
+
+      <el-tabs value="rules" style="padding: 0px 8px;">
+        <el-tab-pane label="路由规则" name="rules">
+          <div v-for="r of ingress.rules" :key="r.host">
+            <div style="margin: 10px 10px 0px 10px">
+              <span style="color: #606266; font-size: 14px; margin-left: 10px;"><b>主机域名： {{ r.host }}</b></span>
+            </div>
+            <div class="msgClass" style="margin: 5px 10px 30px 10px;">
               <el-table v-if="r.http"
                 :data="r.http.paths"
                 class="table-fix"
                 tooltip-effect="dark"
                 style="width: 100%"
-                v-loading="eventLoading"
                 :cell-style="cellStyle"
                 :default-sort = "{prop: 'event_time', order: 'descending'}"
                 >
                 <el-table-column
                   prop="path"
                   label="路径"
-                  min-width="25"
+                  min-width=""
                   show-overflow-tooltip>
                   <template slot-scope="scope">
                     <span v-if="scope.row.path">
@@ -62,84 +60,62 @@
                 </el-table-column>
                 <el-table-column
                   prop="backend"
-                  label="服务后端"
-                  min-width="55"
+                  label="服务"
+                  min-width=""
                   show-overflow-tooltip>
                   <template slot-scope="scope">
                     <span>
-                      {{ scope.row.backend.serviceName }}:{{ scope.row.backend.servicePort }}
+                      {{ scope.row.backend.serviceName }}
+                    </span>
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="backend"
+                  label="端口"
+                  min-width=""
+                  show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    <span>
+                      {{ scope.row.backend.servicePort }}
                     </span>
                   </template>
                 </el-table-column>
               </el-table>
             </div>
           </div>
-        </el-collapse-item>
-        <el-collapse-item title="Events" name="events">
-          <template slot="title">
-            <span class="title-class">Events</span>
-          </template>
-          <div class="msgClass">
-            <el-table
-              v-if="ingressEvents && ingressEvents.length > 0"
-              :data="ingressEvents"
-              class="table-fix"
-              tooltip-effect="dark"
-              style="width: 100%"
-              v-loading="eventLoading"
-              :cell-style="cellStyle"
-              :default-sort = "{prop: 'event_time', order: 'descending'}"
-              >
-              <el-table-column
-                prop="type"
-                label="类型"
-                min-width="25"
-                show-overflow-tooltip>
-              </el-table-column>
-              <el-table-column
-                prop="object"
-                label="对象"
-                min-width="55"
-                show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.object.kind }}/{{ scope.row.object.name }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="reason"
-                label="原因"
-                min-width="50"
-                show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.reason ? scope.row.reason : "——" }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="message"
-                label="信息"
-                min-width="120"
-                show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.message ? scope.row.message : "——" }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="event_time"
-                label="触发时间"
-                min-width="50"
-                show-overflow-tooltip>
-              </el-table-column>
-            </el-table>
-            <div v-else style="color: #909399; text-align: center">暂无数据</div>
-          </div>
-        </el-collapse-item>
-      </el-collapse>
+        </el-tab-pane>
+        <el-tab-pane label="证书" name="tls">
+          <div class="msgClass" style="margin: 5px 10px 30px 10px;">
+              <el-table v-if="ingress.tls"
+                :data="ingress.tls"
+                class="table-fix"
+                tooltip-effect="dark"
+                style="width: 100%"
+                :cell-style="cellStyle"
+                :default-sort = "{prop: 'event_time', order: 'descending'}"
+                >
+                <el-table-column
+                  prop="secretName"
+                  label="Secret"
+                  min-width=""
+                  show-overflow-tooltip>
+                </el-table-column>
+                <el-table-column
+                  prop="hosts"
+                  label="主机域名"
+                  min-width=""
+                  show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    <span>
+                      {{ scope.row.hosts.join(',') }}
+                    </span>
+                  </template>
+                </el-table-column>
+              </el-table>
+              <div v-else style="padding: 25px 15px ; color: #909399; text-align: center">无证书配置</div>
+            </div>
+        </el-tab-pane>
+      </el-tabs>
 
       <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
         <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
@@ -156,7 +132,7 @@
 import { Clusterbar, Yaml } from '@/views/components'
 import { getIngress, deleteIngresses, updateIngress } from '@/api/ingress'
 // import { listEndpoints } from '@/api/endpoints'
-import { listEvents, buildEvent } from '@/api/event'
+// import { listEvents, buildEvent } from '@/api/event'
 // import { listPods, containerClass, buildPods, podMatch, deletePods } from '@/api/pods'
 import { Message } from 'element-ui'
 
@@ -175,8 +151,6 @@ export default {
       loading: true,
       originIngress: undefined,
       endpoints: [],
-      ingressEvents: [],
-      eventLoading: true,
     }
   },
   created() {
@@ -192,31 +166,6 @@ export default {
         let newRv = newObj.resource.metadata.resourceVersion
         if (this.ingress.resource_version < newRv) {
           this.originIngress = newObj.resource
-        }
-      }
-    },
-    eventWatch: function (newObj) {
-      if (newObj && this.originIngress) {
-        let event = newObj.resource
-        if (event.involvedObject.namespace !== this.ingress.namespace) return
-        if (event.involvedObject.uid !== this.ingress.uid) return
-        let newUid = newObj.resource.metadata.uid
-        if (newObj.event === 'add') {
-          this.ingressEvents.push(buildEvent(event))
-        } else if (newObj.event == 'update') {
-          let newRv = newObj.resource.metadata.resourceVersion
-          for (let i in this.ingressEvents) {
-            let d = this.ingressEvents[i]
-            if (d.uid === newUid) {
-              if (d.resource_version < newRv){
-                let newEvent = buildEvent(newObj.resource)
-                this.$set(this.ingressEvents, i, newEvent)
-              }
-              break
-            }
-          }
-        } else if (newObj.event === 'delete') {
-          this.ingressEvents = this.ingressEvents.filter(( { uid } ) => uid !== newUid)
         }
       }
     },
@@ -241,33 +190,26 @@ export default {
     ingressWatch: function() {
       return this.$store.getters["ws/ingressesWatch"]
     },
-    eventWatch: function() {
-      return this.$store.getters["ws/eventWatch"]
-    },
   },
   methods: {
     fetchData: function() {
       this.originIngress = null
       this.ingressEvents = []
       this.loading = true
-      this.eventLoading = true
       const cluster = this.$store.state.cluster
       if (!cluster) {
         Message.error("获取集群参数异常，请刷新重试")
         this.loading = false
-        this.eventLoading = false
         return
       }
       if (!this.namespace) {
         Message.error("获取命名空间参数异常，请刷新重试")
         this.loading = false
-        this.eventLoading = false
         return
       }
       if (!this.ingressName) {
         Message.error("获取Ingress名称参数异常，请刷新重试")
         this.loading = false
-        this.eventLoading = false
         return
       }
       getIngress(cluster, this.namespace, this.ingressName).then(response => {
@@ -275,17 +217,8 @@ export default {
         this.originIngress = response.data
         this.loading = false
 
-        listEvents(cluster, this.originIngress.metadata.uid).then(response => {
-          this.eventLoading = false
-          if (response.data) {
-            this.ingressEvents = response.data.length > 0 ? response.data : []
-          }
-        }).catch(() => {
-          this.eventLoading = false
-        })
       }).catch(() => {
         this.loading = false
-        this.eventLoading = false
       })
     },
     buildIngress: function(ingress) {
@@ -422,6 +355,11 @@ export default {
     }
   }
 }
+
+.msgClass {
+  margin: 6px 6px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
 </style>
 
 <style>
@@ -488,9 +426,9 @@ export default {
 .el-dialog__body {
   padding-top: 5px;
 }
-.msgClass {
+/* .msgClass {
   margin: 0px 25px;
-}
+} */
 .msgClass .el-table::before {
   height: 0px;
 }

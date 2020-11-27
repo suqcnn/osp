@@ -4,7 +4,6 @@
     <div class="dashboard-container">
       <!-- <div class="dashboard-text"></div> -->
       <el-table
-        ref="multipleTable"
         :data="nodes"
         class="table-fix"
         tooltip-effect="dark"
@@ -16,10 +15,6 @@
         @selection-change="handleSelectionChange"
         row-key="uid"
         >
-        <el-table-column
-          type="selection"
-          width="45">
-        </el-table-column>
         <el-table-column
           prop="name"
           label="名称"
@@ -89,10 +84,10 @@
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="edit" />
                   <span style="margin-left: 5px;">修改</span>
                 </el-dropdown-item>
-                <el-dropdown-item @click.native.prevent="deleteNodes([{namespace: scope.row.namespace, name: scope.row.name}])">
+                <!-- <el-dropdown-item @click.native.prevent="deleteNodes([{namespace: scope.row.namespace, name: scope.row.name}])">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="delete" />
                   <span style="margin-left: 5px;">删除</span>
-                </el-dropdown-item>
+                </el-dropdown-item> -->
               </el-dropdown-menu>
             </el-dropdown>
           </template>
